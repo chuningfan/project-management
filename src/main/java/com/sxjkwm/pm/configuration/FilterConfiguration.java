@@ -22,9 +22,9 @@ public class FilterConfiguration {
     private static AntPathMatcher matcher = new AntPathMatcher();
 
     @Bean
-    public FilterRegistrationBean<AuthFilter> authFilter(@Autowired LoginService loginService) {
+    public FilterRegistrationBean<AuthFilter> authFilter(@Autowired LoginService loginService, @Autowired FEConfig feConfig) {
         FilterRegistrationBean<AuthFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
-        filterFilterRegistrationBean.setFilter(new AuthFilter(loginService));
+        filterFilterRegistrationBean.setFilter(new AuthFilter(loginService, feConfig));
         filterFilterRegistrationBean.setUrlPatterns(Lists.newArrayList("/*"));
         filterFilterRegistrationBean.setOrder(0);
         filterFilterRegistrationBean.setName("GlobalAuthFilter");
@@ -37,8 +37,14 @@ public class FilterConfiguration {
 
         private final LoginService loginService;
 
-        public AuthFilter(LoginService loginService) {
+        private final FEConfig feConfig;
+
+        private final String loginURL;
+
+        public AuthFilter(LoginService loginService, FEConfig feConfig) {
             this.loginService = loginService;
+            this.feConfig = feConfig;
+            loginURL = feConfig.getDomain() + feConfig.getProjectPath() + feConfig.getLoginPath();
         }
 
         @Override
@@ -52,7 +58,7 @@ public class FilterConfiguration {
             String uri = req.getRequestURI();
             if (!skippable(uri)) {
                 if (!loginService.isValid(req)) {
-                    resp.sendRedirect("http://localhost:8080/pm/login.html");
+                    resp.sendRedirect(loginURL);
                     return;
                 }
             }

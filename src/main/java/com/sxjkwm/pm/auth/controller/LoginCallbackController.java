@@ -2,6 +2,7 @@ package com.sxjkwm.pm.auth.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sxjkwm.pm.auth.service.LoginService;
+import com.sxjkwm.pm.configuration.FEConfig;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,18 @@ public class LoginCallbackController {
 
     private final LoginService loginService;
 
+    private final FEConfig feConfig;
+
+    private final String redirectURL;
+
+    private final String loginURL;
+
     @Autowired
-    public LoginCallbackController(LoginService loginService) {
+    public LoginCallbackController(LoginService loginService, FEConfig feConfig) {
         this.loginService = loginService;
+        this.feConfig = feConfig;
+        redirectURL = feConfig.getDomain() + feConfig.getProjectPath() + feConfig.getRedirectPath();
+        loginURL = feConfig.getDomain() + feConfig.getProjectPath() + feConfig.getLoginPath();
     }
 
     @GetMapping
@@ -29,11 +39,11 @@ public class LoginCallbackController {
         try {
             JSONObject res = loginService.doLogin(req);
             String token = loginService.processToken(res, req);
-            resp.sendRedirect("http://localhost:8080/pm/redirect.html?" + LoginService.tokenKey + "=" + token);
+            resp.sendRedirect(redirectURL + "?" + LoginService.tokenKey + "=" + token);
         } catch (PmException e) {
             String code = e.getCode();
             if (PmError.WXWORK_LOGIN_FAILED.getValue().equals(code)) {
-                resp.sendRedirect("http://localhost:8080/pm/login.html");
+                resp.sendRedirect(loginURL);
             }
             throw e;
         }
