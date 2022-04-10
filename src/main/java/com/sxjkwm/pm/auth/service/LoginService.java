@@ -3,10 +3,12 @@ package com.sxjkwm.pm.auth.service;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.sxjkwm.pm.configuration.WxConfig;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.WxWorkTokenUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +22,13 @@ import java.util.Objects;
 public class LoginService {
 
     public static final String tokenKey = "makata";
+
+    private final WxConfig wxConfig;
+
+    @Autowired
+    public LoginService(WxConfig wxConfig) {
+        this.wxConfig = wxConfig;
+    }
 
     public boolean isValid(HttpServletRequest req) {
         String token = req.getHeader(tokenKey);
@@ -37,14 +46,14 @@ public class LoginService {
         Map<String, Object> param = Maps.newHashMap();
         param.put("access_token", token);
         param.put("code", code);
-        String res = HttpUtil.get("https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo", param, 30 * 1000);
+        String res = HttpUtil.get(wxConfig.getLoginCodeURL(), param, 30 * 1000);
         JSONObject jsonObject = JSONObject.parseObject(res);
         Integer errCode = jsonObject.getInteger("errcode");
         if (Objects.isNull(errCode) || errCode.intValue() == 0) {
             String userId = jsonObject.getString("UserId");
             param.put("userid", userId);
             param.remove("code");
-            res = HttpUtil.get("https://qyapi.weixin.qq.com/cgi-bin/user/get", param, 30 * 1000);
+            res = HttpUtil.get(wxConfig.getUserURL(), param, 30 * 1000);
             jsonObject = JSONObject.parseObject(res);
             errCode = jsonObject.getInteger("errcode");
             if (Objects.isNull(errCode) || errCode.intValue() == 0) {

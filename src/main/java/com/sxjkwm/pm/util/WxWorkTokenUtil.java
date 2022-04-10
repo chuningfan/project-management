@@ -20,31 +20,32 @@ public class WxWorkTokenUtil {
 
     private static final long threshold = 7000;
 
-    private static volatile String latestToken = null;
+    private static final String noneToken = "nil";
+
+    private static volatile String latestToken = noneToken;
 
     public static String getToken() throws PmException {
-        String token;
+        String token = null;
         if (lastModifiedTime > 0) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastModifiedTime <= threshold) {
                 if (StringUtils.isNotBlank(latestToken)) {
                     token = latestToken;
-                } else {
-                    token = HttpUtil.get(tokenUrl);
                 }
-            } else {
-                token = HttpUtil.get(tokenUrl);
             }
-        } else {
-            token = HttpUtil.get(tokenUrl);
         }
-        lastModifiedTime = System.currentTimeMillis();
-        JSONObject jsonObject = JSONObject.parseObject(token);
-        Integer errcode = jsonObject.getInteger("errcode");
-        if (errcode.intValue() == 0) {
-            return jsonObject.getString("access_token");
-        } else {
-            throw new PmException(PmError.WXWORK_TOKEN_ERROR, jsonObject.getString("errmsg"));
+        synchronized (latestToken) {
+            if (noneToken.equals(latestToken)) {
+                token = HttpUtil.get(tokenUrl);
+                lastModifiedTime = System.currentTimeMillis();
+            }
+            JSONObject jsonObject = JSONObject.parseObject(token);
+            Integer errcode = jsonObject.getInteger("errcode");
+            if (errcode.intValue() == 0) {
+                return latestToken = jsonObject.getString("access_token");
+            } else {
+                throw new PmException(PmError.WXWORK_TOKEN_ERROR, jsonObject.getString("errmsg"));
+            }
         }
     }
 

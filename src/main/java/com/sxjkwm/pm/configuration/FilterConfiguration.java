@@ -17,7 +17,7 @@ import java.util.List;
 @Configuration
 public class FilterConfiguration {
 
-    private static final List<String> whitelist = Lists.newArrayList("/loginData", "/wxworkLogin");
+    private static final List<String> whitelist = Lists.newArrayList("/loginData", "/wxlogin.do");
 
     private static AntPathMatcher matcher = new AntPathMatcher();
 
