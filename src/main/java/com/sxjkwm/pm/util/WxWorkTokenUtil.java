@@ -28,9 +28,9 @@ public class WxWorkTokenUtil {
         String token = null;
         if (lastModifiedTime > 0) {
             long currentTime = System.currentTimeMillis();
-            if (currentTime - lastModifiedTime <= threshold) {
-                if (StringUtils.isNotBlank(latestToken)) {
-                    token = latestToken;
+            if (currentTime - lastModifiedTime >= threshold - 200) {
+                if (!noneToken.equals(latestToken)) {
+                    return latestToken;
                 }
             }
         }
@@ -38,15 +38,16 @@ public class WxWorkTokenUtil {
             if (noneToken.equals(latestToken)) {
                 token = HttpUtil.get(tokenUrl);
                 lastModifiedTime = System.currentTimeMillis();
-            }
-            JSONObject jsonObject = JSONObject.parseObject(token);
-            Integer errcode = jsonObject.getInteger("errcode");
-            if (errcode.intValue() == 0) {
-                return latestToken = jsonObject.getString("access_token");
-            } else {
-                throw new PmException(PmError.WXWORK_TOKEN_ERROR, jsonObject.getString("errmsg"));
+                JSONObject jsonObject = JSONObject.parseObject(token);
+                Integer errcode = jsonObject.getInteger("errcode");
+                if (errcode.intValue() == 0) {
+                    latestToken = jsonObject.getString("access_token");
+                } else {
+                    throw new PmException(PmError.WXWORK_TOKEN_ERROR, jsonObject.getString("errmsg"));
+                }
             }
         }
+        return latestToken;
     }
 
 }

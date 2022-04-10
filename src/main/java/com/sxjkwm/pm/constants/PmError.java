@@ -26,11 +26,11 @@ public enum PmError implements Constant<String, String> {
 
     @Override
     public String getValue() {
-        return null;
+        return code;
     }
 
     @Override
     public String getLabel() {
-        return null;
+        return message;
     }
 }

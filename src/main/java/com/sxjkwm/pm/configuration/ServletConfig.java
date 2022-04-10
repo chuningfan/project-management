@@ -3,6 +3,7 @@ package com.sxjkwm.pm.configuration;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.auth.service.LoginService;
+import com.sxjkwm.pm.constants.ErrorPage;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class ServletConfig {
                     resp.sendRedirect(loginURL);
                 } else {
                     PrintWriter writer = resp.getWriter();
-
+                    writer.write(String.format(ErrorPage.errorPage, e.getErrorMessage()));
                     writer.flush();
                     writer.close();
                 }
