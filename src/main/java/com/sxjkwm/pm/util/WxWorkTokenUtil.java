@@ -4,7 +4,6 @@ import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
-import org.apache.commons.lang3.StringUtils;
 
 public class WxWorkTokenUtil {
 

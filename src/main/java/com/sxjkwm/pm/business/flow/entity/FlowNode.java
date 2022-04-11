@@ -1,15 +1,15 @@
-package com.sxjkwm.pm.business.entity;
+package com.sxjkwm.pm.business.flow.entity;
 
-import com.sxjkwm.pm.business.dto.ProjectFlowNodeDto;
+import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
 import com.sxjkwm.pm.common.BaseFlowNode;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-@Table(name = "pm_project_flow_node")
+@Table(name = "pm_flow_node")
 @Entity
-public class ProjectFlowNode extends BaseFlowNode {
+public class FlowNode extends BaseFlowNode {
 
     @Column(name="pattern_files")
     private String patternFiles;
@@ -17,7 +17,7 @@ public class ProjectFlowNode extends BaseFlowNode {
     @Column(name="description")
     private String description;
 
-    public ProjectFlowNode(Long flowId, ProjectFlowNodeDto dto) {
+    public FlowNode(Long flowId, FlowNodeDto dto) {
         this.flowId = flowId;
         this.nodeVersion = dto.getNodeVersion();
         this.nodeName = dto.getNodeName();
@@ -29,7 +29,7 @@ public class ProjectFlowNode extends BaseFlowNode {
         this.formId = dto.getFormId();
     }
 
-    public ProjectFlowNode() {
+    public FlowNode() {
     }
 
     public String getPatternFiles() {

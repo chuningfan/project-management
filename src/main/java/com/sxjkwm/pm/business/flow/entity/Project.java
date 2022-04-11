@@ -1,4 +1,4 @@
-package com.sxjkwm.pm.business.entity;
+package com.sxjkwm.pm.business.flow.entity;
 
 import com.sxjkwm.pm.common.BaseEntity;
 
@@ -24,6 +24,9 @@ public class Project extends BaseEntity {
 
     @Column(name = "current_node_id")
     private Long currentNodeId;
+
+    @Column(name = "project_description")
+    private String description;
 
     public String getProjectName() {
         return projectName;
@@ -65,4 +68,11 @@ public class Project extends BaseEntity {
         this.currentNodeId = currentNodeId;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

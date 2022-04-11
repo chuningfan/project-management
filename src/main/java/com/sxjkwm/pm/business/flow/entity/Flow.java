@@ -1,4 +1,4 @@
-package com.sxjkwm.pm.business.entity;
+package com.sxjkwm.pm.business.flow.entity;
 
 import com.sxjkwm.pm.common.BaseEntity;
 
@@ -6,12 +6,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-@Table(name = "pm_project_flow")
+@Table(name = "pm_flow")
 @Entity
-public class ProjectFlow extends BaseEntity {
+public class Flow extends BaseEntity {
 
     @Column(name = "flow_name")
     private String flowName;
+
+    @Column(name = "project_description")
+    private String description;
 
     public String getFlowName() {
         return flowName;
@@ -19,5 +22,13 @@ public class ProjectFlow extends BaseEntity {
 
     public void setFlowName(String flowName) {
         this.flowName = flowName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

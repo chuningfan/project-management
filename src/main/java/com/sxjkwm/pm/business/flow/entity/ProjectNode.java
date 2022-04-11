@@ -1,4 +1,4 @@
-package com.sxjkwm.pm.business.entity;
+package com.sxjkwm.pm.business.flow.entity;
 
 import com.sxjkwm.pm.common.BaseEntity;
 
@@ -42,6 +42,9 @@ public class ProjectNode extends BaseEntity {
 
     @Column(name = "form_id")
     protected String formatId;
+
+    @Column(name = "progress_percentage")
+    private Double progressPercentage;
 
     public Long getProjectId() {
         return projectId;
@@ -129,5 +132,13 @@ public class ProjectNode extends BaseEntity {
 
     public void setFormatId(String formatId) {
         this.formatId = formatId;
+    }
+
+    public Double getProgressPercentage() {
+        return progressPercentage;
+    }
+
+    public void setProgressPercentage(Double progressPercentage) {
+        this.progressPercentage = progressPercentage;
     }
 }

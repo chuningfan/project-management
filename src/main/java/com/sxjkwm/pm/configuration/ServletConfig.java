@@ -3,6 +3,7 @@ package com.sxjkwm.pm.configuration;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.auth.service.LoginService;
+import com.sxjkwm.pm.business.file.service.PatternFileService;
 import com.sxjkwm.pm.constants.ErrorPage;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
@@ -15,6 +16,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -66,6 +69,27 @@ public class ServletConfig {
                     writer.close();
                 }
             }
+        }
+    }
+
+    private static class FileDownloadServlet extends HttpServlet {
+
+        private final PatternFileService patternFileService;
+
+        public FileDownloadServlet(PatternFileService patternFileService) {
+            this.patternFileService = patternFileService;
+        }
+
+        @Override
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            String filePath = req.getParameter("filePath");
+            File file = patternFileService.get(filePath);
+            resp.reset();
+            resp.setHeader("content-type", type + ";charset=utf-8");
+            resp.setContentType("application/octet-stream;charset=UTF-8");
+            resp.addHeader("Content-Length", String.valueOf(targetFile.length()));
+            resp.setCharacterEncoding("UTF-8");
+
         }
     }
 

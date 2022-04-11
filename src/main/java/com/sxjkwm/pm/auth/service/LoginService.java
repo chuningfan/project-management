@@ -48,13 +48,10 @@ public class LoginService {
     }
 
     private void populateDataIfNecessary(JSONObject jsonObject, HttpServletRequest req) {
-        if (jsonObject.getInteger("errcode").intValue() != 0) {
-            return;
-        }
         ContextFactoryImpl.AuthUser authUser = new ContextFactoryImpl.AuthUser();
-        authUser.setUserId(jsonObject.getString("userid"));
-        authUser.setDepartmentIds((List<Integer>) jsonObject.get("department"));
-        authUser.setUsername(jsonObject.getString("name"));
+        authUser.setUserId(jsonObject.getString("userId"));
+        authUser.setDepartmentIds((List<Integer>) jsonObject.get("deptIds"));
+        authUser.setUsername(jsonObject.getString("username"));
         String remoteIpAddr = req.getRemoteAddr();
         authUser.setIpAddr(remoteIpAddr);
         Context<ContextFactoryImpl.AuthUser> context = contextFactory.get();

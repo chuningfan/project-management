@@ -1,9 +1,8 @@
-package com.sxjkwm.pm.business.dto;
+package com.sxjkwm.pm.business.flow.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
-public class ProjectFlowNodeDto implements Serializable {
+public class FlowNodeDto implements Serializable {
 
     private Long id;
 
