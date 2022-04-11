@@ -61,7 +61,7 @@ public class ServletConfig {
                     resp.sendRedirect(loginURL);
                 } else {
                     PrintWriter writer = resp.getWriter();
-                    writer.write(String.format(ErrorPage.errorPage, e.getErrorMessage()));
+                    writer.write(ErrorPage.getErrorPageHtml(e.getErrorMessage()));
                     writer.flush();
                     writer.close();
                 }

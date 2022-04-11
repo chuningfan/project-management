@@ -32,29 +32,27 @@ public class ProjectFlowNodeService {
     }
 
     public List<ProjectFlowNodeDto> create(Long flowId, List<ProjectFlowNodeDto> projectFlowNodeDtos) {
-        Integer audittable;
         List<String> auditors;
         ProjectFlowNode projectFlowNode;
         Long flowNodeId;
         for (ProjectFlowNodeDto dto: projectFlowNodeDtos) {
-            audittable = dto.getAudittable();
+//            Integer audittable = dto.getAudittable();
             projectFlowNode = new ProjectFlowNode(flowId, dto);
             projectFlowNode = projectFlowNodeDao.save(projectFlowNode);
-            auditors = dto.getAuditors();
             flowNodeId = projectFlowNode.getId();
             dto.setId(flowNodeId);
-            if (Objects.nonNull(audittable) && Constant.YesOrNo.YES.getValue().equals(audittable) && CollectionUtils.isNotEmpty(auditors)) {
-                List<FlowNodeAuditorRelation> relations = Lists.newArrayList();
-                FlowNodeAuditorRelation relation;
-                for (String userId: auditors) {
-                    relation = new FlowNodeAuditorRelation();
-                    relation.setFlowNodeId(flowNodeId);
-                    relation.setFlowId(flowId);
-                    relation.setUserId(userId);
-                    relations.add(relation);
-                }
-                flowNodeAuditorRelationDao.saveAll(relations);
-            }
+//            if (Objects.nonNull(audittable) && Constant.YesOrNo.YES.getValue().equals(audittable) && CollectionUtils.isNotEmpty(auditors)) {
+//                List<FlowNodeAuditorRelation> relations = Lists.newArrayList();
+//                FlowNodeAuditorRelation relation;
+//                for (String userId: auditors) {
+//                    relation = new FlowNodeAuditorRelation();
+//                    relation.setFlowNodeId(flowNodeId);
+//                    relation.setFlowId(flowId);
+//                    relation.setUserId(userId);
+//                    relations.add(relation);
+//                }
+//                flowNodeAuditorRelationDao.saveAll(relations);
+//            }
         }
         return projectFlowNodeDtos;
     }

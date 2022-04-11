@@ -23,7 +23,8 @@ public class ProjectFlowNodeDto implements Serializable {
 
     private String description;
 
-    private List<String> auditors;
+    // 道一云审批表单
+    private String formId;
 
     public Long getId() {
         return id;
@@ -97,11 +98,11 @@ public class ProjectFlowNodeDto implements Serializable {
         this.description = description;
     }
 
-    public List<String> getAuditors() {
-        return auditors;
+    public String getFormId() {
+        return formId;
     }
 
-    public void setAuditors(List<String> auditors) {
-        this.auditors = auditors;
+    public void setFormId(String formId) {
+        this.formId = formId;
     }
 }

@@ -3,6 +3,9 @@ package com.sxjkwm.pm.auth.service;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.sxjkwm.pm.auth.context.Context;
+import com.sxjkwm.pm.auth.context.ContextFactory;
+import com.sxjkwm.pm.auth.context.impl.ContextFactoryImpl;
 import com.sxjkwm.pm.configuration.WxConfig;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
@@ -25,9 +28,12 @@ public class LoginService {
 
     private final WxConfig wxConfig;
 
+    private final ContextFactory<ContextFactoryImpl.AuthUser> contextFactory;
+
     @Autowired
-    public LoginService(WxConfig wxConfig) {
+    public LoginService(WxConfig wxConfig, ContextFactory<ContextFactoryImpl.AuthUser> contextFactory) {
         this.wxConfig = wxConfig;
+        this.contextFactory = contextFactory;
     }
 
     public boolean isValid(HttpServletRequest req) {
@@ -36,8 +42,23 @@ public class LoginService {
             return false;
         }
         JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+        populateDataIfNecessary(jsonObject, req);
         String userId = jsonObject.getString("userId");
         return StringUtils.isNotBlank(userId);
+    }
+
+    private void populateDataIfNecessary(JSONObject jsonObject, HttpServletRequest req) {
+        if (jsonObject.getInteger("errcode").intValue() != 0) {
+            return;
+        }
+        ContextFactoryImpl.AuthUser authUser = new ContextFactoryImpl.AuthUser();
+        authUser.setUserId(jsonObject.getString("userid"));
+        authUser.setDepartmentIds((List<Integer>) jsonObject.get("department"));
+        authUser.setUsername(jsonObject.getString("name"));
+        String remoteIpAddr = req.getRemoteAddr();
+        authUser.setIpAddr(remoteIpAddr);
+        Context<ContextFactoryImpl.AuthUser> context = contextFactory.get();
+        context.of(authUser);
     }
 
     public JSONObject doLogin(HttpServletRequest req) throws PmException {

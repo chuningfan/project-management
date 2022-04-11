@@ -26,6 +26,7 @@ public class ProjectFlowNode extends BaseFlowNode {
         this.description = dto.getDescription();
         this.skippable = dto.getSkippable();
         this.audittable = dto.getAudittable();
+        this.formId = dto.getFormId();
     }
 
     public ProjectFlowNode() {

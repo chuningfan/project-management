@@ -1,6 +1,8 @@
 package com.sxjkwm.pm.configuration;
 
 import com.google.common.collect.Lists;
+import com.sxjkwm.pm.auth.context.ContextFactory;
+import com.sxjkwm.pm.auth.context.impl.ContextFactoryImpl;
 import com.sxjkwm.pm.auth.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -22,9 +24,9 @@ public class FilterConfiguration {
     private static AntPathMatcher matcher = new AntPathMatcher();
 
     @Bean
-    public FilterRegistrationBean<AuthFilter> authFilter(@Autowired LoginService loginService, @Autowired FEConfig feConfig) {
+    public FilterRegistrationBean<AuthFilter> authFilter(@Autowired LoginService loginService, @Autowired FEConfig feConfig, @Autowired ContextFactory contextFactory) {
         FilterRegistrationBean<AuthFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
-        filterFilterRegistrationBean.setFilter(new AuthFilter(loginService, feConfig));
+        filterFilterRegistrationBean.setFilter(new AuthFilter(loginService, feConfig, contextFactory));
         filterFilterRegistrationBean.setUrlPatterns(Lists.newArrayList("/*"));
         filterFilterRegistrationBean.setOrder(0);
         filterFilterRegistrationBean.setName("GlobalAuthFilter");
@@ -39,11 +41,14 @@ public class FilterConfiguration {
 
         private final FEConfig feConfig;
 
+        private final ContextFactory<ContextFactoryImpl.AuthUser> contextFactory;
+
         private final String loginURL;
 
-        public AuthFilter(LoginService loginService, FEConfig feConfig) {
+        public AuthFilter(LoginService loginService, FEConfig feConfig, ContextFactory<ContextFactoryImpl.AuthUser> contextFactory) {
             this.loginService = loginService;
             this.feConfig = feConfig;
+            this.contextFactory = contextFactory;
             loginURL = feConfig.getDomain() + feConfig.getProjectPath() + feConfig.getLoginPath();
         }
 
@@ -56,13 +61,17 @@ public class FilterConfiguration {
             HttpServletRequest req = (HttpServletRequest) servletRequest;
             HttpServletResponse resp = (HttpServletResponse) servletResponse;
             String uri = req.getRequestURI();
-            if (!skippable(uri)) {
-                if (!loginService.isValid(req)) {
-                    resp.sendRedirect(loginURL);
-                    return;
+            try {
+                if (!skippable(uri)) {
+                    if (!loginService.isValid(req)) {
+                        resp.sendRedirect(loginURL);
+                        return;
+                    }
                 }
+                filterChain.doFilter(req, resp);
+            } finally {
+                contextFactory.remove();
             }
-            filterChain.doFilter(req, resp);
         }
 
         @Override

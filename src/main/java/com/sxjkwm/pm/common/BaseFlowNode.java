@@ -28,7 +28,7 @@ public class BaseFlowNode extends BaseEntity {
 
     // 集成道一云审批流
     @Column(name = "form_id")
-    protected String formatId;
+    protected String formId;
 
     public Long getFlowId() {
         return flowId;
@@ -78,11 +78,11 @@ public class BaseFlowNode extends BaseEntity {
         this.nodeVersion = nodeVersion;
     }
 
-    public String getFormatId() {
-        return formatId;
+    public String getFormId() {
+        return formId;
     }
 
-    public void setFormatId(String formatId) {
-        this.formatId = formatId;
+    public void setFormId(String formId) {
+        this.formId = formId;
     }
 }
