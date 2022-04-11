@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.business.flow.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class FlowNodeDto implements Serializable {
 
@@ -18,7 +19,7 @@ public class FlowNodeDto implements Serializable {
 
     private Integer nodeVersion;
 
-    private String patternFiles;
+    private List<String> patternPaths;
 
     private String description;
 
@@ -81,12 +82,12 @@ public class FlowNodeDto implements Serializable {
         this.nodeVersion = nodeVersion;
     }
 
-    public String getPatternFiles() {
-        return patternFiles;
+    public List<String> getPatternPaths() {
+        return patternPaths;
     }
 
-    public void setPatternFiles(String patternFiles) {
-        this.patternFiles = patternFiles;
+    public void setPatternPaths(List<String> patternPaths) {
+        this.patternPaths = patternPaths;
     }
 
     public String getDescription() {

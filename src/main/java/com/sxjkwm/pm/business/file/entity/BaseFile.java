@@ -8,9 +8,6 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public class BaseFile extends BaseEntity {
 
-    @Column(name = "original_file_name")
-    private String originalFileName;
-
     @Column(name = "file_name")
     private String fileName;
 
@@ -20,15 +17,12 @@ public class BaseFile extends BaseEntity {
     @Column(name = "flow_node_id")
     private Long flowNodeId;
 
-    @Column(name = "file_type")
-    private String fileType;
-
-    public String getOriginalFileName() {
-        return originalFileName;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setOriginalFileName(String originalFileName) {
-        this.originalFileName = originalFileName;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public Long getFlowId() {
@@ -47,11 +41,4 @@ public class BaseFile extends BaseEntity {
         this.flowNodeId = flowNodeId;
     }
 
-    public String getFileType() {
-        return fileType;
-    }
-
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
-    }
 }

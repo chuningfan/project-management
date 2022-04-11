@@ -30,6 +30,9 @@ public class BaseFlowNode extends BaseEntity {
     @Column(name = "form_id")
     protected String formId;
 
+    @Column(name= "include_progress_percentage")
+    protected Integer includeProgressPercentage;
+
     public Long getFlowId() {
         return flowId;
     }
@@ -84,5 +87,13 @@ public class BaseFlowNode extends BaseEntity {
 
     public void setFormId(String formId) {
         this.formId = formId;
+    }
+
+    public Integer getIncludeProgressPercentage() {
+        return includeProgressPercentage;
+    }
+
+    public void setIncludeProgressPercentage(Integer includeProgressPercentage) {
+        this.includeProgressPercentage = includeProgressPercentage;
     }
 }

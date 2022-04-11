@@ -11,9 +11,6 @@ import javax.persistence.Table;
 @Entity
 public class FlowNode extends BaseFlowNode {
 
-    @Column(name="pattern_files")
-    private String patternFiles;
-
     @Column(name="description")
     private String description;
 
@@ -22,7 +19,6 @@ public class FlowNode extends BaseFlowNode {
         this.nodeVersion = dto.getNodeVersion();
         this.nodeName = dto.getNodeName();
         this.nodeIndex = dto.getNodeIndex();
-        this.patternFiles = dto.getPatternFiles();
         this.description = dto.getDescription();
         this.skippable = dto.getSkippable();
         this.audittable = dto.getAudittable();
@@ -30,14 +26,6 @@ public class FlowNode extends BaseFlowNode {
     }
 
     public FlowNode() {
-    }
-
-    public String getPatternFiles() {
-        return patternFiles;
-    }
-
-    public void setPatternFiles(String patternFiles) {
-        this.patternFiles = patternFiles;
     }
 
     public String getDescription() {

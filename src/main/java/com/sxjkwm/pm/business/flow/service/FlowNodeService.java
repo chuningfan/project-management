@@ -1,7 +1,10 @@
 package com.sxjkwm.pm.business.flow.service;
 
+import com.sxjkwm.pm.business.file.dao.PatternFileDao;
+import com.sxjkwm.pm.business.file.entity.PatternFile;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
+import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.constants.Constant;
 import org.apache.commons.collections4.CollectionUtils;
@@ -10,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,64 +26,97 @@ public class FlowNodeService {
 
     private final FlowNodeDao flowNodeDao;
 
+    private final PatternFileDao patternFileDao;
+
     @Autowired
-    public FlowNodeService(FlowNodeDao flowNodeDao) {
+    public FlowNodeService(FlowNodeDao flowNodeDao, PatternFileDao patternFileDao) {
         this.flowNodeDao = flowNodeDao;
+        this.patternFileDao = patternFileDao;
     }
 
-    public List<FlowNodeDto> create(Long flowId, List<FlowNodeDto> projectFlowNodeDtos) {
-        List<String> auditors;
-        FlowNode projectFlowNode;
+    @Transactional
+    public List<FlowNodeDto> create(Long flowId, List<FlowNodeDto> flowNodeDtos) {
+        FlowNode flowNode;
         Long flowNodeId;
-        for (FlowNodeDto dto: projectFlowNodeDtos) {
-//            Integer audittable = dto.getAudittable();
-            projectFlowNode = new FlowNode(flowId, dto);
-            projectFlowNode = flowNodeDao.save(projectFlowNode);
-            flowNodeId = projectFlowNode.getId();
+        List<String> patternFilePaths;
+        PatternFile patternFile;
+        for (FlowNodeDto dto: flowNodeDtos) {
+            flowNode = new FlowNode(flowId, dto);
+            flowNode = flowNodeDao.save(flowNode);
+            flowNodeId = flowNode.getId();
             dto.setId(flowNodeId);
+            patternFilePaths = dto.getPatternPaths();
+            if (CollectionUtils.isNotEmpty(patternFilePaths)) {
+                List<PatternFile> patternFiles = Lists.newArrayList();
+                for (String patternFilePath: patternFilePaths) {
+                    patternFile = new PatternFile();
+                    patternFile.setFlowId(flowId);
+                    patternFile.setFlowNodeId(flowNodeId);
+                    patternFile.setPath(patternFilePath);
+                    patternFile.setFileName(patternFilePath.substring(patternFilePath.lastIndexOf(File.separator) + 1));
+                    patternFiles.add(patternFile);
+                }
+                patternFileDao.saveAll(patternFiles);
+            }
         }
-        return projectFlowNodeDtos;
+        return flowNodeDtos;
     }
 
-    public List<FlowNodeDto> update(Long flowId, List<FlowNodeDto> projectFlowNodeDtos) {
-        List<FlowNodeDto> result = Lists.newArrayList();
-        List<FlowNodeDto> updatedOrRemovedList = projectFlowNodeDtos.stream().filter(pfn -> Objects.nonNull(pfn.getId())).collect(Collectors.toList());
-        List<FlowNodeDto> newList = projectFlowNodeDtos.stream().filter(pfn -> Objects.isNull(pfn.getId())).collect(Collectors.toList());
+    @Transactional
+    public List<FlowNodeDto> update(Long flowId, List<FlowNodeDto> flowNodeDtos) {
         FlowNode condition = new FlowNode();
         condition.setFlowId(flowId);
-        List<FlowNode> existingList = flowNodeDao.findAll(Example.of(condition));
-        if (CollectionUtils.isNotEmpty(existingList)) {
-            List<Long> updatedIds =  updatedOrRemovedList.stream().map(FlowNodeDto::getId).collect(Collectors.toList());
-            Map<Long, FlowNodeDto> updateDataMap = updatedOrRemovedList.stream().collect(Collectors.toMap(FlowNodeDto::getId, pfnd -> pfnd));
-            existingList.forEach(e -> {
-                if (!updatedIds.contains(e.getId())) {
-                    e.setIsDeleted(Constant.YesOrNo.YES.getValue());
-                } else {
-                    FlowNodeDto dto = updateDataMap.get(e.getId());
-                    e.setAudittable(dto.getAudittable());
-                    e.setSkippable(dto.getSkippable());
-                    e.setNodeName(dto.getNodeName());
-                    e.setDescription(dto.getDescription());
-                    e.setNodeVersion(dto.getNodeVersion());
-                    e.setPatternFiles(dto.getPatternFiles());
-                }
+        condition.setIsDeleted(Constant.YesOrNo.NO.getValue());
+        List<FlowNode> sourceList = getByConditions(condition);
+        if (CollectionUtils.isEmpty(sourceList)) {
+            return create(flowId, flowNodeDtos);
+        } else {
+            List<FlowNodeDto> res = Lists.newArrayList();
+            // find new added
+            List<FlowNodeDto> newNodeDtos = flowNodeDtos.stream().filter(fnd -> Objects.isNull(fnd.getId())).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(newNodeDtos)) {
+                res.addAll(create(flowId, newNodeDtos));
+            }
+            List<FlowNode> dataToSave = Lists.newArrayList();
+            // find removed
+            // IDs not in flowNodeDtos
+            List<Long> inputIds = flowNodeDtos.stream().filter(fnd -> Objects.nonNull(fnd.getId())).map(FlowNodeDto::getId).collect(Collectors.toList());
+            sourceList.stream().filter(sfnd -> !inputIds.contains(sfnd.getId())).forEach(sfnd -> {
+                sfnd.setIsDeleted(Constant.YesOrNo.YES.getValue());
+                dataToSave.add(sfnd);
             });
-            existingList = flowNodeDao.saveAll(existingList);
+            // find updated
+            // IDs in flowNodeDtos
+            Map<Long, FlowNodeDto> dtoMap = flowNodeDtos.stream().filter(fnd -> Objects.nonNull(fnd.getId())).collect(Collectors.toMap(FlowNodeDto::getId, fnd -> fnd, (k1, k2) -> k1));
+            sourceList.stream().filter(sfnd -> inputIds.contains(sfnd.getId())).forEach(sfnd -> {
+                Long id = sfnd.getId();
+                FlowNodeDto flowNodeDto = dtoMap.get(id);
+                sfnd.setDescription(flowNodeDto.getDescription());
+                sfnd.setAudittable(flowNodeDto.getAudittable());
+                sfnd.setFormId(flowNodeDto.getFormId());
+                sfnd.setNodeName(flowNodeDto.getNodeName());
+                sfnd.setSkippable(flowNodeDto.getSkippable());
+                sfnd.setNodeVersion(flowNodeDto.getNodeVersion());
+                dataToSave.add(sfnd);
+                res.add(flowNodeDto);
+            });
+            if (CollectionUtils.isNotEmpty(dataToSave)) {
+                flowNodeDao.saveAll(dataToSave);
+            }
+            return res;
         }
-        if (CollectionUtils.isNotEmpty(newList)) {
-            result.addAll(create(flowId, newList));
-        }
-        return Collections.emptyList();
     }
 
     public FlowNode get(Long id) {
-        return flowNodeDao.getOne(id);
+        FlowNode flowNode = new FlowNode();
+        flowNode.setId(id);
+        Example<FlowNode> example = Example.of(flowNode);
+        return flowNodeDao.findOne(example).get();
     }
 
-    public List<FlowNode> getNodes(Long flowId) {
-        FlowNode condition = new FlowNode();
-        condition.setFlowId(flowId);
-        return flowNodeDao.findAll(Example.of(condition));
+    public List<FlowNode> getByConditions(FlowNode condition) {
+        Example<FlowNode> example = Example.of(condition);
+        return flowNodeDao.findAll(example);
     }
 
 }

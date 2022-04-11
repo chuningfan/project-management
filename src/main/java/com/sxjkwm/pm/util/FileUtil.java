@@ -3,10 +3,10 @@ package com.sxjkwm.pm.util;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -57,6 +57,42 @@ public class FileUtil {
                 filePath = new File(path);
                 if (filePath.exists()) {
                     filePath.delete();
+                }
+            }
+        }
+    }
+
+    public static void download(HttpServletResponse resp, String filePath) throws IOException {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return;
+        }
+        String fileName = file.getName();
+        String type = new MimetypesFileTypeMap().getContentType(fileName);
+        resp.reset();
+        resp.setHeader("content-type", type + ";charset=utf-8");
+        resp.setContentType("application/octet-stream;charset=UTF-8");
+        resp.addHeader("Content-Length", String.valueOf(file.length()));
+        resp.setCharacterEncoding("UTF-8");
+        byte[] buff = new byte[1024];
+        BufferedInputStream bis = null;
+        OutputStream os;
+        try {
+            String encodeFileName = URLEncoder.encode(fileName, "UTF-8");
+            resp.setHeader("Content-Disposition", "attachment;filename=" + encodeFileName);
+            os = resp.getOutputStream();
+            bis = new BufferedInputStream(new FileInputStream(file));
+            int i = bis.read(buff);
+            while (i != -1) {
+                os.write(buff, 0, buff.length);
+                os.flush();
+                i = bis.read(buff);
+            }
+        } finally {
+            if (bis != null) {
+                try {
+                    bis.close();
+                } catch (IOException e) {
                 }
             }
         }

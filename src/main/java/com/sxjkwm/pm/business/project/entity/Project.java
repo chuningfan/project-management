@@ -1,4 +1,4 @@
-package com.sxjkwm.pm.business.flow.entity;
+package com.sxjkwm.pm.business.project.entity;
 
 import com.sxjkwm.pm.common.BaseEntity;
 

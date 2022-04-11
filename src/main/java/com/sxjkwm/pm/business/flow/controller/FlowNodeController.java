@@ -32,7 +32,9 @@ public class FlowNodeController {
 
     @GetMapping("/flowId")
     public RestResponse<List<FlowNode>> getNodes(@PathVariable("flowId") Long flowId) {
-        return RestResponse.get(flowNodeService.getNodes(flowId));
+        FlowNode flowNode = new FlowNode();
+        flowNode.setFlowId(flowId);
+        return RestResponse.get(flowNodeService.getByConditions(flowNode));
     }
 
 }
