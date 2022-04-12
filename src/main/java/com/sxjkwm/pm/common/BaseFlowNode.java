@@ -17,8 +17,8 @@ public class BaseFlowNode extends BaseEntity {
     @Column(name = "skippable")
     protected Integer skippable = Constant.YesOrNo.NO.getValue();
 
-    @Column(name = "audittable")
-    protected Integer audittable = Constant.YesOrNo.NO.getValue();
+    @Column(name = "auditable")
+    protected Integer auditable = Constant.YesOrNo.NO.getValue();
 
     @Column(name = "node_index")
     protected Integer nodeIndex;
@@ -57,12 +57,12 @@ public class BaseFlowNode extends BaseEntity {
         this.skippable = skippable;
     }
 
-    public Integer getAudittable() {
-        return audittable;
+    public Integer getAuditable() {
+        return auditable;
     }
 
-    public void setAudittable(Integer audittable) {
-        this.audittable = audittable;
+    public void setAuditable(Integer auditable) {
+        this.auditable = auditable;
     }
 
     public Integer getNodeIndex() {

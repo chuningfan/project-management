@@ -13,7 +13,7 @@ public class FlowNodeDto implements Serializable {
 
     private Integer skippable;
 
-    private Integer audittable;
+    private Integer auditable;
 
     private Integer nodeIndex;
 
@@ -58,12 +58,12 @@ public class FlowNodeDto implements Serializable {
         this.skippable = skippable;
     }
 
-    public Integer getAudittable() {
-        return audittable;
+    public Integer getAuditable() {
+        return auditable;
     }
 
-    public void setAudittable(Integer audittable) {
-        this.audittable = audittable;
+    public void setAuditable(Integer auditable) {
+        this.auditable = auditable;
     }
 
     public Integer getNodeIndex() {
