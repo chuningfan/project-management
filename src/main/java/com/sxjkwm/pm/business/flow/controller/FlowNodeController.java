@@ -22,19 +22,19 @@ public class FlowNodeController {
 
     @PostMapping("/{flowId}")
     public RestResponse<List<FlowNodeDto>> createNodes(@PathVariable("flowId") Long flowId, @RequestBody List<FlowNodeDto> projectFlowNodeDtos) {
-        return RestResponse.get(flowNodeService.create(flowId, projectFlowNodeDtos));
+        return RestResponse.of(flowNodeService.create(flowId, projectFlowNodeDtos));
     }
 
     @PutMapping("/{flowId}")
     public RestResponse<List<FlowNodeDto>> updateNodes(@PathVariable("flowId") Long flowId, @RequestBody List<FlowNodeDto> projectFlowNodeDtos) {
-        return RestResponse.get(flowNodeService.update(flowId, projectFlowNodeDtos));
+        return RestResponse.of(flowNodeService.update(flowId, projectFlowNodeDtos));
     }
 
     @GetMapping("/flowId")
     public RestResponse<List<FlowNode>> getNodes(@PathVariable("flowId") Long flowId) {
         FlowNode flowNode = new FlowNode();
         flowNode.setFlowId(flowId);
-        return RestResponse.get(flowNodeService.getByConditions(flowNode));
+        return RestResponse.of(flowNodeService.getByConditions(flowNode));
     }
 
 }

@@ -68,8 +68,8 @@ public class LoginService {
         JSONObject jsonObject = JSONObject.parseObject(res);
         Integer errCode = jsonObject.getInteger("errcode");
         if (Objects.isNull(errCode) || errCode.intValue() == 0) {
-            String userId = jsonObject.getString("UserId");
-            param.put("userid", userId);
+            String wxUserId = jsonObject.getString("UserId");
+            param.put("userid", wxUserId);
             param.remove("code");
             res = HttpUtil.get(wxConfig.getUserURL(), param, 30 * 1000);
             jsonObject = JSONObject.parseObject(res);
@@ -87,13 +87,13 @@ public class LoginService {
         List<Integer> deptIds = (List<Integer>) jsonObject.get("department");
         String avatar = jsonObject.getString("avatar");
         String mobile = jsonObject.getString("mobile");
-        String userId = jsonObject.getString("userid");
+        String wxUserId = jsonObject.getString("userid");
         Map<String, Object> dataMap = Maps.newHashMap();
         dataMap.put("username", username);
         dataMap.put("deptIds", deptIds);
         dataMap.put("avatar", avatar);
         dataMap.put("mobile", mobile);
-        dataMap.put("userId", userId);
+        dataMap.put("userId", wxUserId);
         String jsonString = JSONObject.toJSONString(dataMap);
         String encoded = new String(Base64.getEncoder().encode(jsonString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         request.getSession().setAttribute(tokenKey, encoded);

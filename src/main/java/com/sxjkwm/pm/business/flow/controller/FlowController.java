@@ -24,27 +24,27 @@ public class FlowController {
 
     @PostMapping
     public RestResponse<Flow> create(@RequestBody Flow flow) {
-        return RestResponse.get(flowService.createFlow(flow));
+        return RestResponse.of(flowService.createFlow(flow));
     }
 
     @PutMapping
     public RestResponse<Flow> update(@RequestBody FlowDto flowDto) {
-        return RestResponse.get(flowService.updateFlow(flowDto));
+        return RestResponse.of(flowService.updateFlow(flowDto));
     }
 
     @GetMapping("/{id}")
     public RestResponse<Flow> getOne(@PathVariable("id") Long id) {
-        return RestResponse.get(flowService.getFlow(id));
+        return RestResponse.of(flowService.getFlow(id));
     }
 
     @GetMapping
     public RestResponse<List<Flow>> getAll() {
-        return RestResponse.get(flowService.getFlows(null));
+        return RestResponse.of(flowService.getFlows(null));
     }
 
     @GetMapping("/list")
     public RestResponse<List<Flow>> getByName(@Param("flowName") String flowName) {
-        return RestResponse.get(flowService.getFlows(flowName));
+        return RestResponse.of(flowService.getFlows(flowName));
     }
 
 }

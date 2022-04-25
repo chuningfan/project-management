@@ -12,6 +12,8 @@ public class FlowDto implements Serializable {
 
     private String description;
 
+    private Integer version;
+
     private Integer isDeleted = Constant.YesOrNo.NO.getValue();
 
     public Long getId() {
@@ -36,6 +38,14 @@ public class FlowDto implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 
     public Integer getIsDeleted() {

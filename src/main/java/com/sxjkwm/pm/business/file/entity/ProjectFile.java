@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "project_name")
+@Table(name = "project_attachment")
 public class ProjectFile extends BaseFile {
 
     @Column(name = "project_id")

@@ -16,6 +16,9 @@ public class Flow extends BaseEntity {
     @Column(name = "project_description")
     private String description;
 
+    @Column(name = "flow_version")
+    private Integer version;
+
     public String getFlowName() {
         return flowName;
     }
@@ -30,5 +33,13 @@ public class Flow extends BaseEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

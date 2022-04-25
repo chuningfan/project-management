@@ -24,7 +24,7 @@ public class PatternFileController {
 
     @PostMapping
     public RestResponse<List<String>> update(@RequestParam("files") List<MultipartFile> files) {
-        return RestResponse.get(patternFileService.upload(files));
+        return RestResponse.of(patternFileService.upload(files));
     }
 
 }

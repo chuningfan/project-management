@@ -2,13 +2,16 @@ package com.sxjkwm.pm.auth.entity;
 
 import com.sxjkwm.pm.common.BaseEntity;
 
-import java.util.Set;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "pm_role")
 public class Role extends BaseEntity {
 
+    @Column(name = "role_name")
     private String name;
-
-    private Set<String> accessibleUris;
 
     public String getName() {
         return name;
@@ -18,11 +21,4 @@ public class Role extends BaseEntity {
         this.name = name;
     }
 
-    public Set<String> getAccessibleUris() {
-        return accessibleUris;
-    }
-
-    public void setAccessibleUris(Set<String> accessibleUris) {
-        this.accessibleUris = accessibleUris;
-    }
 }

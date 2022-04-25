@@ -22,7 +22,7 @@ public class LoginDataController {
 
     @GetMapping
     public RestResponse<Boolean> validate(HttpServletRequest req) {
-        return RestResponse.get(loginService.isValid(req));
+        return RestResponse.of(loginService.isValid(req));
     }
 
 }

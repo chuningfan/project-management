@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 
+import java.util.Objects;
+
 public class WxWorkTokenUtil {
 
     public static final String agentId = "1000009";
@@ -24,29 +26,34 @@ public class WxWorkTokenUtil {
     private static volatile String latestToken = noneToken;
 
     public static String getToken() throws PmException {
-        String token = null;
-        if (lastModifiedTime > 0) {
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - lastModifiedTime >= threshold - 200) {
-                if (!noneToken.equals(latestToken)) {
-                    return latestToken;
+        if (noneToken.equals(latestToken)) {
+            synchronized (latestToken) {
+                if (noneToken.equals(latestToken)) {
+                    latestToken = _getToken();
+                    lastModifiedTime = System.currentTimeMillis();
                 }
             }
-        }
-        synchronized (latestToken) {
-            if (noneToken.equals(latestToken)) {
-                token = HttpUtil.get(tokenUrl);
-                lastModifiedTime = System.currentTimeMillis();
-                JSONObject jsonObject = JSONObject.parseObject(token);
-                Integer errcode = jsonObject.getInteger("errcode");
-                if (errcode.intValue() == 0) {
-                    latestToken = jsonObject.getString("access_token");
-                } else {
-                    throw new PmException(PmError.WXWORK_TOKEN_ERROR, jsonObject.getString("errmsg"));
+        } else  {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastModifiedTime < threshold - 200) {
+                synchronized (latestToken) {
+                    if (currentTime - lastModifiedTime < threshold - 200) {
+                        latestToken = _getToken();
+                        lastModifiedTime = System.currentTimeMillis();
+                    }
                 }
             }
         }
         return latestToken;
     }
+
+    private static String _getToken() throws PmException {
+        JSONObject jsonObject = JSONObject.parseObject(HttpUtil.get(tokenUrl));
+        if (Objects.nonNull(jsonObject) && jsonObject.getInteger("errcode").intValue() == 0) {
+            return jsonObject.getString("access_token");
+        }
+        throw new PmException(PmError.WXWORK_TOKEN_ERROR, jsonObject.getString("errmsg"));
+    }
+
 
 }

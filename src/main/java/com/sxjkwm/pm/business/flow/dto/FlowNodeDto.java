@@ -13,11 +13,9 @@ public class FlowNodeDto implements Serializable {
 
     private Integer skippable;
 
-    private Integer auditable;
-
     private Integer nodeIndex;
 
-    private Integer nodeVersion;
+    private Integer flowVersion;
 
     private List<String> patternPaths;
 
@@ -58,14 +56,6 @@ public class FlowNodeDto implements Serializable {
         this.skippable = skippable;
     }
 
-    public Integer getAuditable() {
-        return auditable;
-    }
-
-    public void setAuditable(Integer auditable) {
-        this.auditable = auditable;
-    }
-
     public Integer getNodeIndex() {
         return nodeIndex;
     }
@@ -74,12 +64,12 @@ public class FlowNodeDto implements Serializable {
         this.nodeIndex = nodeIndex;
     }
 
-    public Integer getNodeVersion() {
-        return nodeVersion;
+    public Integer getFlowVersion() {
+        return flowVersion;
     }
 
-    public void setNodeVersion(Integer nodeVersion) {
-        this.nodeVersion = nodeVersion;
+    public void setFlowVersion(Integer flowVersion) {
+        this.flowVersion = flowVersion;
     }
 
     public List<String> getPatternPaths() {

@@ -39,7 +39,7 @@ public class RestResponse<T> implements Serializable {
         return this;
     }
 
-    public static <T> RestResponse<T> get(T data) {
+    public static <T> RestResponse<T> of(T data) {
         return new RestResponse<T>().setData(data).setCode(successful_code);
     }
 

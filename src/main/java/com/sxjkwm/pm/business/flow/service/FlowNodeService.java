@@ -92,11 +92,9 @@ public class FlowNodeService {
                 Long id = sfnd.getId();
                 FlowNodeDto flowNodeDto = dtoMap.get(id);
                 sfnd.setDescription(flowNodeDto.getDescription());
-                sfnd.setAuditable(flowNodeDto.getAuditable());
                 sfnd.setFormId(flowNodeDto.getFormId());
                 sfnd.setNodeName(flowNodeDto.getNodeName());
                 sfnd.setSkippable(flowNodeDto.getSkippable());
-                sfnd.setNodeVersion(flowNodeDto.getNodeVersion());
                 dataToSave.add(sfnd);
                 res.add(flowNodeDto);
             });

@@ -25,15 +25,17 @@ public class PmException extends Exception {
         return code;
     }
 
-    public void setCode(String code) {
+    public PmException setCode(String code) {
         this.code = code;
+        return this;
     }
 
     public String getErrorMessage() {
         return errorMessage;
     }
 
-    public void setErrorMessage(String errorMessage) {
+    public PmException setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+        return this;
     }
 }

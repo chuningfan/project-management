@@ -28,7 +28,7 @@ public class JpaAuditConfig {
         return () -> {
             String operator = "system";
             Context<ContextFactoryImpl.AuthUser> context = contextFactory.get();
-            if (Objects.nonNull(context)) {
+            if (Objects.nonNull(context) && Objects.nonNull(context.unwrap())) {
                 ContextFactoryImpl.AuthUser authUser = context.unwrap();
                 operator = authUser.getUserId();
             }

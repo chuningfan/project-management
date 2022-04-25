@@ -28,6 +28,9 @@ public class Project extends BaseEntity {
     @Column(name = "project_description")
     private String description;
 
+    @Column(name = "dept_name")
+    private String deptName;
+
     public String getProjectName() {
         return projectName;
     }
@@ -74,5 +77,13 @@ public class Project extends BaseEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getDeptName() {
+        return deptName;
+    }
+
+    public void setDeptName(String deptName) {
+        this.deptName = deptName;
     }
 }

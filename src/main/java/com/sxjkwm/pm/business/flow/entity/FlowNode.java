@@ -16,12 +16,10 @@ public class FlowNode extends BaseFlowNode {
 
     public FlowNode(Long flowId, FlowNodeDto dto) {
         this.flowId = flowId;
-        this.nodeVersion = dto.getNodeVersion();
         this.nodeName = dto.getNodeName();
         this.nodeIndex = dto.getNodeIndex();
         this.description = dto.getDescription();
         this.skippable = dto.getSkippable();
-        this.auditable = dto.getAuditable();
         this.formId = dto.getFormId();
     }
 
