@@ -7,7 +7,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.auth.dao.UserDao;
 import com.sxjkwm.pm.auth.entity.User;
-import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.WxWorkTokenUtil;

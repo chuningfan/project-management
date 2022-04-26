@@ -1,32 +1,40 @@
 package com.sxjkwm.pm.configuration;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.sxjkwm.pm.auth.context.ContextFactory;
 import com.sxjkwm.pm.auth.context.impl.ContextFactoryImpl;
 import com.sxjkwm.pm.auth.service.LoginService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Set;
 
 @Configuration
 public class FilterConfiguration {
 
-    private static final List<String> whitelist = Lists.newArrayList("/loginData", "/wxlogin.do");
-
     private static AntPathMatcher matcher = new AntPathMatcher();
 
     @Bean
-    public FilterRegistrationBean<AuthFilter> authFilter(@Autowired LoginService loginService, @Autowired FEConfig feConfig, @Autowired ContextFactory contextFactory) {
+    public FilterRegistrationBean<AuthFilter> authFilter(@Autowired LoginService loginService, @Autowired FEConfig feConfig,
+                                                         @Autowired ContextFactory contextFactory, @Autowired WhitelistConfig whitelistConfig) {
         FilterRegistrationBean<AuthFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
-        filterFilterRegistrationBean.setFilter(new AuthFilter(loginService, feConfig, contextFactory));
+        String whitelistStr = whitelistConfig.getWhitelistStr();
+        Set<String> legalUris = Sets.newHashSet();
+        if (StringUtils.isNotBlank(whitelistStr)) {
+            legalUris.addAll(Arrays.asList(whitelistStr.split(";")));
+        }
+        filterFilterRegistrationBean.setFilter(new AuthFilter(loginService, feConfig, contextFactory, legalUris));
         filterFilterRegistrationBean.setUrlPatterns(Lists.newArrayList("/*"));
         filterFilterRegistrationBean.setOrder(0);
         filterFilterRegistrationBean.setName("GlobalAuthFilter");
@@ -45,11 +53,14 @@ public class FilterConfiguration {
 
         private final String loginURL;
 
-        public AuthFilter(LoginService loginService, FEConfig feConfig, ContextFactory<ContextFactoryImpl.AuthUser> contextFactory) {
+        private final Set<String> legalUris;
+
+        public AuthFilter(LoginService loginService, FEConfig feConfig, ContextFactory<ContextFactoryImpl.AuthUser> contextFactory, Set<String> legalUris) {
             this.loginService = loginService;
             this.feConfig = feConfig;
             this.contextFactory = contextFactory;
             loginURL = feConfig.getDomain() + feConfig.getProjectPath() + feConfig.getLoginPath();
+            this.legalUris = legalUris;
         }
 
         @Override
@@ -79,7 +90,10 @@ public class FilterConfiguration {
         }
 
         private boolean skippable(String uri) {
-            for (String pattern: whitelist) {
+            if (CollectionUtils.isEmpty(legalUris)) {
+                return false;
+            }
+            for (String pattern: legalUris) {
                 if (matcher.match(pattern, uri)) {
                     return true;
                 }
