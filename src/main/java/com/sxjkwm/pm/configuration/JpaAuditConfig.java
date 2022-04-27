@@ -28,8 +28,8 @@ public class JpaAuditConfig {
         return () -> {
             String operator = "system";
             Context<ContextFactoryImpl.AuthUser> context = contextFactory.get();
-            if (Objects.nonNull(context) && Objects.nonNull(context.unwrap())) {
-                ContextFactoryImpl.AuthUser authUser = context.unwrap();
+            ContextFactoryImpl.AuthUser authUser = context.unwrap();
+            if (Objects.nonNull(authUser)) {
                 operator = authUser.getUserId();
             }
             return Optional.ofNullable(operator);

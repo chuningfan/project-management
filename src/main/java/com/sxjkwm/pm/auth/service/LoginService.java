@@ -42,12 +42,12 @@ public class LoginService {
             return false;
         }
         JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
-        populateDataIfNecessary(jsonObject, req);
+        populateData(jsonObject, req);
         String userId = jsonObject.getString("userId");
         return StringUtils.isNotBlank(userId);
     }
 
-    private void populateDataIfNecessary(JSONObject jsonObject, HttpServletRequest req) {
+    private void populateData(JSONObject jsonObject, HttpServletRequest req) {
         ContextFactoryImpl.AuthUser authUser = new ContextFactoryImpl.AuthUser();
         authUser.setUserId(jsonObject.getString("userId"));
         authUser.setDepartmentIds((List<Integer>) jsonObject.get("deptIds"));
