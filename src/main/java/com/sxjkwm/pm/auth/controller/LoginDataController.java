@@ -2,6 +2,7 @@ package com.sxjkwm.pm.auth.controller;
 
 import com.sxjkwm.pm.auth.service.LoginService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.configuration.annotation.Valve;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ public class LoginDataController {
     public LoginDataController(LoginService loginService) {
         this.loginService = loginService;
     }
+
 
     @GetMapping
     public RestResponse<Boolean> validate(HttpServletRequest req) {
