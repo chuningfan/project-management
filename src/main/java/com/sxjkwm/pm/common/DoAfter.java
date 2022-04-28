@@ -4,6 +4,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 
 public interface DoAfter {
 
-    void doAfter(MethodSignature methodSignature, Object result);
+    void doAfter(MethodSignature methodSignature, Object result, Object...args);
 
 }

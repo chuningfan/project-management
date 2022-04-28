@@ -45,7 +45,7 @@ public class AspectConfig {
                 result = proceedingJoinPoint.proceed();
             }
         } catch (Throwable e) {
-            loggingWhenThrowException.handleException(e);
+            loggingWhenThrowException.handleException(methodSignature, e);
         }
         if (CollectionUtils.isNotEmpty(afterList)) {
             for (DoAfter doAfter: afterList) {

@@ -11,6 +11,6 @@ public class LoggingBeforeInvocation implements DoBefore {
 
     @Override
     public void doBefore(MethodSignature signature, Object...args) {
-        logger.warn("We are attempting invoke {} with args {}", signature.getDeclaringTypeName(), args);
+        logger.warn("We are attempting invoke {} with args {}", signature.getDeclaringTypeName() + "#" + signature.getName(), args);
     }
 }
