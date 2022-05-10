@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.sxjkwm.pm.auth.context.Context;
 import com.sxjkwm.pm.auth.context.ContextFactory;
-import com.sxjkwm.pm.auth.context.impl.ContextFactoryImpl;
+import com.sxjkwm.pm.common.AuthUser;
 import com.sxjkwm.pm.configuration.WxConfig;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
@@ -28,10 +28,10 @@ public class LoginService {
 
     private final WxConfig wxConfig;
 
-    private final ContextFactory<ContextFactoryImpl.AuthUser> contextFactory;
+    private final ContextFactory<AuthUser> contextFactory;
 
     @Autowired
-    public LoginService(WxConfig wxConfig, ContextFactory<ContextFactoryImpl.AuthUser> contextFactory) {
+    public LoginService(WxConfig wxConfig, ContextFactory<AuthUser> contextFactory) {
         this.wxConfig = wxConfig;
         this.contextFactory = contextFactory;
     }
@@ -48,13 +48,13 @@ public class LoginService {
     }
 
     private void populateData(JSONObject jsonObject, HttpServletRequest req) {
-        ContextFactoryImpl.AuthUser authUser = new ContextFactoryImpl.AuthUser();
+        AuthUser authUser = new AuthUser();
         authUser.setUserId(jsonObject.getString("userId"));
         authUser.setDepartmentIds((List<Integer>) jsonObject.get("deptIds"));
         authUser.setUsername(jsonObject.getString("username"));
         String remoteIpAddr = req.getRemoteAddr();
         authUser.setIpAddr(remoteIpAddr);
-        Context<ContextFactoryImpl.AuthUser> context = contextFactory.get();
+        Context<AuthUser> context = contextFactory.get();
         context.of(authUser);
     }
 

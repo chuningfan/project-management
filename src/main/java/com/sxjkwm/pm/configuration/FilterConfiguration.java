@@ -3,8 +3,8 @@ package com.sxjkwm.pm.configuration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sxjkwm.pm.auth.context.ContextFactory;
-import com.sxjkwm.pm.auth.context.impl.ContextFactoryImpl;
 import com.sxjkwm.pm.auth.service.LoginService;
+import com.sxjkwm.pm.common.AuthUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -49,13 +49,13 @@ public class FilterConfiguration {
 
         private final FEConfig feConfig;
 
-        private final ContextFactory<ContextFactoryImpl.AuthUser> contextFactory;
+        private final ContextFactory<AuthUser> contextFactory;
 
         private final String loginURL;
 
         private final Set<String> legalUris;
 
-        public AuthFilter(LoginService loginService, FEConfig feConfig, ContextFactory<ContextFactoryImpl.AuthUser> contextFactory, Set<String> legalUris) {
+        public AuthFilter(LoginService loginService, FEConfig feConfig, ContextFactory<AuthUser> contextFactory, Set<String> legalUris) {
             this.loginService = loginService;
             this.feConfig = feConfig;
             this.contextFactory = contextFactory;

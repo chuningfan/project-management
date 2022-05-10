@@ -1,26 +1,27 @@
 package com.sxjkwm.pm.auth.context.impl;
 
 import com.sxjkwm.pm.auth.context.Context;
+import com.sxjkwm.pm.common.AuthUser;
 
-class ContextImpl implements Context<ContextFactoryImpl.AuthUser> {
+class ContextImpl implements Context<AuthUser> {
 
-    private ContextFactoryImpl.AuthUser authUser;
+    private AuthUser authUser;
 
-    private void setAuthUser(ContextFactoryImpl.AuthUser authUser) {
+    private void setAuthUser(AuthUser authUser) {
         this.authUser = authUser;
     }
-    private ContextFactoryImpl.AuthUser getAuthUser() {
+    private AuthUser getAuthUser() {
         return this.authUser;
     }
 
     @Override
-    public Context<ContextFactoryImpl.AuthUser> of(ContextFactoryImpl.AuthUser authUser) {
+    public Context<AuthUser> of(AuthUser authUser) {
         setAuthUser(authUser);
         return this;
     }
 
     @Override
-    public ContextFactoryImpl.AuthUser unwrap() {
+    public AuthUser unwrap() {
         return getAuthUser();
     }
 

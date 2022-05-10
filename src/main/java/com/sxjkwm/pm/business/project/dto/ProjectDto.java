@@ -1,44 +1,36 @@
-package com.sxjkwm.pm.business.project.entity;
+package com.sxjkwm.pm.business.project.dto;
 
-import com.sxjkwm.pm.common.BaseEntity;
+import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+public class ProjectDto implements Serializable {
 
-@Table(name = "pm_project")
-@Entity
-public class Project extends BaseEntity {
+    private Long id;
 
-    @Column(name = "project_name")
     private String projectName;
 
-    @Column(name = "taskNum")
     private String taskNum;
 
-    @Column(name = "flow_id")
     private Long flowId;
 
-    @Column(name = "require_part")
     private String requirePart; // 业主
 
-    @Column(name = "supply_part")
     private String supplyPart; // 供应商
 
-    @Column(name = "agent")
     private String agent; // 转售者：物贸
 
-    @Column(name = "current_node_id")
     private Long currentNodeId;
 
-    @Column(name = "project_description")
     private String description;
 
-    @Column(name = "dept_name")
     private String deptName;
 
-    @Column(name = "owner_user_id")
-    private String ownerUserId;
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getProjectName() {
         return projectName;
@@ -110,13 +102,5 @@ public class Project extends BaseEntity {
 
     public void setDeptName(String deptName) {
         this.deptName = deptName;
-    }
-
-    public String getOwnerUserId() {
-        return ownerUserId;
-    }
-
-    public void setOwnerUserId(String ownerUserId) {
-        this.ownerUserId = ownerUserId;
     }
 }

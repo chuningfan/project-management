@@ -1,6 +1,6 @@
 package com.sxjkwm.pm.auth.service;
 
-import cn.hutool.core.lang.func.Func;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.auth.dao.*;
@@ -9,12 +9,12 @@ import com.sxjkwm.pm.auth.entity.Department;
 import com.sxjkwm.pm.auth.entity.Role;
 import com.sxjkwm.pm.auth.entity.RoleAndFunctionRelation;
 import com.sxjkwm.pm.auth.entity.User;
+import com.sxjkwm.pm.common.CacheService;
 import com.sxjkwm.pm.function.entity.Function;
 import com.sxjkwm.pm.function.service.FunctionService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,16 +34,23 @@ public class UserDataService {
 
     private final RoleAndFunctionRelationDao roleAndFunctionRelationDao;
 
+    private final CacheService cacheService;
+
     @Autowired
-    public UserDataService(UserDao userDao, RoleDao roleDao, DepartmentDao departmentDao, UserAndRoleRelationDao userAndRoleRelationDao, RoleAndFunctionRelationDao roleAndFunctionRelationDao) {
+    public UserDataService(UserDao userDao, RoleDao roleDao, DepartmentDao departmentDao, UserAndRoleRelationDao userAndRoleRelationDao, RoleAndFunctionRelationDao roleAndFunctionRelationDao, CacheService cacheService) {
         this.userDao = userDao;
         this.roleDao = roleDao;
         this.departmentDao = departmentDao;
         this.userAndRoleRelationDao = userAndRoleRelationDao;
         this.roleAndFunctionRelationDao = roleAndFunctionRelationDao;
+        this.cacheService = cacheService;
     }
 
     public UserDataDto getUserDataByWxUserId(String wxUserId) {
+        String userDataJson = cacheService.getString(wxUserId);
+        if (StringUtils.isNotBlank(userDataJson)) {
+            return JSONObject.parseObject(userDataJson, UserDataDto.class);
+        }
         User user = userDao.findUserByWxUserId(wxUserId);
         if (Objects.nonNull(user)) {
             UserDataDto result = new UserDataDto();

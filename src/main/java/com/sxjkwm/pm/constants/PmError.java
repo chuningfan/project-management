@@ -14,6 +14,9 @@ public enum PmError implements Constant<String, String> {
     WXWORK_LOGIN_FAILED("2002", "Login failed!"),
     WXWORK_READ_USER_FAILED("2003", "Cannot read user data from WxWork"),
     WXWORK_READ_DEPARTMENT_LIST_FAILED("2004", "Cannot read department list from WxWork"),
+    WXWORK_SEND_MSG_FAILED("2005", "Send WxWork message failed"),
+
+    NUONUO_GET_TOKEN_FAILED("2101", "Get NuoNuo token failed"),
     ;
 
     private String code;
