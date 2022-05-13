@@ -5,6 +5,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.errors.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,10 +17,10 @@ import java.security.NoSuchAlgorithmException;
 public class MinioClientConfig {
 
     @Bean
-    public MinioClient minioClient() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public MinioClient minioClient(@Autowired OssConfig ossConfig) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         MinioClient minioClient = MinioClient.builder()
-                .endpoint("http://117.78.7.196:19100")
-                .credentials("sxjkadmin", "sxjkadmin")
+                .endpoint(ossConfig.getOssAddress())
+                .credentials(ossConfig.getAccessKey(), ossConfig.getSecretKey())
                 .build();
         Constant.FileType[] fileTypes = Constant.FileType.values();
         for (Constant.FileType fileType: fileTypes) {
@@ -32,5 +33,4 @@ public class MinioClientConfig {
         minioClient.setTimeout(60000, 60000, 60000);
         return minioClient;
     }
-
 }

@@ -118,6 +118,16 @@
             <artifactId>minio</artifactId>
             <version>8.3.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.8.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>1.6.20</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

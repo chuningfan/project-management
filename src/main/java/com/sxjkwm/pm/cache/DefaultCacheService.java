@@ -2,11 +2,13 @@ package com.sxjkwm.pm.cache;
 
 import com.google.common.collect.Maps;
 import com.sxjkwm.pm.common.CacheService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Service
+@ConditionalOnMissingBean(RedisService.class)
 public class DefaultCacheService implements CacheService {
 
     private static final Map<String, String> userDataCache = Maps.newHashMap();
