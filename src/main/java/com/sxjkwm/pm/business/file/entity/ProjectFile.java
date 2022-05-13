@@ -5,14 +5,17 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "project_attachment")
+@Table(name = "pm_project_attachment")
 public class ProjectFile extends BaseFile {
 
     @Column(name = "project_id")
     private Long projectId;
 
-    @Column(name = "object_id")
-    private String objId;
+    @Column(name = "object_name")
+    private String objName;
+
+    @Column(name = "file_type")
+    private String fileType;
 
     public Long getProjectId() {
         return projectId;
@@ -22,11 +25,19 @@ public class ProjectFile extends BaseFile {
         this.projectId = projectId;
     }
 
-    public String getObjId() {
-        return objId;
+    public String getObjName() {
+        return objName;
     }
 
-    public void setObjId(String objId) {
-        this.objId = objId;
+    public void setObjName(String objName) {
+        this.objName = objName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
     }
 }

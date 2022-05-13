@@ -23,7 +23,7 @@ public class PatternFileController {
     }
 
     @PostMapping
-    public RestResponse<List<String>> update(@RequestParam("files") List<MultipartFile> files) {
+    public RestResponse<List<String>> upload(@RequestParam("files") List<MultipartFile> files) {
         return RestResponse.of(patternFileService.upload(files));
     }
 

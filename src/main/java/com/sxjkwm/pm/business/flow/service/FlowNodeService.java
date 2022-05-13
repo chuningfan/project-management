@@ -50,7 +50,6 @@ public class FlowNodeService {
                 List<PatternFile> patternFiles = Lists.newArrayList();
                 for (String patternFilePath: patternFilePaths) {
                     patternFile = new PatternFile();
-                    patternFile.setFlowId(flowId);
                     patternFile.setFlowNodeId(flowNodeId);
                     patternFile.setPath(patternFilePath);
                     patternFile.setFileName(patternFilePath.substring(patternFilePath.lastIndexOf(File.separator) + 1));
