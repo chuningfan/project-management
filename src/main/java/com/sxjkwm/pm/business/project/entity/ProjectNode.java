@@ -43,9 +43,6 @@ public class ProjectNode extends BaseEntity {
     @Column(name = "form_id")
     protected String formatId;
 
-    @Column(name = "progress_percentage")
-    private Double progressPercentage;
-
     public Long getProjectId() {
         return projectId;
     }
@@ -134,11 +131,4 @@ public class ProjectNode extends BaseEntity {
         this.formatId = formatId;
     }
 
-    public Double getProgressPercentage() {
-        return progressPercentage;
-    }
-
-    public void setProgressPercentage(Double progressPercentage) {
-        this.progressPercentage = progressPercentage;
-    }
 }
