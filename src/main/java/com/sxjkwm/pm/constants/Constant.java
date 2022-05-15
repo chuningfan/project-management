@@ -58,6 +58,7 @@ public interface Constant<K, V> {
     }
 
     enum FileType implements Constant<String, String> {
+        ISSUE("方案", "issue"), REPORT("评审报告", "report"),
         INQUIRY("询价文件", "inquiry"), ISSUE_INQUIRY("议题征询单", "issueinquiry"),
         PURCHASE_CONTRACT("采购合同", "purchasecontract"), SALES_CONTRACT("销售合同", "salescontract")
 
