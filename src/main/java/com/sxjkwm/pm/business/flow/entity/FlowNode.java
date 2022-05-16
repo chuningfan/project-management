@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @Entity
 public class FlowNode extends BaseFlowNode {
 
-    @Column(name="description")
+    @Column(name="description", length = 4000)
     private String description;
 
     public FlowNode(Long flowId, FlowNodeDto dto) {

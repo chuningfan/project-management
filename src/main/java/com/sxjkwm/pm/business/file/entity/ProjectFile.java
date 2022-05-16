@@ -1,10 +1,13 @@
 package com.sxjkwm.pm.business.file.entity;
 
+import org.hibernate.annotations.Proxy;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
+@Proxy(lazy = false)
 @Table(name = "pm_project_attachment")
 public class ProjectFile extends BaseFile {
 
@@ -15,7 +18,7 @@ public class ProjectFile extends BaseFile {
     private String objName;
 
     @Column(name = "project_node_id")
-    private String projectNodeId;
+    private Long projectNodeId;
 
     @Column(name = "file_type")
     private String fileType;
@@ -44,11 +47,11 @@ public class ProjectFile extends BaseFile {
         this.fileType = fileType;
     }
 
-    public String getProjectNodeId() {
+    public Long getProjectNodeId() {
         return projectNodeId;
     }
 
-    public void setProjectNodeId(String projectNodeId) {
+    public void setProjectNodeId(Long projectNodeId) {
         this.projectNodeId = projectNodeId;
     }
 }

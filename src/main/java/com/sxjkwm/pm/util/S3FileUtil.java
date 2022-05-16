@@ -31,7 +31,6 @@ public class S3FileUtil {
 
     public String upload(Serializable projectIdentity, MultipartFile file, Constant.FileType fileType) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         try (InputStream inputStream = file.getInputStream()) {
-            String contentType = file.getContentType();
             String fileName = file.getOriginalFilename();
             String objectName = projectIdentity + "/" + fileName;
             PutObjectArgs objectArgs = PutObjectArgs.builder().bucket(fileType.getValue()).object(objectName)

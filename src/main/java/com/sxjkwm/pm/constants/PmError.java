@@ -19,6 +19,8 @@ public enum PmError implements Constant<String, String> {
     WXWORK_READ_DEPARTMENT_LIST_FAILED("2004", "Cannot read department list from WxWork"),
     WXWORK_SEND_MSG_FAILED("2005", "Send WxWork message failed"),
 
+    S3_SERVICE_ERROR("2101", "S3-service error"),
+
     NUONUO_GET_TOKEN_FAILED("2101", "Get NuoNuo token failed"),
     ;
 

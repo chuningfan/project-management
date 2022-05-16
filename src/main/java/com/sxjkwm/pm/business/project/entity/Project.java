@@ -29,7 +29,7 @@ public class Project extends BaseEntity {
     @Column(name = "current_node_id")
     private Long currentNodeId;
 
-    @Column(name = "project_description")
+    @Column(name = "project_description", length=4000)
     private String description;
 
     @Column(name = "dept_name")

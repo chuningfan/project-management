@@ -45,4 +45,10 @@ public class PmException extends Exception {
         this.errorMessage = errorMessage;
         return this;
     }
+
+    public PmException appendMsg(String msg) {
+        this.errorMessage = this.errorMessage + ": " + msg;
+        return this;
+    }
+
 }

@@ -3,6 +3,7 @@ package com.sxjkwm.pm.business.file.controller;
 import com.sxjkwm.pm.business.file.service.S3FileService;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
+import com.sxjkwm.pm.exception.PmException;
 import io.minio.errors.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -36,13 +37,23 @@ public class S3FileController {
                                         @PathVariable("projectId") Long projectId,
                                         @PathVariable("nodeId") Long nodeId,
                                         @PathVariable("fileType") String fileType,
-                                        @RequestParam("fileName") String fileName) {
+                                        @RequestParam("fileName") String fileName) throws PmException {
         return RestResponse.of(s3FileService.upload(projectId, file, Constant.FileType.valueOf(fileType.toUpperCase(Locale.ROOT)), nodeId, fileName));
     }
 
     @GetMapping("/{projectId}/{nodeId}/{fileType}")
-    public void download(HttpServletResponse response, @PathVariable("projectId") Long projectId, @PathVariable("nodeId") Long nodeId, @PathVariable("fileType") String fileType) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public void download(HttpServletResponse response, @PathVariable("projectId") Long projectId, @PathVariable("nodeId") Long nodeId, @PathVariable("fileType") String fileType) throws PmException {
         s3FileService.download(projectId, nodeId, fileType, response);
+    }
+
+    @GetMapping("/{id}")
+    public void downloadFileByFileId(HttpServletResponse response, @PathVariable("id") Long fileId) throws PmException {
+        s3FileService.downloadByFileId(fileId, response);
+    }
+
+    @DeleteMapping("/{id}")
+    public RestResponse<Boolean> deleteFileById(@PathVariable("id") Long id) throws PmException {
+        return RestResponse.of(s3FileService.removeFileById(id));
     }
 
 }

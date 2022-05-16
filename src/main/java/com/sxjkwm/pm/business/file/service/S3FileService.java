@@ -3,6 +3,8 @@ package com.sxjkwm.pm.business.file.service;
 import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
 import com.sxjkwm.pm.business.file.entity.ProjectFile;
 import com.sxjkwm.pm.constants.Constant;
+import com.sxjkwm.pm.constants.PmError;
+import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.S3FileUtil;
 import io.minio.GetObjectResponse;
 import io.minio.errors.*;
@@ -39,11 +41,34 @@ public class S3FileService {
         this.projectFileDao = projectFileDao;
     }
 
+    public void downloadByFileId(Long fileId, HttpServletResponse response) throws PmException{
+        ProjectFile projectFile = projectFileDao.getOne(fileId);
+        Long projectId = projectFile.getProjectId();
+        String fileType = projectFile.getFileType();
+        Long nodeId = projectFile.getProjectNodeId();
+        this.download(projectId, nodeId, fileType, response);
+    }
+
+    public Boolean removeFileById(Long fileId) throws PmException {
+        try {
+            ProjectFile projectFile = projectFileDao.getOne(fileId);
+            String fileType = projectFile.getFileType();
+            String objectName = projectFile.getObjName();
+            projectFileDao.delete(projectFile);
+            s3FileUtil.remove(Constant.FileType.valueOf(fileType.toUpperCase(Locale.ROOT)), objectName);
+            return true;
+        } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException | NoSuchAlgorithmException | InvalidKeyException |
+                InvalidResponseException | XmlParserException | InternalException e) {
+            throw getException(e);
+        }
+    }
+
     @Transactional
-    public Long upload(Long projectId, MultipartFile file, Constant.FileType fileType, Long nodeId, String fileName) {
+    public Long upload(Long projectId, MultipartFile file, Constant.FileType fileType, Long projectNodeId, String fileName) throws PmException {
+        PmError error = null;
         try {
             ProjectFile condition = new ProjectFile();
-            condition.setFlowNodeId(nodeId);
+            condition.setProjectNodeId(projectNodeId);
             condition.setProjectId(projectId);
             condition.setFileType(fileType.getValue());
             ProjectFile existingFile = projectFileDao.findOne(Example.of(condition)).orElse(null);
@@ -56,33 +81,16 @@ public class S3FileService {
             projectFile.setObjName(objectName);
             projectFile.setFileName(fileName);
             projectFile.setProjectId(projectId);
-            projectFile.setFlowNodeId(nodeId);
+            projectFile.setProjectNodeId(projectNodeId);
             projectFile.setFileType(fileType.getValue());
             projectFile = projectFileDao.save(projectFile);
             return projectFile.getId();
-        } catch (ServerException e) {
-            e.printStackTrace();
-        } catch (InsufficientDataException e) {
-            e.printStackTrace();
-        } catch (ErrorResponseException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (InvalidResponseException e) {
-            e.printStackTrace();
-        } catch (XmlParserException e) {
-            e.printStackTrace();
-        } catch (InternalException e) {
-            e.printStackTrace();
+        } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
+            throw getException(e);
         }
-        return null;
     }
 
-    public void download(Long projectId, Long nodeId, String fileType, HttpServletResponse response) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public void download(Long projectId, Long nodeId, String fileType, HttpServletResponse response) throws PmException {
         ProjectFile projectFile = new ProjectFile();
         projectFile.setFlowNodeId(nodeId);
         projectFile.setProjectId(projectId);
@@ -113,10 +121,20 @@ public class S3FileService {
                         stream.flush();
                     }
                 }
+            } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
+                    NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
+                throw getException(e);
             }
         } else {
-
+            throw new PmException(PmError.NO_DATA_FOUND);
         }
+    }
+
+    private PmException getException(Exception e) {
+        PmException pmException = new PmException(PmError.S3_SERVICE_ERROR);
+        pmException.appendMsg(e.getMessage());
+        // TODO
+        return pmException;
     }
 
 }
