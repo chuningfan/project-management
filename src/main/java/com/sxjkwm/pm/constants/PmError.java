@@ -9,6 +9,8 @@ public enum PmError implements Constant<String, String> {
      * 3. starts with 300 means data error
      * 4. starts with 400 means user operation error
      */
+    // System error
+    NO_SUCH_BEAN("1001", "Cannot find target bean"),
     // third-party error
     WXWORK_TOKEN_ERROR("2001", "Get WxWork token failed!"),
     WXWORK_LOGIN_FAILED("2002", "Login failed!"),

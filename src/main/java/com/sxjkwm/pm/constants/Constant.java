@@ -1,5 +1,8 @@
 package com.sxjkwm.pm.constants;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 public interface Constant<K, V> {
 
     V getValue();
@@ -81,6 +84,65 @@ public interface Constant<K, V> {
         @Override
         public String getLabel() {
             return type;
+        }
+    }
+
+    enum PropertyType implements Constant<String, String> {
+        PRICE("金额", "price", BigDecimal.class),
+        STRING("字符串", "string", String.class),
+        FILE("文件", "file", Long.class),
+        COLLECTION("集合", "collection", List.class),
+        ;
+
+        private String type;
+
+        private String value;
+
+        private Class<?> clazz;
+
+        PropertyType(String type, String value, Class<?> clazz) {
+            this.type = type;
+            this.value = value;
+            this.clazz = clazz;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public String getLabel() {
+            return type;
+        }
+
+        public Class<?> getClazz() {
+            return clazz;
+        }
+    }
+
+    enum ProjectNodeStatus implements Constant<String, Integer> {
+        INPROGRESS("处理中", 0),
+        FINISHED("已完成", 1),
+        ;
+
+        private String status;
+
+        private Integer value;
+
+        ProjectNodeStatus(String status, Integer value) {
+            this.status = status;
+            this.value = value;
+        }
+
+        @Override
+        public Integer getValue() {
+            return value;
+        }
+
+        @Override
+        public String getLabel() {
+            return status;
         }
     }
 

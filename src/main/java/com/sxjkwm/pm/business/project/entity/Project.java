@@ -5,6 +5,7 @@ import com.sxjkwm.pm.common.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 @Table(name = "pm_project")
 @Entity
@@ -12,9 +13,6 @@ public class Project extends BaseEntity {
 
     @Column(name = "project_name")
     private String projectName;
-
-    @Column(name = "taskNum")
-    private String taskNum;
 
     @Column(name = "flow_id")
     private Long flowId;
@@ -24,9 +22,6 @@ public class Project extends BaseEntity {
 
     @Column(name = "supply_part")
     private String supplyPart; // 供应商
-
-    @Column(name = "agent")
-    private String agent; // 转售者：物贸
 
     @Column(name = "current_node_id")
     private Long currentNodeId;
@@ -40,20 +35,15 @@ public class Project extends BaseEntity {
     @Column(name = "owner_user_id")
     private String ownerUserId;
 
+    @Column(name = "budget")
+    private BigDecimal budget;
+
     public String getProjectName() {
         return projectName;
     }
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
-    }
-
-    public String getTaskNum() {
-        return taskNum;
-    }
-
-    public void setTaskNum(String taskNum) {
-        this.taskNum = taskNum;
     }
 
     public Long getFlowId() {
@@ -78,14 +68,6 @@ public class Project extends BaseEntity {
 
     public void setSupplyPart(String supplyPart) {
         this.supplyPart = supplyPart;
-    }
-
-    public String getAgent() {
-        return agent;
-    }
-
-    public void setAgent(String agent) {
-        this.agent = agent;
     }
 
     public Long getCurrentNodeId() {
@@ -118,5 +100,13 @@ public class Project extends BaseEntity {
 
     public void setOwnerUserId(String ownerUserId) {
         this.ownerUserId = ownerUserId;
+    }
+
+    public BigDecimal getBudget() {
+        return budget;
+    }
+
+    public void setBudget(BigDecimal budget) {
+        this.budget = budget;
     }
 }

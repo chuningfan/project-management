@@ -40,7 +40,7 @@ public class S3FileService {
     }
 
     @Transactional
-    public Boolean upload(Long projectId, MultipartFile file, Constant.FileType fileType, Long nodeId, String fileName) {
+    public Long upload(Long projectId, MultipartFile file, Constant.FileType fileType, Long nodeId, String fileName) {
         try {
             ProjectFile condition = new ProjectFile();
             condition.setFlowNodeId(nodeId);
@@ -58,8 +58,8 @@ public class S3FileService {
             projectFile.setProjectId(projectId);
             projectFile.setFlowNodeId(nodeId);
             projectFile.setFileType(fileType.getValue());
-            projectFileDao.save(projectFile);
-            return true;
+            projectFile = projectFileDao.save(projectFile);
+            return projectFile.getId();
         } catch (ServerException e) {
             e.printStackTrace();
         } catch (InsufficientDataException e) {
@@ -79,7 +79,7 @@ public class S3FileService {
         } catch (InternalException e) {
             e.printStackTrace();
         }
-        return false;
+        return null;
     }
 
     public void download(Long projectId, Long nodeId, String fileType, HttpServletResponse response) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {

@@ -14,6 +14,9 @@ public class ProjectFile extends BaseFile {
     @Column(name = "object_name")
     private String objName;
 
+    @Column(name = "project_node_id")
+    private String projectNodeId;
+
     @Column(name = "file_type")
     private String fileType;
 
@@ -39,5 +42,13 @@ public class ProjectFile extends BaseFile {
 
     public void setFileType(String fileType) {
         this.fileType = fileType;
+    }
+
+    public String getProjectNodeId() {
+        return projectNodeId;
+    }
+
+    public void setProjectNodeId(String projectNodeId) {
+        this.projectNodeId = projectNodeId;
     }
 }

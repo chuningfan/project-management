@@ -4,6 +4,7 @@ package com.sxjkwm.pm.util;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class ContextUtil {
@@ -18,6 +19,11 @@ public class ContextUtil {
     public static <T> T getBean(Class<T> clazz) {
         if (Objects.isNull(context)) return null;
         return context.getBean(clazz);
+    }
+
+    public static <T> Map<String, T> getBeansOfType(Class<T> clazz) {
+        if (Objects.isNull(context)) return null;
+        return context.getBeansOfType(clazz);
     }
 
     public static ListableBeanFactory getBeanFactory() {

@@ -32,7 +32,7 @@ public class S3FileController {
 
 
     @PostMapping("/{projectId}/{nodeId}/{fileType}")
-    public RestResponse<Boolean> upload(@RequestParam("file") MultipartFile file,
+    public RestResponse<Long> upload(@RequestParam("file") MultipartFile file,
                                         @PathVariable("projectId") Long projectId,
                                         @PathVariable("nodeId") Long nodeId,
                                         @PathVariable("fileType") String fileType,

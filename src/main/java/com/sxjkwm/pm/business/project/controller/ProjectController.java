@@ -1,24 +1,26 @@
 package com.sxjkwm.pm.business.project.controller;
 
+import com.sxjkwm.pm.business.project.dto.ProjectDto;
+import com.sxjkwm.pm.business.project.service.ProjectService;
 import com.sxjkwm.pm.common.BaseController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.sxjkwm.pm.common.RestResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/project")
 public class ProjectController extends BaseController {
 
-//    @PostMapping
-//    public RestResponse<ProjectDto> newProject(@RequestBody ProjectDto projectDto) {
-//
-//    }
+    private final ProjectService projectService;
 
-    @GetMapping
-    public String test() {
-        getUserData();
-        return "123";
+    @Autowired
+    public ProjectController(ProjectService projectService) {
+        this.projectService = projectService;
     }
 
+    @PostMapping
+    public RestResponse<ProjectDto> saveOrUpdate(@RequestBody ProjectDto projectDto) {
+        return RestResponse.of(projectService.saveOrUpdate(projectDto));
+    }
 
 }

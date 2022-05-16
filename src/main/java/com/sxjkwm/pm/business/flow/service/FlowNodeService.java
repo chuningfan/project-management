@@ -45,18 +45,18 @@ public class FlowNodeService {
             flowNode = flowNodeDao.save(flowNode);
             flowNodeId = flowNode.getId();
             dto.setId(flowNodeId);
-            patternFilePaths = dto.getPatternPaths();
-            if (CollectionUtils.isNotEmpty(patternFilePaths)) {
-                List<PatternFile> patternFiles = Lists.newArrayList();
-                for (String patternFilePath: patternFilePaths) {
-                    patternFile = new PatternFile();
-                    patternFile.setFlowNodeId(flowNodeId);
-                    patternFile.setPath(patternFilePath);
-                    patternFile.setFileName(patternFilePath.substring(patternFilePath.lastIndexOf(File.separator) + 1));
-                    patternFiles.add(patternFile);
-                }
-                patternFileDao.saveAll(patternFiles);
-            }
+//            patternFilePaths = dto.getPatternPaths();
+//            if (CollectionUtils.isNotEmpty(patternFilePaths)) {
+//                List<PatternFile> patternFiles = Lists.newArrayList();
+//                for (String patternFilePath: patternFilePaths) {
+//                    patternFile = new PatternFile();
+//                    patternFile.setFlowNodeId(flowNodeId);
+//                    patternFile.setPath(patternFilePath);
+//                    patternFile.setFileName(patternFilePath.substring(patternFilePath.lastIndexOf(File.separator) + 1));
+//                    patternFiles.add(patternFile);
+//                }
+//                patternFileDao.saveAll(patternFiles);
+//            }
         }
         return flowNodeDtos;
     }
