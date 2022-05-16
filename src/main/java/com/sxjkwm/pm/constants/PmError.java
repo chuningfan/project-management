@@ -11,6 +11,7 @@ public enum PmError implements Constant<String, String> {
      */
     // System error
     NO_SUCH_BEAN("1001", "Cannot find target bean"),
+    NO_DATA_FOUND("1002", "Cannot find data by conditions"),
     // third-party error
     WXWORK_TOKEN_ERROR("2001", "Get WxWork token failed!"),
     WXWORK_LOGIN_FAILED("2002", "Login failed!"),

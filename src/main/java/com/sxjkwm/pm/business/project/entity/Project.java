@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.business.project.entity;
 
 import com.sxjkwm.pm.common.BaseEntity;
+import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +10,7 @@ import java.math.BigDecimal;
 
 @Table(name = "pm_project")
 @Entity
+@Proxy(lazy = false)
 public class Project extends BaseEntity {
 
     @Column(name = "project_name")

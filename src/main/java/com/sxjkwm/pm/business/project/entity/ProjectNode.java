@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.business.project.entity;
 
 import com.sxjkwm.pm.common.BaseEntity;
+import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +9,7 @@ import javax.persistence.Table;
 
 @Table(name = "pm_project_node")
 @Entity
+@Proxy(lazy = false)
 public class ProjectNode extends BaseEntity {
 
     @Column(name = "project_id")

@@ -6,17 +6,14 @@ import com.sxjkwm.pm.common.BaseController;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Vic.Chu
  * @date 2022/5/15 16:37
  */
 @RestController
-@RequestMapping("projectNode")
+@RequestMapping("/projectNode")
 public class ProjectNodeController extends BaseController {
 
     private final ProjectNodeService projectNodeService;
@@ -28,7 +25,13 @@ public class ProjectNodeController extends BaseController {
 
     @PostMapping
     public RestResponse<ProjectNodeDto> save(@RequestBody ProjectNodeDto projectNodeDto) throws PmException {
-        return RestResponse.of(projectNodeService.save(projectNodeDto));
+        return RestResponse.of(projectNodeService.saveOrUpdate(projectNodeDto));
     }
+
+    @GetMapping("/{id}")
+    public RestResponse<ProjectNodeDto> getOne(@PathVariable("id") Long projectNodeId) throws PmException {
+        return RestResponse.of(projectNodeService.getOne(projectNodeId));
+    }
+
 
 }
