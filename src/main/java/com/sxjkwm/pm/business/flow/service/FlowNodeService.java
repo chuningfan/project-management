@@ -11,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -109,6 +110,11 @@ public class FlowNodeService {
         flowNode.setId(id);
         Example<FlowNode> example = Example.of(flowNode);
         return flowNodeDao.findOne(example).get();
+    }
+
+    public List<FlowNode> getByConditions(FlowNode condition, Sort sort) {
+        Example<FlowNode> example = Example.of(condition);
+        return flowNodeDao.findAll(example, sort);
     }
 
     public List<FlowNode> getByConditions(FlowNode condition) {

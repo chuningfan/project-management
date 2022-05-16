@@ -4,6 +4,7 @@ import com.sxjkwm.pm.common.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 /**
@@ -11,7 +12,7 @@ import javax.persistence.Table;
  * @date 2022/5/15 12:43
  */
 @Entity
-@Table(name = "pm_project_node_property")
+@Table(name = "pm_project_node_property", indexes = {@Index(name = "projectnodeprop_projectInfo", columnList = "project_id,project_node_id,property_key")})
 public class ProjectNodeProperty extends BaseEntity {
 
     @Column(name = "project_id")

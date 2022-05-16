@@ -5,9 +5,10 @@ import com.sxjkwm.pm.common.BaseFlowNode;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
-@Table(name = "pm_flow_node")
+@Table(name = "pm_flow_node", indexes = {@Index(name = "flownode_flowId", columnList = "flow_id")})
 @Entity
 public class FlowNode extends BaseFlowNode {
 

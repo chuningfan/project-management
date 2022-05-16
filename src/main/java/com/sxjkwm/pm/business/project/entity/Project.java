@@ -5,10 +5,11 @@ import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 
-@Table(name = "pm_project")
+@Table(name = "pm_project", indexes = {@Index(name="project_flowId", columnList = "flow_id")})
 @Entity
 @Proxy(lazy = false)
 public class Project extends BaseEntity {

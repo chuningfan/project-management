@@ -4,6 +4,7 @@ import com.sxjkwm.pm.common.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 /**
@@ -11,7 +12,7 @@ import javax.persistence.Table;
  * @date 2022/5/15 12:27
  */
 @Entity
-@Table(name = "pm_flow_node_definition")
+@Table(name = "pm_flow_node_definition", indexes = {@Index(name = "flownodedef_flownodeId", columnList = "flow_node_id"), @Index(name = "flownodedef_propertyKey", columnList = "property_key")})
 public class FlowNodeDefinition extends BaseEntity {
 
     @Column(name = "flow_node_id")

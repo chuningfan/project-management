@@ -5,9 +5,10 @@ import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
-@Table(name = "pm_project_node")
+@Table(name = "pm_project_node", indexes = {@Index(name = "projectnode_projectId", columnList = "project_id"), @Index(name = "projectnode_flowNodeId", columnList = "flow_node_id")})
 @Entity
 @Proxy(lazy = false)
 public class ProjectNode extends BaseEntity {
