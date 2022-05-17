@@ -38,5 +38,4 @@ public class ProjectController extends BaseController {
         }
         return RestResponse.of(projectService.queryMine(userDataDto.getWxUserId(), status, projectCode, projectName, requirePart, pageNo, pageSize));
     }
-
 }
