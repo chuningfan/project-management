@@ -9,7 +9,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 
-@Table(name = "pm_project", indexes = {@Index(name="project_flowId", columnList = "flow_id")})
+@Table(name = "pm_project", indexes = {@Index(name="project_flowId", columnList = "flow_id"), @Index(name="project_unionIndex", columnList = "owner_user_id,project_code,project_code,project_status")})
 @Entity
 @Proxy(lazy = false)
 public class Project extends BaseEntity {
@@ -40,6 +40,12 @@ public class Project extends BaseEntity {
 
     @Column(name = "budget")
     private BigDecimal budget;
+
+    @Column(name = "project_code")
+    private String projectCode;  // 项目编号
+
+    @Column(name = "project_status")
+    private Integer projectStatus;
 
     public String getProjectName() {
         return projectName;
@@ -111,5 +117,21 @@ public class Project extends BaseEntity {
 
     public void setBudget(BigDecimal budget) {
         this.budget = budget;
+    }
+
+    public String getProjectCode() {
+        return projectCode;
+    }
+
+    public void setProjectCode(String projectCode) {
+        this.projectCode = projectCode;
+    }
+
+    public Integer getProjectStatus() {
+        return projectStatus;
+    }
+
+    public void setProjectStatus(Integer projectStatus) {
+        this.projectStatus = projectStatus;
     }
 }

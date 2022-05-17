@@ -1,11 +1,16 @@
 package com.sxjkwm.pm.business.project.controller;
 
+import com.sxjkwm.pm.auth.dto.UserDataDto;
 import com.sxjkwm.pm.business.project.dto.ProjectDto;
+import com.sxjkwm.pm.business.project.entity.Project;
 import com.sxjkwm.pm.business.project.service.ProjectService;
 import com.sxjkwm.pm.common.BaseController;
 import com.sxjkwm.pm.common.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/project")
@@ -21,6 +26,17 @@ public class ProjectController extends BaseController {
     @PostMapping
     public RestResponse<ProjectDto> saveOrUpdate(@RequestBody ProjectDto projectDto) {
         return RestResponse.of(projectService.saveOrUpdate(projectDto));
+    }
+
+    @GetMapping
+    public RestResponse<Page<Project>> getMyProjects(@RequestParam(name = "status", required = false) Integer status, @RequestParam(name = "projectName", required = false) String projectName,
+                                                     @RequestParam(name = "projectCode", required = false)String projectCode, @RequestParam(name = "requirePart", required = false) String requirePart,
+                                                     @RequestParam("pageNo") Integer pageNo, @RequestParam("pageSize") Integer pageSize) {
+        UserDataDto userDataDto = getUserData();
+        if (Objects.isNull(userDataDto)) {
+            return RestResponse.of(projectService.queryMine("chuningfan", status, projectCode, projectName, requirePart, pageNo, pageSize));
+        }
+        return RestResponse.of(projectService.queryMine(userDataDto.getWxUserId(), status, projectCode, projectName, requirePart, pageNo, pageSize));
     }
 
 }
