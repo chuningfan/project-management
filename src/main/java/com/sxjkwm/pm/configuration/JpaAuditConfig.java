@@ -2,9 +2,7 @@ package com.sxjkwm.pm.configuration;
 
 import com.sxjkwm.pm.auth.context.Context;
 import com.sxjkwm.pm.auth.context.ContextFactory;
-import com.sxjkwm.pm.auth.context.impl.ContextFactoryImpl;
 import com.sxjkwm.pm.auth.dto.UserDataDto;
-import com.sxjkwm.pm.common.AuthUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

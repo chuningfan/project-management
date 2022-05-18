@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import com.sxjkwm.pm.auth.context.Context;
 import com.sxjkwm.pm.auth.context.ContextFactory;
 import com.sxjkwm.pm.auth.dto.UserDataDto;
-import com.sxjkwm.pm.common.AuthUser;
 import com.sxjkwm.pm.common.CacheService;
 import com.sxjkwm.pm.configuration.WxConfig;
 import com.sxjkwm.pm.constants.PmError;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 

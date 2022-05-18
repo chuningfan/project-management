@@ -2,7 +2,6 @@ package com.sxjkwm.pm.auth.context.impl;
 
 import com.sxjkwm.pm.auth.context.Context;
 import com.sxjkwm.pm.auth.dto.UserDataDto;
-import com.sxjkwm.pm.common.AuthUser;
 
 class ContextImpl implements Context<UserDataDto> {
 
