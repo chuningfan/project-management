@@ -47,6 +47,9 @@ public class Project extends BaseEntity {
     @Column(name = "project_status")
     private Integer projectStatus;
 
+    @Column(name = "project_time")
+    private Long projectTime;
+
     public String getProjectName() {
         return projectName;
     }
@@ -133,5 +136,13 @@ public class Project extends BaseEntity {
 
     public void setProjectStatus(Integer projectStatus) {
         this.projectStatus = projectStatus;
+    }
+
+    public Long getProjectTime() {
+        return projectTime;
+    }
+
+    public void setProjectTime(Long projectTime) {
+        this.projectTime = projectTime;
     }
 }

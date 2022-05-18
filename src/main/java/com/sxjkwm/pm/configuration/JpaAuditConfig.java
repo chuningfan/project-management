@@ -3,6 +3,7 @@ package com.sxjkwm.pm.configuration;
 import com.sxjkwm.pm.auth.context.Context;
 import com.sxjkwm.pm.auth.context.ContextFactory;
 import com.sxjkwm.pm.auth.context.impl.ContextFactoryImpl;
+import com.sxjkwm.pm.auth.dto.UserDataDto;
 import com.sxjkwm.pm.common.AuthUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -17,10 +18,10 @@ import java.util.Optional;
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 public class JpaAuditConfig {
 
-    private final ContextFactory<AuthUser> contextFactory;
+    private final ContextFactory<UserDataDto> contextFactory;
 
     @Autowired
-    public JpaAuditConfig(ContextFactory<AuthUser> contextFactory) {
+    public JpaAuditConfig(ContextFactory<UserDataDto> contextFactory) {
         this.contextFactory = contextFactory;
     }
 
@@ -28,10 +29,10 @@ public class JpaAuditConfig {
     public AuditorAware<String> auditorProvider() {
         return () -> {
             String operator = "system";
-            Context<AuthUser> context = contextFactory.get();
-            AuthUser authUser = context.unwrap();
+            Context<UserDataDto> context = contextFactory.get();
+            UserDataDto authUser = context.unwrap();
             if (Objects.nonNull(authUser)) {
-                operator = authUser.getUserId();
+                operator = authUser.getWxUserId();
             }
             return Optional.ofNullable(operator);
         };

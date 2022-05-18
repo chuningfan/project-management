@@ -19,6 +19,8 @@ public class UserDataDto implements Serializable {
 
     private String avatar;
 
+    private String ipAddr;
+
     public Long getUserId() {
         return userId;
     }
@@ -65,5 +67,13 @@ public class UserDataDto implements Serializable {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public String getIpAddr() {
+        return ipAddr;
+    }
+
+    public void setIpAddr(String ipAddr) {
+        this.ipAddr = ipAddr;
     }
 }

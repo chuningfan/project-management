@@ -5,7 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.sxjkwm.pm.auth.context.Context;
 import com.sxjkwm.pm.auth.context.ContextFactory;
+import com.sxjkwm.pm.auth.dto.UserDataDto;
 import com.sxjkwm.pm.common.AuthUser;
+import com.sxjkwm.pm.common.CacheService;
 import com.sxjkwm.pm.configuration.WxConfig;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
@@ -28,12 +30,18 @@ public class LoginService {
 
     private final WxConfig wxConfig;
 
-    private final ContextFactory<AuthUser> contextFactory;
+    private final ContextFactory<UserDataDto> contextFactory;
+
+    private final CacheService cacheService;
+
+    private final UserDataService userDataService;
 
     @Autowired
-    public LoginService(WxConfig wxConfig, ContextFactory<AuthUser> contextFactory) {
+    public LoginService(WxConfig wxConfig, ContextFactory<UserDataDto> contextFactory, CacheService cacheService, UserDataService userDataService) {
         this.wxConfig = wxConfig;
         this.contextFactory = contextFactory;
+        this.cacheService = cacheService;
+        this.userDataService = userDataService;
     }
 
     public boolean isValid(HttpServletRequest req) {
@@ -42,20 +50,20 @@ public class LoginService {
             return false;
         }
         JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
-        populateData(jsonObject, req);
         String userId = jsonObject.getString("userId");
-        return StringUtils.isNotBlank(userId);
+        String userDataDtoString = cacheService.getString(userId);
+        if (StringUtils.isNotBlank(userDataDtoString)) {
+            fillContext(JSONObject.parseObject(userDataDtoString, UserDataDto.class), req);
+            return true;
+        }
+        return false;
     }
 
-    private void populateData(JSONObject jsonObject, HttpServletRequest req) {
-        AuthUser authUser = new AuthUser();
-        authUser.setUserId(jsonObject.getString("userId"));
-        authUser.setDepartmentIds((List<Integer>) jsonObject.get("deptIds"));
-        authUser.setUsername(jsonObject.getString("username"));
+    private void fillContext(UserDataDto userDataDto, HttpServletRequest req) {
         String remoteIpAddr = req.getRemoteAddr();
-        authUser.setIpAddr(remoteIpAddr);
-        Context<AuthUser> context = contextFactory.get();
-        context.of(authUser);
+        userDataDto.setIpAddr(remoteIpAddr);
+        Context<UserDataDto> context = contextFactory.get();
+        context.of(userDataDto);
     }
 
     public JSONObject doLogin(HttpServletRequest req) throws PmException {
@@ -83,20 +91,26 @@ public class LoginService {
     }
 
     public String processToken(JSONObject jsonObject, HttpServletRequest request) {
-        String username = jsonObject.getString("name");
-        List<Integer> deptIds = (List<Integer>) jsonObject.get("department");
-        String avatar = jsonObject.getString("avatar");
-        String mobile = jsonObject.getString("mobile");
+//        String username = jsonObject.getString("name");
+//        List<Integer> deptIds = (List<Integer>) jsonObject.get("department");
+//        String avatar = jsonObject.getString("avatar");
+//        String mobile = jsonObject.getString("mobile");
         String wxUserId = jsonObject.getString("userid");
         Map<String, Object> dataMap = Maps.newHashMap();
-        dataMap.put("username", username);
-        dataMap.put("deptIds", deptIds);
-        dataMap.put("avatar", avatar);
-        dataMap.put("mobile", mobile);
+//        dataMap.put("username", username);
+//        dataMap.put("deptIds", deptIds);
+//        dataMap.put("avatar", avatar);
+//        dataMap.put("mobile", mobile);
         dataMap.put("userId", wxUserId);
         String jsonString = JSONObject.toJSONString(dataMap);
         String encoded = new String(Base64.getEncoder().encode(jsonString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-        request.getSession().setAttribute(tokenKey, encoded);
+//        request.getSession().setAttribute(tokenKey, encoded);
+        UserDataDto dataDto = userDataService.getUserDataByWxUserId(wxUserId);
+        if (Objects.isNull(dataDto)) {
+            return null;
+        }
+        String userDataString = JSONObject.toJSONString(dataDto);
+        cacheService.store(wxUserId, userDataString);
         return encoded;
     }
 

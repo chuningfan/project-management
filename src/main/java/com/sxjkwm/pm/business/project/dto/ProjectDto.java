@@ -30,6 +30,8 @@ public class ProjectDto implements Serializable {
 
     private Integer projectStatus;
 
+    private Long projectTime;
+
     public Long getId() {
         return id;
     }
@@ -126,4 +128,11 @@ public class ProjectDto implements Serializable {
         this.projectStatus = projectStatus;
     }
 
+    public Long getProjectTime() {
+        return projectTime;
+    }
+
+    public void setProjectTime(Long projectTime) {
+        this.projectTime = projectTime;
+    }
 }
