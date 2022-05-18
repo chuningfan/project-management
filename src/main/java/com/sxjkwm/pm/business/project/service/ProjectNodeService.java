@@ -138,6 +138,7 @@ public class ProjectNodeService {
             dto.setProjectNodeId(id);
             dto.setPropertyIndex(flowNodeDefinition.getPropertyIndex());
             dto.setPropertyType(flowNodeDefinition.getPropertyType());
+            dto.setPropertyName(flowNodeDefinition.getPropertyName());
             dto.setPropertyKey(propertyKey);
             if (propertyType == Constant.PropertyType.COLLECTION) {
                 String handlerBeanName = flowNodeDefinition.getCollectionPropertyHandler();
@@ -151,6 +152,58 @@ public class ProjectNodeService {
             propertyDtos.add(dto);
         }
         return result;
+    }
+
+    public ProjectNodeDto getOne(Long projectId, Long flowNodeId) {
+        ProjectNodeDto dto = new ProjectNodeDto();
+        List<FlowNodeDefinition> flowNodeDefinitions = flowNodeDefinitionDao.getByFlowNodeId(flowNodeId);
+        flowNodeDefinitions = flowNodeDefinitions.stream().filter(fnd -> fnd.getIsDeleted().intValue() == 0).collect(Collectors.toList());
+        ProjectNode condition = new ProjectNode();
+        condition.setProjectId(projectId);
+        condition.setFlowNodeId(flowNodeId);
+        condition.setIsDeleted(0);
+        Example<ProjectNode> example = Example.of(condition);
+        ProjectNode projectNode = projectNodeDao.findOne(example).orElse(null);
+        if (Objects.nonNull(projectNode)) {
+            dto.setHasValue(true);
+            dto.setProjectId(projectId);
+            dto.setNodeStatus(projectNode.getNodeStatus());
+            dto.setFlowNodeId(flowNodeId);
+            dto.setId(projectNode.getId());
+            List<ProjectNodePropertyDto> propertyDtos = Lists.newArrayList();
+            dto.setPropertyDtos(propertyDtos);
+            ProjectNodeProperty propCondition = new ProjectNodeProperty();
+            propCondition.setProjectId(projectId);
+            propCondition.setProjectNodeId(projectNode.getId());
+            List<ProjectNodeProperty> projectNodePropertyList = projectNodePropertyDao.findAll(Example.of(propCondition));
+            if (CollectionUtils.isNotEmpty(projectNodePropertyList)) {
+                Map<String, ProjectNodeProperty> propertyMap = projectNodePropertyList.stream().collect(Collectors.toMap(ProjectNodeProperty::getPropertyKey, prop -> prop, (k1, k2) -> k1));
+                ProjectNodePropertyDto projectNodePropertyDto;
+                for (FlowNodeDefinition definition : flowNodeDefinitions) {
+                    projectNodePropertyDto = new ProjectNodePropertyDto();
+                    String key = definition.getPropertyKey();
+                    projectNodePropertyDto.setPropertyKey(key);
+                    projectNodePropertyDto.setPropertyType(definition.getPropertyType());
+                    projectNodePropertyDto.setPropertyIndex(definition.getPropertyIndex());
+                    projectNodePropertyDto.setPropertyName(definition.getPropertyName());
+                    projectNodePropertyDto.setCollectionPropertyHandler(definition.getCollectionPropertyHandler());
+                    ProjectNodeProperty projectNodeProperty = propertyMap.get(key);
+                    if (Objects.nonNull(projectNodeProperty)) {
+                        projectNodePropertyDto.setId(projectNodeProperty.getId());
+                        if ("COLLECTION".equalsIgnoreCase(definition.getPropertyType())) {
+                            String propertyHandler = definition.getCollectionPropertyHandler();
+                            PropertyHandler handler = handlerMap.get(propertyHandler);
+                            List dataList = handler.query(projectId, projectNode.getId(), key);
+                            projectNodePropertyDto.setCollectionData(dataList);
+                        } else {
+                            projectNodePropertyDto.setPropertyValue(projectNodeProperty.getPropertyValue());
+                        }
+                    }
+                    propertyDtos.add(projectNodePropertyDto);
+                }
+            }
+        }
+        return dto;
     }
 
 //    @Transactional

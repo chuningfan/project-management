@@ -24,7 +24,7 @@ public class ProjectNodeController extends BaseController {
     }
 
     @PostMapping
-    public RestResponse<ProjectNodeDto> save(@RequestBody ProjectNodeDto projectNodeDto) throws PmException {
+    public RestResponse<ProjectNodeDto> saveOrUpdate(@RequestBody ProjectNodeDto projectNodeDto) throws PmException {
         return RestResponse.of(projectNodeService.saveOrUpdate(projectNodeDto));
     }
 
@@ -33,5 +33,9 @@ public class ProjectNodeController extends BaseController {
         return RestResponse.of(projectNodeService.getOne(projectNodeId));
     }
 
+    @GetMapping("/{projectId}/{flowNodeId}")
+    public RestResponse<ProjectNodeDto> getOne(@PathVariable("projectId") Long projectId, @PathVariable("flowNodeId") Long flowNodeId) {
+        return RestResponse.of(projectNodeService.getOne(projectId, flowNodeId));
+    }
 
 }
