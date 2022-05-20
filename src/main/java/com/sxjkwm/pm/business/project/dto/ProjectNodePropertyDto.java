@@ -26,6 +26,8 @@ public class ProjectNodePropertyDto implements Serializable {
 
     private Integer propertyIndex;
 
+    private String propertyName;
+
     private List<? extends BaseCollectionProperty> collectionData;
 
     private String collectionPropertyHandler;
@@ -100,5 +102,13 @@ public class ProjectNodePropertyDto implements Serializable {
 
     public void setCollectionPropertyHandler(String collectionPropertyHandler) {
         this.collectionPropertyHandler = collectionPropertyHandler;
+    }
+
+    public String getPropertyName() {
+        return propertyName;
+    }
+
+    public void setPropertyName(String propertyName) {
+        this.propertyName = propertyName;
     }
 }

@@ -28,10 +28,13 @@ public class ProjectController extends BaseController {
         return RestResponse.of(projectService.saveOrUpdate(projectDto));
     }
 
-    @GetMapping
+    @GetMapping("/list")
     public RestResponse<Page<Project>> getMyProjects(@RequestParam(name = "status", required = false) Integer status, @RequestParam(name = "projectName", required = false) String projectName,
                                                      @RequestParam(name = "projectCode", required = false)String projectCode, @RequestParam(name = "requirePart", required = false) String requirePart,
-                                                     @RequestParam("pageNo") Integer pageNo, @RequestParam("pageSize") Integer pageSize) {
+                                                     @RequestParam("pageNo") Integer pageNo, @RequestParam(name = "pageSize", required = false) Integer pageSize) {
+        if (Objects.isNull(pageSize)) {
+            pageSize = 15;
+        }
         UserDataDto userDataDto = getUserData();
         if (Objects.isNull(userDataDto)) {
             return RestResponse.of(projectService.queryMine("chuningfan", status, projectCode, projectName, requirePart, pageNo, pageSize));

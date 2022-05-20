@@ -21,6 +21,8 @@ public class ProjectNodeDto implements Serializable {
 
     private List<ProjectNodePropertyDto> propertyDtos;
 
+    private Boolean hasValue = false;
+
     public Long getId() {
         return id;
     }
@@ -61,4 +63,11 @@ public class ProjectNodeDto implements Serializable {
         this.propertyDtos = propertyDtos;
     }
 
+    public Boolean getHasValue() {
+        return hasValue;
+    }
+
+    public void setHasValue(Boolean hasValue) {
+        this.hasValue = hasValue;
+    }
 }

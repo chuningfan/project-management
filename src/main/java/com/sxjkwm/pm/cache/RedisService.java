@@ -4,12 +4,13 @@ import com.sxjkwm.pm.common.CacheService;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Vic.Chu
  * @date 2022/5/13 21:04
  */
-//@Service
+@Service
 public class RedisService implements CacheService {
 
     private final RedissonClient redissonClient;
