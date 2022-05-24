@@ -1,6 +1,8 @@
 package com.sxjkwm.pm.business.project.service;
 
 import com.google.common.collect.Lists;
+import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
+import com.sxjkwm.pm.business.file.entity.ProjectFile;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.business.project.dao.ProjectDao;
@@ -18,16 +20,14 @@ import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.ContextUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -47,12 +47,15 @@ public class ProjectNodeService {
 
     private final Map<String, PropertyHandler> handlerMap;
 
+    private final ProjectFileDao projectFileDao;
+
     @Autowired
-    public ProjectNodeService(ProjectNodeDao projectNodeDao, ProjectNodePropertyDao projectNodePropertyDao, FlowNodeDefinitionDao flowNodeDefinitionDao, ProjectDao projectDao) {
+    public ProjectNodeService(ProjectNodeDao projectNodeDao, ProjectNodePropertyDao projectNodePropertyDao, FlowNodeDefinitionDao flowNodeDefinitionDao, ProjectDao projectDao, ProjectFileDao projectFileDao) {
         this.projectNodeDao = projectNodeDao;
         this.projectNodePropertyDao = projectNodePropertyDao;
         this.flowNodeDefinitionDao = flowNodeDefinitionDao;
         this.projectDao = projectDao;
+        this.projectFileDao = projectFileDao;
         handlerMap = ContextUtil.getBeansOfType(PropertyHandler.class);
     }
 
@@ -72,13 +75,14 @@ public class ProjectNodeService {
         projectNode.setFlowNodeId(projectNodeDto.getFlowNodeId());
         projectNodeDao.save(projectNode);
         Project project = projectDao.getOne(projectNodeDto.getProjectId());
-        if (Objects.isNull(project.getCurrentNodeId()) || project.getCurrentNodeId() < projectNode.getId()) {
-            project.setCurrentNodeId(projectNode.getId());
+        if (Objects.isNull(project.getCurrentNodeId()) || project.getCurrentNodeId() < projectNodeDto.getFlowNodeId()) {
+            project.setCurrentNodeId(projectNodeDto.getFlowNodeId());
             projectDao.save(project);
         }
         Long projectNodeId = projectNode.getId();
         List<ProjectNodeProperty> projectNodePropertyList = Lists.newArrayList();
         for (ProjectNodePropertyDto dto: propertyDtos) {
+            dto.setProjectId(projectNodeDto.getProjectId());
             String type = dto.getPropertyType();
             Constant.PropertyType propertyType = Constant.PropertyType.valueOf(type.toUpperCase(Locale.ROOT));
             List<? extends BaseCollectionProperty> collectionData;
@@ -88,11 +92,18 @@ public class ProjectNodeService {
                 if (Objects.isNull(propertyHandler)) {
                     throw new PmException(PmError.NO_SUCH_BEAN);
                 }
+                for (BaseCollectionProperty baseCollectionProperty: collectionData) {
+                    baseCollectionProperty.setProjectNodeId(projectNodeId);
+                    baseCollectionProperty.setProjectId(project.getId());
+                    baseCollectionProperty.setProjectNodePropertyKey(dto.getPropertyKey());
+                }
                 propertyHandler.save(collectionData);
             }
             ProjectNodeProperty projectNodeProperty = new ProjectNodeProperty();
+            projectNodeProperty.setProjectId(projectNodeDto.getProjectId());
             dto.setProjectNodeId(projectNodeId);
             BeanUtils.copyProperties(dto, projectNodeProperty);
+            projectNodeProperty.setProjectId(projectNodeDto.getProjectId());
             projectNodePropertyList.add(projectNodeProperty);
         }
         if (CollectionUtils.isNotEmpty(projectNodePropertyList)) {
@@ -164,80 +175,66 @@ public class ProjectNodeService {
         condition.setIsDeleted(0);
         Example<ProjectNode> example = Example.of(condition);
         ProjectNode projectNode = projectNodeDao.findOne(example).orElse(null);
-        if (Objects.nonNull(projectNode)) {
-            dto.setHasValue(true);
-            dto.setProjectId(projectId);
-            dto.setNodeStatus(projectNode.getNodeStatus());
-            dto.setFlowNodeId(flowNodeId);
-            dto.setId(projectNode.getId());
-            List<ProjectNodePropertyDto> propertyDtos = Lists.newArrayList();
-            dto.setPropertyDtos(propertyDtos);
-            ProjectNodeProperty propCondition = new ProjectNodeProperty();
-            propCondition.setProjectId(projectId);
-            propCondition.setProjectNodeId(projectNode.getId());
-            List<ProjectNodeProperty> projectNodePropertyList = projectNodePropertyDao.findAll(Example.of(propCondition));
-            if (CollectionUtils.isNotEmpty(projectNodePropertyList)) {
-                Map<String, ProjectNodeProperty> propertyMap = projectNodePropertyList.stream().collect(Collectors.toMap(ProjectNodeProperty::getPropertyKey, prop -> prop, (k1, k2) -> k1));
-                ProjectNodePropertyDto projectNodePropertyDto;
-                for (FlowNodeDefinition definition : flowNodeDefinitions) {
-                    projectNodePropertyDto = new ProjectNodePropertyDto();
-                    String key = definition.getPropertyKey();
-                    projectNodePropertyDto.setPropertyKey(key);
-                    projectNodePropertyDto.setPropertyType(definition.getPropertyType());
-                    projectNodePropertyDto.setPropertyIndex(definition.getPropertyIndex());
-                    projectNodePropertyDto.setPropertyName(definition.getPropertyName());
-                    projectNodePropertyDto.setCollectionPropertyHandler(definition.getCollectionPropertyHandler());
-                    ProjectNodeProperty projectNodeProperty = propertyMap.get(key);
-                    if (Objects.nonNull(projectNodeProperty)) {
-                        projectNodePropertyDto.setId(projectNodeProperty.getId());
-                        if ("COLLECTION".equalsIgnoreCase(definition.getPropertyType())) {
-                            String propertyHandler = definition.getCollectionPropertyHandler();
-                            PropertyHandler handler = handlerMap.get(propertyHandler);
-                            List dataList = handler.query(projectId, projectNode.getId(), key);
-                            projectNodePropertyDto.setCollectionData(dataList);
-                        } else {
-                            projectNodePropertyDto.setPropertyValue(projectNodeProperty.getPropertyValue());
-                        }
+        if (Objects.isNull(projectNode)) {
+            projectNode = new ProjectNode();
+            projectNode.setProjectId(projectId);
+            projectNode.setNodeStatus(0);
+            projectNode.setFlowNodeId(flowNodeId);
+            projectNode.setIsDeleted(0);
+            projectNodeDao.save(projectNode);
+        }
+        dto.setProjectId(projectId);
+        dto.setNodeStatus(projectNode.getNodeStatus());
+        dto.setFlowNodeId(flowNodeId);
+        dto.setId(projectNode.getId());
+        List<ProjectNodePropertyDto> propertyDtos = Lists.newArrayList();
+        ProjectNodeProperty propCondition = new ProjectNodeProperty();
+        propCondition.setProjectId(projectId);
+        propCondition.setProjectNodeId(projectNode.getId());
+        List<ProjectNodeProperty> projectNodePropertyList = projectNodePropertyDao.findAll(Example.of(propCondition));
+        Map<String, ProjectNodeProperty> propertyMap = null;
+        if (CollectionUtils.isNotEmpty(projectNodePropertyList)) {
+            propertyMap = projectNodePropertyList.stream().collect(Collectors.toMap(ProjectNodeProperty::getPropertyKey, prop -> prop, (k1, k2) -> k1));
+        }
+        ProjectNodePropertyDto projectNodePropertyDto;
+        ProjectNodeProperty projectNodeProperty = null;
+        for (FlowNodeDefinition definition : flowNodeDefinitions) {
+            projectNodePropertyDto = new ProjectNodePropertyDto();
+            String key = definition.getPropertyKey();
+            projectNodePropertyDto.setPropertyKey(key);
+            projectNodePropertyDto.setPropertyType(definition.getPropertyType());
+            projectNodePropertyDto.setPropertyIndex(definition.getPropertyIndex());
+            projectNodePropertyDto.setPropertyName(definition.getPropertyName());
+            projectNodePropertyDto.setCollectionPropertyHandler(definition.getCollectionPropertyHandler());
+            if (Objects.nonNull(propertyMap)) {
+                projectNodeProperty = propertyMap.get(key);
+            }
+            if (Objects.nonNull(projectNodeProperty)) {
+                projectNodePropertyDto.setId(projectNodeProperty.getId());
+                if ("COLLECTION".equalsIgnoreCase(definition.getPropertyType())) {
+                    String propertyHandler = definition.getCollectionPropertyHandler();
+                    PropertyHandler handler = handlerMap.get(propertyHandler);
+                    List dataList = handler.query(projectId, projectNode.getId(), key);
+                    projectNodePropertyDto.setCollectionData(dataList);
+                } else if ("FILE".equalsIgnoreCase(definition.getPropertyType())) {
+                    String propVal =  projectNodeProperty.getPropertyValue();
+                    if (StringUtils.isNotBlank(propVal)) {
+                        Long fileId = Long.valueOf(propVal);
+                        ProjectFile projectFile = projectFileDao.getOne(fileId);
+                        projectNodePropertyDto.setFileName(projectFile.getFileName());
                     }
-                    propertyDtos.add(projectNodePropertyDto);
+                    projectNodePropertyDto.setPropertyValue(propVal);
+                } else {
+                    projectNodePropertyDto.setPropertyValue(projectNodeProperty.getPropertyValue());
                 }
             }
+            propertyDtos.add(projectNodePropertyDto);
         }
+        if (CollectionUtils.isNotEmpty(propertyDtos)) {
+            propertyDtos = propertyDtos.stream().sorted(Comparator.comparing(ProjectNodePropertyDto::getPropertyIndex)).collect(Collectors.toList());
+        }
+        dto.setPropertyDtos(propertyDtos);
         return dto;
     }
-
-//    @Transactional
-//    public ProjectNodeDto update(ProjectNodeDto projectNodeDto) throws PmException {
-//        Long id = projectNodeDto.getId();
-//        ProjectNode projectNode = projectNodeDao.getOne(id);
-//        String createdBy = projectNode.getCreatedBy();
-//        Long createdAt = projectNode.getCreatedAt();
-//        BeanUtils.copyProperties(projectNodeDto, projectNode);
-//        projectNode.setCreatedAt(createdAt);
-//        projectNode.setCreatedBy(createdBy);
-//        projectNodeDao.save(projectNode);
-//        List<ProjectNodePropertyDto> propertyDtos = projectNodeDto.getPropertyDtos();
-//        if (CollectionUtils.isNotEmpty(propertyDtos)) {
-//            List<ProjectNodeProperty> projectNodePropertyList = Lists.newArrayList();
-//            for (ProjectNodePropertyDto dto: propertyDtos) {
-//                dto.setProjectId(projectNodeDto.getProjectId());
-//                dto.setProjectNodeId(id);
-//                ProjectNodeProperty projectNodeProperty = new ProjectNodeProperty();
-//                BeanUtils.copyProperties(dto, projectNodeProperty);
-//                projectNodePropertyList.add(projectNodeProperty);
-//                if (Constant.PropertyType.valueOf(dto.getPropertyType().toUpperCase(Locale.ROOT)) == Constant.PropertyType.COLLECTION) {
-//                    List<? extends BaseCollectionProperty> dataList = dto.getCollectionData();
-//                    String handlerBeanName = dto.getCollectionPropertyHandler();
-//                    PropertyHandler propertyHandler = handlerMap.get(handlerBeanName);
-//                    if (Objects.isNull(propertyHandler)) {
-//                        throw new PmException(PmError.NO_SUCH_BEAN);
-//                    }
-//                    propertyHandler.update(dataList);
-//                }
-//            }
-//            projectNodePropertyDao.saveAll(projectNodePropertyList);
-//        }
-//        return projectNodeDto;
-//    }
 
 }

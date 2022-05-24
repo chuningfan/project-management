@@ -4,24 +4,25 @@ import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
 @Proxy(lazy = false)
-@Table(name = "pm_project_attachment")
+@Table(name = "pm_project_attachment", indexes = {@Index(name = "pm_attach_union_indexes", columnList = "project_id,flow_node_id,property_key")})
 public class ProjectFile extends BaseFile {
 
     @Column(name = "project_id")
     private Long projectId;
 
     @Column(name = "object_name")
-    private String objName;
+    private String objectName;
 
-    @Column(name = "project_node_id")
-    private Long projectNodeId;
+    @Column(name = "property_key")
+    private String propertyKey;
 
-    @Column(name = "file_type")
-    private String fileType;
+    @Column(name = "bucket_name")
+    private String bucketName;
 
     public Long getProjectId() {
         return projectId;
@@ -31,27 +32,27 @@ public class ProjectFile extends BaseFile {
         this.projectId = projectId;
     }
 
-    public String getObjName() {
-        return objName;
+    public String getObjectName() {
+        return objectName;
     }
 
-    public void setObjName(String objName) {
-        this.objName = objName;
+    public void setObjectName(String objectName) {
+        this.objectName = objectName;
     }
 
-    public String getFileType() {
-        return fileType;
+    public String getPropertyKey() {
+        return propertyKey;
     }
 
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
+    public void setPropertyKey(String propertyKey) {
+        this.propertyKey = propertyKey;
     }
 
-    public Long getProjectNodeId() {
-        return projectNodeId;
+    public String getBucketName() {
+        return bucketName;
     }
 
-    public void setProjectNodeId(Long projectNodeId) {
-        this.projectNodeId = projectNodeId;
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
     }
 }

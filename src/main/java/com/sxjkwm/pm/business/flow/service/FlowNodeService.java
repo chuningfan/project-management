@@ -67,6 +67,7 @@ public class FlowNodeService {
         FlowNode condition = new FlowNode();
         condition.setFlowId(flowId);
         condition.setIsDeleted(Constant.YesOrNo.NO.getValue());
+        condition.setSkippable(null);
         List<FlowNode> sourceList = getByConditions(condition);
         if (CollectionUtils.isEmpty(sourceList)) {
             return create(flowId, flowNodeDtos);

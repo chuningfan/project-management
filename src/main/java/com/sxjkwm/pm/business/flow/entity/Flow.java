@@ -16,8 +16,8 @@ public class Flow extends BaseEntity {
     @Column(name = "project_description")
     private String description;
 
-    @Column(name = "flow_version")
-    private Integer version;
+    @Column(name = "flowValue", nullable = false)
+    private String flowValue;  // This is for S3 file service to create bucket
 
     public String getFlowName() {
         return flowName;
@@ -35,11 +35,11 @@ public class Flow extends BaseEntity {
         this.description = description;
     }
 
-    public Integer getVersion() {
-        return version;
+    public String getFlowValue() {
+        return flowValue;
     }
 
-    public void setVersion(Integer version) {
-        this.version = version;
+    public void setFlowValue(String flowValue) {
+        this.flowValue = flowValue;
     }
 }

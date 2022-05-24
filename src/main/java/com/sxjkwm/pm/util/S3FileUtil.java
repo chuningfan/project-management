@@ -1,7 +1,6 @@
 package com.sxjkwm.pm.util;
 
 
-import com.sxjkwm.pm.constants.Constant;
 import io.minio.*;
 import io.minio.errors.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -29,25 +27,24 @@ public class S3FileUtil {
         this.minioClient = minioClient;
     }
 
-    public String upload(Serializable projectIdentity, MultipartFile file, Constant.FileType fileType) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public String upload(String bucketName, MultipartFile file, String objectName) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         try (InputStream inputStream = file.getInputStream()) {
             String fileName = file.getOriginalFilename();
-            String objectName = projectIdentity + "/" + fileName;
-            PutObjectArgs objectArgs = PutObjectArgs.builder().bucket(fileType.getValue()).object(objectName)
+            PutObjectArgs objectArgs = PutObjectArgs.builder().bucket(bucketName).object(objectName)
                     .stream(file.getInputStream(), file.getSize(), -1).contentType(file.getContentType()).build();
             minioClient.putObject(objectArgs);
             return objectName;
         }
     }
 
-    public GetObjectResponse getFile(Constant.FileType fileType, String objectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        GetObjectArgs objectArgs = GetObjectArgs.builder().bucket(fileType.getValue())
+    public GetObjectResponse getFile(String bucketName, String objectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        GetObjectArgs objectArgs = GetObjectArgs.builder().bucket(bucketName)
                 .object(objectName).build();
         return minioClient.getObject(objectArgs);
     }
 
-    public void remove(Constant.FileType fileType, String objectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        minioClient.removeObject(RemoveObjectArgs.builder().bucket(fileType.getValue()).object(objectName).build());
+    public void remove(String bucketName, String objectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(objectName).build());
     }
 
 }

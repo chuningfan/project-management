@@ -35,6 +35,7 @@ public class FlowNodeController {
     public RestResponse<List<FlowNode>> getNodes(@RequestParam("flowId") Long flowId) {
         FlowNode flowNode = new FlowNode();
         flowNode.setFlowId(flowId);
+        flowNode.setSkippable(null);
         return RestResponse.of(flowNodeService.getByConditions(flowNode, Sort.by(Sort.Direction.fromString("ASC"), "nodeIndex")));
     }
 

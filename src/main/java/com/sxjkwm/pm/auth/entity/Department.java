@@ -4,10 +4,11 @@ import com.sxjkwm.pm.common.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "pm_department")
+@Table(name = "pm_department", indexes = {@Index(name = "pm_dept_id", columnList = "wx_dept_id"), @Index(name = "pm_dept_pid", columnList = "dept_parent_id")})
 public class Department extends BaseEntity {
 
     @Column(name = "wx_dept_id")
@@ -42,4 +43,5 @@ public class Department extends BaseEntity {
     public void setParentId(Long parentId) {
         this.parentId = parentId;
     }
+
 }

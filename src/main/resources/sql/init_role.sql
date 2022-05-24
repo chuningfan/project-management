@@ -1,0 +1,3 @@
+insert into project_management.pm_role(id, created_at, created_by, modified_at, modified_by, is_deleted, role_name) values (1, 1653027658291, 'system', 1653027658291, 'system', 0, '流程管理员');
+insert into project_management.pm_role(id, created_at, created_by, modified_at, modified_by, is_deleted, role_name) values (2, 1653027658291, 'system', 1653027658291, 'system', 0, '业务人员');
+insert into project_management.pm_role(id, created_at, created_by, modified_at, modified_by, is_deleted, role_name) values (3, 1653027658291, 'system', 1653027658291, 'system', 0, '财务人员');

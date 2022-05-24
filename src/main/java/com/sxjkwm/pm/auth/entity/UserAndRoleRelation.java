@@ -8,7 +8,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "pm_user_role_relation", indexes = {@Index(name="pm_urr_user_role_id", columnList="wx_user_id,role_id")})
+@Table(name = "pm_user_role_relation", indexes = {@Index(name="pm_urr_user_id", columnList="wx_user_id"), @Index(name = "pm_urr_role_id", columnList = "role_id")})
 public class UserAndRoleRelation extends BaseEntity {
 
     @Column(name="wx_user_id")

@@ -11,7 +11,7 @@ public class BaseEntity extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     protected Long id;
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted", columnDefinition = "DEFAULT 0")
     protected Integer isDeleted = Constant.YesOrNo.NO.getValue();
 
     public Long getId() {

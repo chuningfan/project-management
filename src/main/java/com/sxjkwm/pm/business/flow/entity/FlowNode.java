@@ -15,6 +15,9 @@ public class FlowNode extends BaseFlowNode {
     @Column(name="description", length = 4000)
     private String description;
 
+    @Column(name = "flow_node_value", nullable = false)
+    private String flowNodeValue; // This is for s3 file bucket
+
     public FlowNode(Long flowId, FlowNodeDto dto) {
         this.flowId = flowId;
         this.nodeName = dto.getNodeName();
@@ -33,5 +36,13 @@ public class FlowNode extends BaseFlowNode {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getFlowNodeValue() {
+        return flowNodeValue;
+    }
+
+    public void setFlowNodeValue(String flowNodeValue) {
+        this.flowNodeValue = flowNodeValue;
     }
 }

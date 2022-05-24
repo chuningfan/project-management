@@ -30,9 +30,6 @@ public class ProjectNodeProperty extends BaseEntity {
     @Column(name = "property_type")
     private String propertyType;
 
-    @Column(name = "property_index")
-    private Integer propertyIndex;
-
     public Long getProjectId() {
         return projectId;
     }
@@ -73,11 +70,4 @@ public class ProjectNodeProperty extends BaseEntity {
         this.projectNodeId = projectNodeId;
     }
 
-    public Integer getPropertyIndex() {
-        return propertyIndex;
-    }
-
-    public void setPropertyIndex(Integer propertyIndex) {
-        this.propertyIndex = propertyIndex;
-    }
 }
