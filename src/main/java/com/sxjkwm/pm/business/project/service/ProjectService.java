@@ -61,6 +61,7 @@ public class ProjectService {
             Predicate predicate = criteriaBuilder.conjunction();
             List<Expression<Boolean>> expressions = predicate.getExpressions();
             expressions.add(criteriaBuilder.equal(root.get("ownerUserId").as(String.class), userId));
+            expressions.add(criteriaBuilder.equal(root.get("isDeleted").as(Integer.class), 0));
             if (Objects.nonNull(projectStatus)) {
                 expressions.add(criteriaBuilder.equal(root.get("projectStatus").as(Integer.class), projectStatus));
             }

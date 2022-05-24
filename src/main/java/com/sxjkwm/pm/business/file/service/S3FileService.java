@@ -2,12 +2,22 @@ package com.sxjkwm.pm.business.file.service;
 
 import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
 import com.sxjkwm.pm.business.file.entity.ProjectFile;
-import com.sxjkwm.pm.constants.Constant;
+import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
+import com.sxjkwm.pm.business.flow.entity.Flow;
+import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
+import com.sxjkwm.pm.business.project.dao.ProjectDao;
+import com.sxjkwm.pm.business.project.dao.ProjectNodeDao;
+import com.sxjkwm.pm.business.project.dao.ProjectNodePropertyDao;
+import com.sxjkwm.pm.business.project.entity.Project;
+import com.sxjkwm.pm.business.project.entity.ProjectNode;
+import com.sxjkwm.pm.business.project.entity.ProjectNodeProperty;
+import com.sxjkwm.pm.configuration.MinioClientConfig;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.S3FileUtil;
 import io.minio.GetObjectResponse;
 import io.minio.errors.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -19,10 +29,13 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Locale;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Vic.Chu
@@ -35,27 +48,31 @@ public class S3FileService {
 
     private final ProjectFileDao projectFileDao;
 
+    private final ProjectDao projectDao;
+
+    private final ProjectNodeDao projectNodeDao;
+
+    private final ProjectNodePropertyDao projectNodePropertyDao;
+
+    private final FlowNodeDefinitionDao flowNodeDefinitionDao;
+
     @Autowired
-    public S3FileService(S3FileUtil s3FileUtil, ProjectFileDao projectFileDao) {
+    public S3FileService(S3FileUtil s3FileUtil, ProjectFileDao projectFileDao, ProjectDao projectDao, ProjectNodeDao projectNodeDao, ProjectNodePropertyDao projectNodePropertyDao, FlowNodeDefinitionDao flowNodeDefinitionDao) {
         this.s3FileUtil = s3FileUtil;
         this.projectFileDao = projectFileDao;
-    }
-
-    public void downloadByFileId(Long fileId, HttpServletResponse response) throws PmException{
-        ProjectFile projectFile = projectFileDao.getOne(fileId);
-        Long projectId = projectFile.getProjectId();
-        String fileType = projectFile.getFileType();
-        Long nodeId = projectFile.getProjectNodeId();
-        this.download(projectId, nodeId, fileType, response);
+        this.projectDao = projectDao;
+        this.projectNodeDao = projectNodeDao;
+        this.projectNodePropertyDao = projectNodePropertyDao;
+        this.flowNodeDefinitionDao = flowNodeDefinitionDao;
     }
 
     public Boolean removeFileById(Long fileId) throws PmException {
         try {
             ProjectFile projectFile = projectFileDao.getOne(fileId);
-            String fileType = projectFile.getFileType();
-            String objectName = projectFile.getObjName();
+            String bucketName = projectFile.getBucketName();
+            String objectName = projectFile.getObjectName();
             projectFileDao.delete(projectFile);
-            s3FileUtil.remove(Constant.FileType.valueOf(fileType.toUpperCase(Locale.ROOT)), objectName);
+            s3FileUtil.remove(bucketName, objectName);
             return true;
         } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException | NoSuchAlgorithmException | InvalidKeyException |
                 InvalidResponseException | XmlParserException | InternalException e) {
@@ -64,48 +81,74 @@ public class S3FileService {
     }
 
     @Transactional
-    public Long upload(Long projectId, MultipartFile file, Constant.FileType fileType, Long projectNodeId, String fileName) throws PmException {
-        PmError error = null;
+    public Long upload(Long projectId, MultipartFile file, Long flowNodeId, String propertyKey) throws PmException {
         try {
+            String fileName = file.getOriginalFilename();
+            Project project = projectDao.getOne(projectId);
+            Long flowId = project.getFlowId();
             ProjectFile condition = new ProjectFile();
-            condition.setProjectNodeId(projectNodeId);
+            condition.setFlowNodeId(flowNodeId);
             condition.setProjectId(projectId);
-            condition.setFileType(fileType.getValue());
+            condition.setPropertyKey(propertyKey);
             ProjectFile existingFile = projectFileDao.findOne(Example.of(condition)).orElse(null);
             if (Objects.nonNull(existingFile)) {
-                projectFileDao.delete(existingFile);
-                s3FileUtil.remove(fileType, existingFile.getObjName());
+//                String bucketName = MinioClientConfig.FLOW_VALUE_DIC.get(flowId) + MinioClientConfig.FLOW_NODE_VALUE_DIC.get(flowNodeId) + propertyKey.toLowerCase();
+//                projectFileDao.delete(existingFile);
+//                s3FileUtil.remove(bucketName, existingFile.getObjectName());
+                removeFileById(existingFile.getId());
             }
-            String objectName = s3FileUtil.upload(projectId, file, fileType);
+            String bucketName = MinioClientConfig.FLOW_VALUE_DIC.get(flowId) + MinioClientConfig.FLOW_NODE_VALUE_DIC.get(flowNodeId) + propertyKey.toLowerCase();
+            String objectName = project.getId() + "/" + flowNodeId + "/" + propertyKey.toLowerCase();
+            s3FileUtil.upload(bucketName, file, objectName);
             ProjectFile projectFile = new ProjectFile();
-            projectFile.setObjName(objectName);
+            projectFile.setObjectName(objectName);
             projectFile.setFileName(fileName);
             projectFile.setProjectId(projectId);
-            projectFile.setProjectNodeId(projectNodeId);
-            projectFile.setFileType(fileType.getValue());
+            projectFile.setFlowNodeId(flowNodeId);
+            projectFile.setBucketName(bucketName);
+            projectFile.setPropertyKey(propertyKey);
             projectFile = projectFileDao.save(projectFile);
+            ProjectNode projectNodeCondition = new ProjectNode();
+            projectNodeCondition.setProjectId(projectId);
+            projectNodeCondition.setFlowNodeId(flowNodeId);
+            ProjectNode projectNode = projectNodeDao.findOne(Example.of(projectNodeCondition)).orElse(null);
+            ProjectNodeProperty projectNodeProperty = new ProjectNodeProperty();
+            if (Objects.nonNull(projectNode)) {
+                projectNodeProperty.setProjectId(projectId);
+                projectNodeProperty.setProjectNodeId(projectNode.getId());
+                projectNodeProperty.setPropertyKey(propertyKey);
+                ProjectNodeProperty existingProjectNodeProperty = projectNodePropertyDao.findOne(Example.of(projectNodeProperty)).orElse(null);
+                if (Objects.nonNull(existingProjectNodeProperty)) {
+                    projectNodeProperty.setPropertyType(existingProjectNodeProperty.getPropertyType());
+                    projectNodeProperty = existingProjectNodeProperty;
+                } else {
+                    List<FlowNodeDefinition> flowNodeDefinitions = flowNodeDefinitionDao.getByFlowNodeId(flowNodeId);
+                    Map<String, FlowNodeDefinition> definitionMap = flowNodeDefinitions.stream().collect(Collectors.toMap(FlowNodeDefinition::getPropertyKey, fnd -> fnd, (k1, k2) -> k1));
+                    FlowNodeDefinition flowNodeDefinition = definitionMap.get(propertyKey);
+                    projectNodeProperty.setPropertyType(flowNodeDefinition.getPropertyType());
+                    projectNodeProperty.setProjectNodeId(projectNode.getId());
+                }
+                projectNodeProperty.setPropertyValue(projectFile.getId() + "");
+                projectNodePropertyDao.save(projectNodeProperty);
+            }
             return projectFile.getId();
         } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
             throw getException(e);
         }
     }
 
-    public void download(Long projectId, Long nodeId, String fileType, HttpServletResponse response) throws PmException {
-        ProjectFile projectFile = new ProjectFile();
-        projectFile.setFlowNodeId(nodeId);
-        projectFile.setProjectId(projectId);
-        Constant.FileType type = Constant.FileType.valueOf(fileType.toUpperCase(Locale.ROOT));
-        projectFile.setFileType(type.getValue());
-        projectFile = projectFileDao.findOne(Example.of(projectFile)).orElse(null);
+    public void download(HttpServletResponse response, Long fileId) throws PmException {
+        ProjectFile projectFile = projectFileDao.getOne(fileId);
         if (Objects.nonNull(projectFile)) {
-            String objectName = projectFile.getObjName();
+            String bucketName = projectFile.getBucketName();
+            String objectName = projectFile.getObjectName();
             String fileName = projectFile.getFileName();
             String fType = new MimetypesFileTypeMap().getContentType(fileName);
             response.reset();
             response.setHeader("content-type", fType + ";charset=utf-8");
             response.setContentType("application/octet-stream;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
-            try (GetObjectResponse getObjectResponse = s3FileUtil.getFile(type, objectName)) {
+            try (GetObjectResponse getObjectResponse = s3FileUtil.getFile(bucketName, objectName)) {
                 byte[] buf = new byte[1024];
                 int len;
                 try (FastByteArrayOutputStream os = new FastByteArrayOutputStream()) {
@@ -115,7 +158,49 @@ public class S3FileService {
                     os.flush();
                     byte[] bytes = os.toByteArray();
                     response.setCharacterEncoding("utf-8");
-                    response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);
+                    String UnicodeFileName = URLEncoder.encode(fileName, "UTF-8");
+                    response.addHeader("Content-Disposition", "attachment;fileName=" + UnicodeFileName);
+                    try (ServletOutputStream stream = response.getOutputStream()){
+                        stream.write(bytes);
+                        stream.flush();
+                    }
+                }
+            } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
+                    NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
+                throw getException(e);
+            }
+        } else {
+            throw new PmException(PmError.NO_DATA_FOUND);
+        }
+    }
+
+    public void download(Long projectId, Long flowNodeId, String propertyKey, HttpServletResponse response) throws PmException {
+        ProjectFile projectFile = new ProjectFile();
+        projectFile.setFlowNodeId(flowNodeId);
+        projectFile.setProjectId(projectId);
+        projectFile.setPropertyKey(propertyKey);
+        projectFile = projectFileDao.findOne(Example.of(projectFile)).orElse(null);
+        if (Objects.nonNull(projectFile)) {
+            String bucketName = projectFile.getBucketName();
+            String objectName = projectFile.getObjectName();
+            String fileName = projectFile.getFileName();
+            String fType = new MimetypesFileTypeMap().getContentType(fileName);
+            response.reset();
+            response.setHeader("content-type", fType + ";charset=utf-8");
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            try (GetObjectResponse getObjectResponse = s3FileUtil.getFile(bucketName, objectName)) {
+                byte[] buf = new byte[1024];
+                int len;
+                try (FastByteArrayOutputStream os = new FastByteArrayOutputStream()) {
+                    while ((len=getObjectResponse.read(buf))!=-1){
+                        os.write(buf,0,len);
+                    }
+                    os.flush();
+                    byte[] bytes = os.toByteArray();
+                    response.setCharacterEncoding("utf-8");
+                    String UnicodeFileName = URLEncoder.encode(fileName, "UTF-8");
+                    response.addHeader("Content-Disposition", "attachment;fileName=" + UnicodeFileName);
                     try (ServletOutputStream stream = response.getOutputStream()){
                         stream.write(bytes);
                         stream.flush();
@@ -133,7 +218,7 @@ public class S3FileService {
     private PmException getException(Exception e) {
         PmException pmException = new PmException(PmError.S3_SERVICE_ERROR);
         pmException.appendMsg(e.getMessage());
-        // TODO
+        // TODO We should process each exception here
         return pmException;
     }
 

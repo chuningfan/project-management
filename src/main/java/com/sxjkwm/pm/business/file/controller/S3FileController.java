@@ -2,18 +2,12 @@ package com.sxjkwm.pm.business.file.controller;
 
 import com.sxjkwm.pm.business.file.service.S3FileService;
 import com.sxjkwm.pm.common.RestResponse;
-import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
-import io.minio.errors.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Locale;
 
 /**
  * @author Vic.Chu
@@ -31,29 +25,27 @@ public class S3FileController {
         this.s3FileService = s3FileService;
     }
 
-
-    @PostMapping("/{projectId}/{nodeId}/{fileType}")
+    @PostMapping("/{projectId}/{flowNodeId}/{propertyKey}")
     public RestResponse<Long> upload(@RequestParam("file") MultipartFile file,
                                         @PathVariable("projectId") Long projectId,
-                                        @PathVariable("nodeId") Long nodeId,
-                                        @PathVariable("fileType") String fileType,
-                                        @RequestParam("fileName") String fileName) throws PmException {
-        return RestResponse.of(s3FileService.upload(projectId, file, Constant.FileType.valueOf(fileType.toUpperCase(Locale.ROOT)), nodeId, fileName));
+                                        @PathVariable("flowNodeId") Long flowNodeId,
+                                        @PathVariable("propertyKey") String propertyKey) throws PmException {
+        return RestResponse.of(s3FileService.upload(projectId, file, flowNodeId, propertyKey));
     }
 
-    @GetMapping("/{projectId}/{nodeId}/{fileType}")
-    public void download(HttpServletResponse response, @PathVariable("projectId") Long projectId, @PathVariable("nodeId") Long nodeId, @PathVariable("fileType") String fileType) throws PmException {
-        s3FileService.download(projectId, nodeId, fileType, response);
-    }
-
-    @GetMapping("/{id}")
-    public void downloadFileByFileId(HttpServletResponse response, @PathVariable("id") Long fileId) throws PmException {
-        s3FileService.downloadByFileId(fileId, response);
+    @GetMapping("/file")
+    public void downloadFileByKeys(HttpServletResponse response, @RequestParam("projectId") Long projectId, @RequestParam("flowNodeId") Long flowNodeId, @RequestParam("propertyKey") String propertyKey) throws PmException {
+        s3FileService.download(projectId, flowNodeId, propertyKey, response);
     }
 
     @DeleteMapping("/{id}")
     public RestResponse<Boolean> deleteFileById(@PathVariable("id") Long id) throws PmException {
         return RestResponse.of(s3FileService.removeFileById(id));
+    }
+
+    @GetMapping("/{fileId}")
+    public void downloadFileByFileId(HttpServletResponse response, @PathVariable("fileId") Long fileId) throws PmException {
+        s3FileService.download(response, fileId);
     }
 
 }

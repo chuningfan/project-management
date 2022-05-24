@@ -18,7 +18,6 @@ public class UserRoleController {
         this.userAndRoleRelationService = userAndRoleRelationService;
     }
 
-
     @PostMapping("/{wxUserId}")
     public RestResponse<Boolean> addRelations(@PathVariable("wxUserId") String wxUserId, @RequestBody List<Long> roleIds) {
         return RestResponse.of(userAndRoleRelationService.populateRelations(wxUserId, roleIds));

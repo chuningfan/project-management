@@ -28,6 +28,8 @@ public class ProjectNodePropertyDto implements Serializable {
 
     private String propertyName;
 
+    private String fileName;
+
     private List<? extends BaseCollectionProperty> collectionData;
 
     private String collectionPropertyHandler;
@@ -110,5 +112,13 @@ public class ProjectNodePropertyDto implements Serializable {
 
     public void setPropertyName(String propertyName) {
         this.propertyName = propertyName;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

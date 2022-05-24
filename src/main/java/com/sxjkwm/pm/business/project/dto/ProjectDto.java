@@ -1,5 +1,7 @@
 package com.sxjkwm.pm.business.project.dto;
 
+import com.sxjkwm.pm.constants.Constant;
+
 import javax.persistence.Column;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,8 +16,6 @@ public class ProjectDto implements Serializable {
 
     private String requirePart; // 业主
 
-    private String supplyPart; // 供应商
-
     private Long currentNodeId;
 
     private String description;
@@ -28,9 +28,11 @@ public class ProjectDto implements Serializable {
 
     private String projectCode;  // 项目编号
 
-    private Integer projectStatus;
+    private Integer projectStatus = 0;
 
     private Long projectTime;
+
+    private Integer isDeleted;
 
     public Long getId() {
         return id;
@@ -62,14 +64,6 @@ public class ProjectDto implements Serializable {
 
     public void setRequirePart(String requirePart) {
         this.requirePart = requirePart;
-    }
-
-    public String getSupplyPart() {
-        return supplyPart;
-    }
-
-    public void setSupplyPart(String supplyPart) {
-        this.supplyPart = supplyPart;
     }
 
     public Long getCurrentNodeId() {
@@ -134,5 +128,13 @@ public class ProjectDto implements Serializable {
 
     public void setProjectTime(Long projectTime) {
         this.projectTime = projectTime;
+    }
+
+    public Integer getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }

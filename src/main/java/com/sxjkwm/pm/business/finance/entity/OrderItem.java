@@ -21,20 +21,29 @@ public class OrderItem extends BaseCollectionProperty {
     @Column(name = "unit_name")
     private String unitName;
 
-    @Column(name = "item_type")
-    private String itemType;
-
-    @Column(name = "tax_code")
-    private String taxCode;
+    @Column(name = "item_model")
+    private String itemModel;
 
     @Column(name = "buy_price")
     private BigDecimal buyPrice;
 
     @Column(name = "buy_count")
-    private Integer buyCount;
+    private BigDecimal buyCount;
 
-    @Column(name = "tax_value")
-    private BigDecimal taxValue;
+    @Column(name = "sell_price")
+    private BigDecimal sellPrice;
+
+    @Column(name = "sell_count")
+    private BigDecimal sellCount;
+
+    @Column(name = "tax_code")
+    private String taxCode;
+
+    @Column(name = "buy_no_tax_amount")
+    private BigDecimal buyNoTaxAmount;
+
+    @Column(name = "buy_tax_amount")
+    private BigDecimal buyTaxAmount;
 
     public String getItemName() {
         return itemName;
@@ -52,12 +61,12 @@ public class OrderItem extends BaseCollectionProperty {
         this.unitName = unitName;
     }
 
-    public String getItemType() {
-        return itemType;
+    public String getItemModel() {
+        return itemModel;
     }
 
-    public void setItemType(String itemType) {
-        this.itemType = itemType;
+    public void setItemModel(String itemModel) {
+        this.itemModel = itemModel;
     }
 
     public BigDecimal getBuyPrice() {
@@ -68,12 +77,28 @@ public class OrderItem extends BaseCollectionProperty {
         this.buyPrice = buyPrice;
     }
 
-    public Integer getBuyCount() {
+    public BigDecimal getBuyCount() {
         return buyCount;
     }
 
-    public void setBuyCount(Integer buyCount) {
+    public void setBuyCount(BigDecimal buyCount) {
         this.buyCount = buyCount;
+    }
+
+    public BigDecimal getSellPrice() {
+        return sellPrice;
+    }
+
+    public void setSellPrice(BigDecimal sellPrice) {
+        this.sellPrice = sellPrice;
+    }
+
+    public BigDecimal getSellCount() {
+        return sellCount;
+    }
+
+    public void setSellCount(BigDecimal sellCount) {
+        this.sellCount = sellCount;
     }
 
     public String getTaxCode() {
@@ -84,11 +109,20 @@ public class OrderItem extends BaseCollectionProperty {
         this.taxCode = taxCode;
     }
 
-    public BigDecimal getTaxValue() {
-        return taxValue;
+    public BigDecimal getBuyTaxAmount() {
+        return buyTaxAmount;
     }
 
-    public void setTaxValue(BigDecimal taxValue) {
-        this.taxValue = taxValue;
+    public void setBuyTaxAmount(BigDecimal buyTaxAmount) {
+        this.buyTaxAmount = buyTaxAmount;
     }
+
+    public BigDecimal getBuyNoTaxAmount() {
+        return buyNoTaxAmount;
+    }
+
+    public void setBuyNoTaxAmount(BigDecimal buyNoTaxAmount) {
+        this.buyNoTaxAmount = buyNoTaxAmount;
+    }
+
 }

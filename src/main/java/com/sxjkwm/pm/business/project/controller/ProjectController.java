@@ -35,6 +35,9 @@ public class ProjectController extends BaseController {
         if (Objects.isNull(pageSize)) {
             pageSize = 15;
         }
+        if (Objects.nonNull(status) && -1 == status.intValue()) {
+            status = null;
+        }
         UserDataDto userDataDto = getUserData();
         if (Objects.isNull(userDataDto)) {
             return RestResponse.of(projectService.queryMine("chuningfan", status, projectCode, projectName, requirePart, pageNo, pageSize));

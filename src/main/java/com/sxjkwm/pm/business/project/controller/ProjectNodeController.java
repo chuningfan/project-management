@@ -33,8 +33,8 @@ public class ProjectNodeController extends BaseController {
         return RestResponse.of(projectNodeService.getOne(projectNodeId));
     }
 
-    @GetMapping("/{projectId}/{flowNodeId}")
-    public RestResponse<ProjectNodeDto> getOne(@PathVariable("projectId") Long projectId, @PathVariable("flowNodeId") Long flowNodeId) {
+    @GetMapping("/detail")
+    public RestResponse<ProjectNodeDto> getOne(@RequestParam("projectId") Long projectId, @RequestParam("flowNodeId") Long flowNodeId) {
         return RestResponse.of(projectNodeService.getOne(projectId, flowNodeId));
     }
 
