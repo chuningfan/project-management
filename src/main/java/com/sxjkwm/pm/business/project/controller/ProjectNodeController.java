@@ -8,6 +8,8 @@ import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
+
 /**
  * @author Vic.Chu
  * @date 2022/5/15 16:37
@@ -24,17 +26,12 @@ public class ProjectNodeController extends BaseController {
     }
 
     @PostMapping
-    public RestResponse<ProjectNodeDto> saveOrUpdate(@RequestBody ProjectNodeDto projectNodeDto) throws PmException {
+    public RestResponse<ProjectNodeDto> saveOrUpdate(@RequestBody ProjectNodeDto projectNodeDto) throws PmException, SQLException {
         return RestResponse.of(projectNodeService.saveOrUpdate(projectNodeDto));
     }
 
-    @GetMapping("/{id}")
-    public RestResponse<ProjectNodeDto> getOne(@PathVariable("id") Long projectNodeId) throws PmException {
-        return RestResponse.of(projectNodeService.getOne(projectNodeId));
-    }
-
     @GetMapping("/detail")
-    public RestResponse<ProjectNodeDto> getOne(@RequestParam("projectId") Long projectId, @RequestParam("flowNodeId") Long flowNodeId) {
+    public RestResponse<ProjectNodeDto> getOne(@RequestParam("projectId") Long projectId, @RequestParam("flowNodeId") Long flowNodeId) throws SQLException {
         return RestResponse.of(projectNodeService.getOne(projectId, flowNodeId));
     }
 
