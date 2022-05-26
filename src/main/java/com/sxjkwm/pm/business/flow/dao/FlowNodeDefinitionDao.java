@@ -19,10 +19,10 @@ public interface FlowNodeDefinitionDao extends JpaRepository<FlowNodeDefinition,
     List<FlowNodeDefinition> getByFlowNodeId(Long flowNodeId);
 
 
-    Page<FlowNodeDefinition> getAllByFlowNodeId(Pageable pageable,Long flowNodeId);
+    List<FlowNodeDefinition> getAllByFlowNodeId(Long flowNodeId);
 
     @Modifying
-    @Query(value = "update FlowNode fn set fn.isDeleted = :isDelete where fn.id = :id")
+    @Query(value = "update FlowNodeDefinition fnd set fnd.isDeleted = :isDelete where fnd.id = :id")
     int updateFlowNodeDefinition(Integer isDelete, Long id);
 
 }

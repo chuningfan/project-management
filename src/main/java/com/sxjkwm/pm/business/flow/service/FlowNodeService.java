@@ -121,17 +121,11 @@ public class FlowNodeService {
     }
 
 
-    public Page<FlowNode> getFlowNodeList(Integer pageNum,Integer pageSize,Long flowId){
-        if (pageNum <= 1) {
-            pageNum = 0;
-        } else {
-            pageNum -= 1;
-        }
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+    public List<FlowNode> getFlowNodeList(Long flowId){
+
         Integer isDelete = Constant.YesOrNo.NO.getValue();
-        Page<FlowNode> page = flowNodeDao.getAllByFlowIdAndIsDeleted(pageable,flowId,isDelete);
-        return page;
+        List<FlowNode> flowNodeList = flowNodeDao.getAllByFlowIdAndIsDeleted(flowId,isDelete);
+        return flowNodeList;
     }
     @Transactional
     public int remove(Long id) {

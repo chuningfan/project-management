@@ -36,13 +36,8 @@ public class FlowNodeDefinitionController {
 
 
     @PostMapping(value = "/getFlowNodeDefinitionList")
-    public RestResponse<Page<FlowNodeDefinition>> getFlowList(@RequestParam("pageNum") Integer pageNum,
-                                                              @RequestParam("pageSize") Integer pageSize,
-                                                              @RequestParam("flowNodeId") Long flowNodeId) {
-        if (Objects.isNull(pageSize)) {
-            pageSize = 15;
-        }
-        return RestResponse.of(flowNodeDefinitionService.getFlowNodeDefinitionList(pageNum, pageSize,flowNodeId));
+    public RestResponse<List<FlowNodeDefinition>> getFlowList( @RequestParam("flowNodeId") Long flowNodeId) {
+        return RestResponse.of(flowNodeDefinitionService.getFlowNodeDefinitionList(flowNodeId));
     }
 
     @PostMapping(value = "/deleteNodeDefinition")

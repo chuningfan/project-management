@@ -6,7 +6,6 @@ import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.business.flow.service.FlowNodeService;
 import com.sxjkwm.pm.common.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,13 +42,9 @@ public class FlowNodeController {
     }
 
     @PostMapping(value = "/getFlowNodeList")
-    public RestResponse<Page<FlowNode>> getFlowList(@RequestParam("pageNum") Integer pageNum,
-                                                    @RequestParam("pageSize") Integer pageSize,
-                                                    @RequestParam("flowId") Long flowId) {
-        if (Objects.isNull(pageSize)) {
-            pageSize = 15;
-        }
-        return RestResponse.of(flowNodeService.getFlowNodeList(pageNum, pageSize, flowId));
+    public RestResponse<List<FlowNode>> getFlowList(@RequestParam("flowId") Long flowId) {
+
+        return RestResponse.of(flowNodeService.getFlowNodeList(flowId));
     }
 
     @PostMapping(value = "/deleteNode")
