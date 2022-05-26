@@ -14,6 +14,8 @@ public class PmException extends Exception {
 
     public PmException(String errorMessage) {
         super(errorMessage);
+        this.code = "500";
+        this.errorMessage = errorMessage;
     }
 
     public PmException(Constant<String, String> error) {
@@ -32,18 +34,8 @@ public class PmException extends Exception {
         return code;
     }
 
-    public PmException setCode(String code) {
-        this.code = code;
-        return this;
-    }
-
     public String getErrorMessage() {
         return errorMessage;
-    }
-
-    public PmException setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-        return this;
     }
 
     public PmException appendMsg(String msg) {

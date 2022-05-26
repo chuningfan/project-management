@@ -2,12 +2,12 @@ package com.sxjkwm.pm.configuration;
 
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.exception.PmException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Objects;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionConfig {
 
     @ExceptionHandler({Exception.class})

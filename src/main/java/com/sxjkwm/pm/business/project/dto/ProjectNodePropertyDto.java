@@ -5,6 +5,7 @@ import com.sxjkwm.pm.common.BaseCollectionProperty;
 import javax.persistence.Column;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Vic.Chu
@@ -30,7 +31,7 @@ public class ProjectNodePropertyDto implements Serializable {
 
     private String fileName;
 
-    private List<? extends BaseCollectionProperty> collectionData;
+    private List<Map<String, Object>> collectionData;
 
     private String collectionPropertyHandler;
 
@@ -90,11 +91,11 @@ public class ProjectNodePropertyDto implements Serializable {
         this.propertyIndex = propertyIndex;
     }
 
-    public List<? extends BaseCollectionProperty> getCollectionData() {
+    public List<Map<String, Object>> getCollectionData() {
         return collectionData;
     }
 
-    public void setCollectionData(List<? extends BaseCollectionProperty> collectionData) {
+    public void setCollectionData(List<Map<String, Object>> collectionData) {
         this.collectionData = collectionData;
     }
 
