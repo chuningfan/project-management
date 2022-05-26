@@ -2,10 +2,13 @@ package com.sxjkwm.pm.business.flow.controller;
 
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDefinitionDto;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
+import com.sxjkwm.pm.business.flow.dto.PropertyTypeDto;
 import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.business.flow.service.FlowNodeDefinitionService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,5 +59,19 @@ public class FlowNodeDefinitionController {
         } catch (Exception e) {
             return new RestResponse<>().setCode("500").setMessage("删除失败");
         }
+    }
+
+    @GetMapping("/propTypes")
+    public RestResponse<List<PropertyTypeDto>> findTypes() {
+        Constant.PropertyType[] types = Constant.PropertyType.values();
+        List<PropertyTypeDto> dataList = Lists.newArrayList();
+        PropertyTypeDto propertyTypeDto;
+        for (Constant.PropertyType type: types) {
+            propertyTypeDto = new PropertyTypeDto();
+            propertyTypeDto.setValue(type.name());
+            propertyTypeDto.setLabel(type.getLabel());
+            dataList.add(propertyTypeDto);
+        }
+        return RestResponse.of(dataList);
     }
 }
