@@ -40,21 +40,10 @@ public class FlowNodeService {
         for (FlowNodeDto dto : flowNodeDtos) {
             flowNode = new FlowNode(flowId, dto);
             flowNode.setIsDeleted(Constant.YesOrNo.NO.getValue());
+            flowNode.setFlowNodeValue("fnv" + dto.getNodeName().hashCode());
             flowNode = flowNodeDao.save(flowNode);
             flowNodeId = flowNode.getId();
             dto.setId(flowNodeId);
-//            patternFilePaths = dto.getPatternPaths();
-//            if (CollectionUtils.isNotEmpty(patternFilePaths)) {
-//                List<PatternFile> patternFiles = Lists.newArrayList();
-//                for (String patternFilePath: patternFilePaths) {
-//                    patternFile = new PatternFile();
-//                    patternFile.setFlowNodeId(flowNodeId);
-//                    patternFile.setPath(patternFilePath);
-//                    patternFile.setFileName(patternFilePath.substring(patternFilePath.lastIndexOf(File.separator) + 1));
-//                    patternFiles.add(patternFile);
-//                }
-//                patternFileDao.saveAll(patternFiles);
-//            }
         }
         return flowNodeDtos;
     }
@@ -80,7 +69,7 @@ public class FlowNodeService {
             // IDs not in flowNodeDtos
             List<Long> inputIds = flowNodeDtos.stream().filter(fnd -> Objects.nonNull(fnd.getId())).map(FlowNodeDto::getId).collect(Collectors.toList());
             sourceList.stream().filter(sfnd -> !inputIds.contains(sfnd.getId())).forEach(sfnd -> {
-                sfnd.setIsDeleted(Constant.YesOrNo.NO.getValue());
+                sfnd.setIsDeleted(Constant.YesOrNo.YES.getValue());
                 dataToSave.add(sfnd);
             });
             // find updated

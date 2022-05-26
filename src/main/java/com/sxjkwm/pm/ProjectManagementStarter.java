@@ -40,7 +40,7 @@ public class ProjectManagementStarter {
         builder.bannerMode(Banner.Mode.OFF);
         builder.run(args);
         stopWatch.stop();
-        logger.info("========= Service is fully started! ========= cost: " + stopWatch.getTotalTimeSeconds() + "seconds");
+        logger.info("========= Service is fully started! ========= cost: " + stopWatch.getTotalTimeSeconds() + " seconds");
     }
 
 }
