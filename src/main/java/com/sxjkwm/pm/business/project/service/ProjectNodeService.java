@@ -150,7 +150,7 @@ public class ProjectNodeService {
 
     public ProjectNodeDto getOne(Long projectId, Long flowNodeId) throws SQLException {
 
-        ProjectNodeDto dto = new ProjectNodeDto();
+       ProjectNodeDto dto = new ProjectNodeDto();
         List<FlowNodeDefinition> flowNodeDefinitions = flowNodeDefinitionDao.getByFlowNodeId(flowNodeId);
         flowNodeDefinitions = flowNodeDefinitions.stream().filter(fnd -> fnd.getIsDeleted().intValue() == 0).collect(Collectors.toList());
         ProjectNode condition = new ProjectNode();
