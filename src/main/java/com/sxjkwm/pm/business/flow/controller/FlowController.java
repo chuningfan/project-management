@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/flow")
+@RequestMapping("/flows")
 public class FlowController {
 
     private final FlowService flowService;
@@ -24,12 +24,12 @@ public class FlowController {
         this.flowService = flowService;
     }
 
-    @PostMapping("/saveFlow")
+    @PostMapping
     public RestResponse<Flow> create(@RequestBody Flow flow) {
         return RestResponse.of(flowService.createFlow(flow));
     }
 
-    @PutMapping("/updateFlow")
+    @PutMapping
     public RestResponse<Flow> update(@RequestBody FlowDto flowDto) {
         return RestResponse.of(flowService.updateFlow(flowDto));
     }
@@ -59,10 +59,9 @@ public class FlowController {
         return RestResponse.of(flowService.getFlowList(pageNum, pageSize, flowName));
     }
 
-    @PostMapping(value = "/delete")
-    public RestResponse<Object> removeFlow(@RequestBody Flow flow) {
+    @DeleteMapping("/{id}")
+    public RestResponse<Object> removeFlow(@PathVariable("id") Long id) {
         try {
-            Long id = flow.getId();
             if (Objects.isNull(id)) {
                 return new RestResponse<>().setCode("500").setMessage("流程ID不能为空");
             }

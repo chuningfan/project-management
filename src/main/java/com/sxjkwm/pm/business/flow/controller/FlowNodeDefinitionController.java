@@ -6,14 +6,13 @@ import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.business.flow.service.FlowNodeDefinitionService;
 import com.sxjkwm.pm.common.RestResponse;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping(value = "/flowNodeDefinition")
+@RequestMapping(value = "/flowNodeDefinitions")
 public class FlowNodeDefinitionController {
 
     private final FlowNodeDefinitionService flowNodeDefinitionService;
@@ -40,10 +39,9 @@ public class FlowNodeDefinitionController {
         return RestResponse.of(flowNodeDefinitionService.getFlowNodeDefinitionList(flowNodeId));
     }
 
-    @PostMapping(value = "/deleteNodeDefinition")
-    public RestResponse<Object> removeFlow(@RequestBody Flow flow) {
+    @DeleteMapping("/{id}")
+    public RestResponse<Object> removeFlow(@PathVariable("id") Long id) {
         try {
-            Long id = flow.getId();
             if (Objects.isNull(id)) {
                 return new RestResponse<>().setCode("500").setMessage("流程ID不能为空");
             }
