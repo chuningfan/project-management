@@ -26,6 +26,10 @@ public class FlowService {
     }
 
     public Flow createFlow(Flow flow) {
+        String flowVal = flow.getFlowValue();
+        if (StringUtils.isBlank(flowVal)) {
+            flow.setFlowValue("fv" + flow.getFlowName().hashCode());
+        }
         return flowDao.save(flow);
     }
 
