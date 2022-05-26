@@ -18,6 +18,8 @@ public class FlowNodeDto implements Serializable {
 
     private String description;
 
+    private String flowNodeValue;
+
     // 道一云审批表单
     private String formId;
 
@@ -83,5 +85,13 @@ public class FlowNodeDto implements Serializable {
 
     public void setFormId(String formId) {
         this.formId = formId;
+    }
+
+    public String getFlowNodeValue() {
+        return flowNodeValue;
+    }
+
+    public void setFlowNodeValue(String flowNodeValue) {
+        this.flowNodeValue = flowNodeValue;
     }
 }

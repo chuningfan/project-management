@@ -1,5 +1,6 @@
 package com.sxjkwm.pm.business.flow.entity;
 
+import com.sxjkwm.pm.business.flow.dto.FlowNodeDefinitionDto;
 import com.sxjkwm.pm.common.BaseEntity;
 
 import javax.persistence.Column;
@@ -32,6 +33,18 @@ public class FlowNodeDefinition extends BaseEntity {
 
     @Column(name = "collection_property_handler")
     private String collectionPropertyHandler;
+
+    public FlowNodeDefinition(Long flowNodeId, FlowNodeDefinitionDto flowNodeDefinitionDto) {
+        this.flowNodeId = flowNodeId;
+        this.collectionPropertyHandler = flowNodeDefinitionDto.getCollectionPropertyHandler();
+        this.propertyIndex = flowNodeDefinitionDto.getPropertyIndex();
+        this.propertyKey = flowNodeDefinitionDto.getPropertyKey();
+        this.propertyName = flowNodeDefinitionDto.getPropertyName();
+        this.propertyType = flowNodeDefinitionDto.getPropertyType();
+    }
+
+    public FlowNodeDefinition() {
+    }
 
     public Long getFlowNodeId() {
         return flowNodeId;

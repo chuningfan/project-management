@@ -1,6 +1,8 @@
 package com.sxjkwm.pm.business.flow.dao;
 
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,5 +16,8 @@ public interface FlowNodeDefinitionDao extends JpaRepository<FlowNodeDefinition,
 
     @Query("SELECT f FROM FlowNodeDefinition f WHERE f.isDeleted = 0 AND f.flowNodeId = ?1")
     List<FlowNodeDefinition> getByFlowNodeId(Long flowNodeId);
+
+
+    Page<FlowNodeDefinition> getAllByFlowNodeId(Pageable pageable,Long flowNodeId);
 
 }

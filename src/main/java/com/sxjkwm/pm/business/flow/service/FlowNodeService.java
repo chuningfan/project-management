@@ -4,19 +4,15 @@ import com.sxjkwm.pm.business.file.dao.PatternFileDao;
 import com.sxjkwm.pm.business.file.entity.PatternFile;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
-import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.constants.Constant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,6 +39,7 @@ public class FlowNodeService {
         PatternFile patternFile;
         for (FlowNodeDto dto: flowNodeDtos) {
             flowNode = new FlowNode(flowId, dto);
+            flowNode.setIsDeleted(Constant.YesOrNo.NO.getValue());
             flowNode = flowNodeDao.save(flowNode);
             flowNodeId = flowNode.getId();
             dto.setId(flowNodeId);
@@ -83,7 +80,7 @@ public class FlowNodeService {
             // IDs not in flowNodeDtos
             List<Long> inputIds = flowNodeDtos.stream().filter(fnd -> Objects.nonNull(fnd.getId())).map(FlowNodeDto::getId).collect(Collectors.toList());
             sourceList.stream().filter(sfnd -> !inputIds.contains(sfnd.getId())).forEach(sfnd -> {
-                sfnd.setIsDeleted(Constant.YesOrNo.YES.getValue());
+                sfnd.setIsDeleted(Constant.YesOrNo.NO.getValue());
                 dataToSave.add(sfnd);
             });
             // find updated
@@ -121,6 +118,25 @@ public class FlowNodeService {
     public List<FlowNode> getByConditions(FlowNode condition) {
         Example<FlowNode> example = Example.of(condition);
         return flowNodeDao.findAll(example);
+    }
+
+
+    public Page<FlowNode> getFlowNodeList(Integer pageNum,Integer pageSize,Long flowId){
+        if (pageNum <= 1) {
+            pageNum = 0;
+        } else {
+            pageNum -= 1;
+        }
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+        Integer isDelete = Constant.YesOrNo.NO.getValue();
+        Page<FlowNode> page = flowNodeDao.getAllByFlowIdAndIsDeleted(pageable,flowId,isDelete);
+        return page;
+    }
+    @Transactional
+    public int remove(Long id) {
+        int count = flowNodeDao.updateFlowNode(Constant.YesOrNo.YES.getValue(), id);
+        return count;
     }
 
 }
