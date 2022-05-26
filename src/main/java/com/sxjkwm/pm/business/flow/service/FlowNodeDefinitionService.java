@@ -55,4 +55,11 @@ public class FlowNodeDefinitionService {
         return page;
     }
 
+
+
+    @Transactional
+    public int remove(Long id) {
+        int count = flowNodeDefinitionDao.updateFlowNodeDefinition(Constant.YesOrNo.YES.getValue(), id);
+        return count;
+    }
 }

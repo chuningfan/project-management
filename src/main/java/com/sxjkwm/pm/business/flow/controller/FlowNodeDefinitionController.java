@@ -2,6 +2,7 @@ package com.sxjkwm.pm.business.flow.controller;
 
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDefinitionDto;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
+import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.business.flow.service.FlowNodeDefinitionService;
 import com.sxjkwm.pm.common.RestResponse;
@@ -42,5 +43,23 @@ public class FlowNodeDefinitionController {
             pageSize = 15;
         }
         return RestResponse.of(flowNodeDefinitionService.getFlowNodeDefinitionList(pageNum, pageSize,flowNodeId));
+    }
+
+    @PostMapping(value = "/deleteNodeDefinition")
+    public RestResponse<Object> removeFlow(@RequestBody Flow flow) {
+        try {
+            Long id = flow.getId();
+            if (Objects.isNull(id)) {
+                return new RestResponse<>().setCode("500").setMessage("流程ID不能为空");
+            }
+            int count = flowNodeDefinitionService.remove(id);
+            if (count > 0) {
+                return new RestResponse<>().setCode("200").setMessage("删除成功");
+            } else {
+                return new RestResponse<>().setCode("500").setMessage("删除失败");
+            }
+        } catch (Exception e) {
+            return new RestResponse<>().setCode("500").setMessage("删除失败");
+        }
     }
 }

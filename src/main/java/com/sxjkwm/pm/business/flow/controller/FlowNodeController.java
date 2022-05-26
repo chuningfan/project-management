@@ -49,16 +49,16 @@ public class FlowNodeController {
         if (Objects.isNull(pageSize)) {
             pageSize = 15;
         }
-        return RestResponse.of(flowNodeService.getFlowNodeList(pageNum, pageSize,flowId));
+        return RestResponse.of(flowNodeService.getFlowNodeList(pageNum, pageSize, flowId));
     }
 
     @PostMapping(value = "/deleteNode")
     public RestResponse<Object> removeFlow(@RequestBody Flow flow) {
-        Long id = flow.getId();
-        if (Objects.isNull(id)) {
-            return new RestResponse<>().setCode("500").setMessage("节点ID不能为空");
-        }
         try {
+            Long id = flow.getId();
+            if (Objects.isNull(id)) {
+                return new RestResponse<>().setCode("500").setMessage("节点ID不能为空");
+            }
             int count = flowNodeService.remove(id);
             if (count > 0) {
                 return new RestResponse<>().setCode("200").setMessage("删除成功");

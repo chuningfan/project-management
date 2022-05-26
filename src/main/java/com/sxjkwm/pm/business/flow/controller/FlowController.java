@@ -61,11 +61,11 @@ public class FlowController {
 
     @PostMapping(value = "/delete")
     public RestResponse<Object> removeFlow(@RequestBody Flow flow) {
-        Long id = flow.getId();
-        if (Objects.isNull(id)) {
-            return new RestResponse<>().setCode("500").setMessage("流程ID不能为空");
-        }
         try {
+            Long id = flow.getId();
+            if (Objects.isNull(id)) {
+                return new RestResponse<>().setCode("500").setMessage("流程ID不能为空");
+            }
             int count = flowService.remove(id);
             if (count > 0) {
                 return new RestResponse<>().setCode("200").setMessage("删除成功");
