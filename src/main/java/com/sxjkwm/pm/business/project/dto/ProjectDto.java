@@ -14,6 +14,8 @@ public class ProjectDto implements Serializable {
 
     private Long flowId;
 
+    private Long requirePartId;
+
     private String requirePart; // 业主
 
     private Long currentNodeId;
@@ -56,6 +58,14 @@ public class ProjectDto implements Serializable {
 
     public void setFlowId(Long flowId) {
         this.flowId = flowId;
+    }
+
+    public Long getRequirePartId() {
+        return requirePartId;
+    }
+
+    public void setRequirePartId(Long requirePartId) {
+        this.requirePartId = requirePartId;
     }
 
     public String getRequirePart() {

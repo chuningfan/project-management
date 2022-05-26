@@ -9,7 +9,10 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 
-@Table(name = "pm_project", indexes = {@Index(name="project_flowId", columnList = "flow_id"), @Index(name="project_unionIndex", columnList = "owner_user_id,project_code,project_code,project_status")})
+@Table(name = "pm_project",
+        indexes = {@Index(name="project_flowId", columnList = "flow_id"),
+                @Index(name="project_unionIndex", columnList = "owner_user_id,project_code,project_code,project_status"),
+                @Index(name="project_requireid", columnList = "require_part_id")})
 @Entity
 @Proxy(lazy = false)
 public class Project extends BaseEntity {
@@ -19,6 +22,9 @@ public class Project extends BaseEntity {
 
     @Column(name = "flow_id")
     private Long flowId;
+
+    @Column(name = "require_part_id")
+    private Long requirePartId;
 
     @Column(name = "require_part")
     private String requirePart; // 业主
@@ -64,6 +70,14 @@ public class Project extends BaseEntity {
 
     public void setFlowId(Long flowId) {
         this.flowId = flowId;
+    }
+
+    public Long getRequirePartId() {
+        return requirePartId;
+    }
+
+    public void setRequirePartId(Long requirePartId) {
+        this.requirePartId = requirePartId;
     }
 
     public String getRequirePart() {

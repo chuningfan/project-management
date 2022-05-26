@@ -1,14 +1,8 @@
 package com.sxjkwm.pm.business.flow.service;
 
-import com.sxjkwm.pm.business.file.entity.PatternFile;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDefinitionDto;
-import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
-import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
-import com.sxjkwm.pm.constants.Constant;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Lists;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,9 +11,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class FlowNodeDefinitionService {
