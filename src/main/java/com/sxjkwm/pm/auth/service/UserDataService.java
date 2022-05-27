@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -46,6 +48,11 @@ public class UserDataService {
         this.cacheService = cacheService;
     }
 
+    public UserDataDto getUserDataByToken(String token) {
+        String wxUserId = String.valueOf(Base64.getDecoder().decode(token.getBytes(StandardCharsets.UTF_8)));
+        return getUserDataByWxUserId(wxUserId);
+    }
+
     public UserDataDto getUserDataByWxUserId(String wxUserId) {
         String userDataJson = cacheService.getString(wxUserId);
         if (StringUtils.isNotBlank(userDataJson)) {
@@ -54,6 +61,7 @@ public class UserDataService {
         User user = userDao.findUserByWxUserId(wxUserId);
         if (Objects.nonNull(user)) {
             UserDataDto result = new UserDataDto();
+            result.setUsername(user.getName());
             result.setUserId(user.getId());
             result.setWxUserId(user.getWxUserId());
             result.setAvatar(user.getAvatar());

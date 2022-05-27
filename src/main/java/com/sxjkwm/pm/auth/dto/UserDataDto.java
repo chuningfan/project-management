@@ -11,6 +11,8 @@ public class UserDataDto implements Serializable {
 
     private String wxUserId;
 
+    private String username;
+
     private List<String> deptNames;
 
     private List<String> roleNames;
@@ -35,6 +37,14 @@ public class UserDataDto implements Serializable {
 
     public void setWxUserId(String wxUserId) {
         this.wxUserId = wxUserId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public List<String> getDeptNames() {

@@ -20,9 +20,6 @@ public class FEConfig {
     @Value("${fe.page.redirectPath}")
     private String redirectPath;
 
-    @Value("${fe.page.indexPath}")
-    private String indexPath;
-
     public String getDomain() {
         return domain;
     }
@@ -53,14 +50,6 @@ public class FEConfig {
 
     public void setRedirectPath(String redirectPath) {
         this.redirectPath = redirectPath;
-    }
-
-    public String getIndexPath() {
-        return indexPath;
-    }
-
-    public void setIndexPath(String indexPath) {
-        this.indexPath = indexPath;
     }
 
 }

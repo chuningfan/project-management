@@ -25,7 +25,7 @@ public class FilterConfiguration {
 
     private static AntPathMatcher matcher = new AntPathMatcher();
 
-//    @Bean
+    @Bean
     public FilterRegistrationBean<AuthFilter> authFilter(@Autowired LoginService loginService, @Autowired FEConfig feConfig,
                                                          @Autowired ContextFactory contextFactory, @Autowired WhitelistConfig whitelistConfig) {
         FilterRegistrationBean<AuthFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
