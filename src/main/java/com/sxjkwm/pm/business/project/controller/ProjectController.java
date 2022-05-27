@@ -25,6 +25,7 @@ public class ProjectController extends BaseController {
 
     @PostMapping
     public RestResponse<ProjectDto> saveOrUpdate(@RequestBody ProjectDto projectDto) {
+        projectDto.setOwnerUserId(getAuthUser().getWxUserId());
         return RestResponse.of(projectService.saveOrUpdate(projectDto));
     }
 

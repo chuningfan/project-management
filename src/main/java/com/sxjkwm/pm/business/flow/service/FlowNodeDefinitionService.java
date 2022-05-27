@@ -4,10 +4,7 @@ import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDefinitionDto;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.constants.Constant;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -18,6 +15,7 @@ public class FlowNodeDefinitionService {
 
     private final FlowNodeDefinitionDao flowNodeDefinitionDao;
 
+    @Autowired
     public FlowNodeDefinitionService(FlowNodeDefinitionDao flowNodeDefinitionDao) {
         this.flowNodeDefinitionDao = flowNodeDefinitionDao;
     }
@@ -30,7 +28,7 @@ public class FlowNodeDefinitionService {
             flowNodeDefinition = new FlowNodeDefinition(flowNodeId, dto);
             flowNodeDefinition = flowNodeDefinitionDao.save(flowNodeDefinition);
             flowNodeDefinitionId = flowNodeDefinition.getId();
-            dto.setId(flowNodeId);
+            dto.setId(flowNodeDefinitionId);
         }
         return flowNodeDefinitionDtos;
     }
