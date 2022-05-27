@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 
 @RestController
 @RequestMapping("/loginData")
@@ -23,7 +24,7 @@ public class LoginDataController {
 
 
     @GetMapping
-    public RestResponse<Boolean> validate(HttpServletRequest req) {
+    public RestResponse<Boolean> validate(HttpServletRequest req) throws UnsupportedEncodingException {
         return RestResponse.of(loginService.isValid(req));
     }
 
