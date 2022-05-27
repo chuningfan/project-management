@@ -25,6 +25,7 @@ public class ProjectController extends BaseController {
 
     @PostMapping
     public RestResponse<ProjectDto> saveOrUpdate(@RequestBody ProjectDto projectDto) {
+        projectDto.setOwnerUserId(getAuthUser().getWxUserId());
         return RestResponse.of(projectService.saveOrUpdate(projectDto));
     }
 
@@ -39,9 +40,9 @@ public class ProjectController extends BaseController {
             status = null;
         }
         UserDataDto userDataDto = getUserData();
-        if (Objects.isNull(userDataDto)) {
-            return RestResponse.of(projectService.queryMine("chuningfan", status, projectCode, projectName, requirePart, pageNo, pageSize));
-        }
+//        if (Objects.isNull(userDataDto)) {
+//            return RestResponse.of(projectService.queryMine("chuningfan", status, projectCode, projectName, requirePart, pageNo, pageSize));
+//        }
         return RestResponse.of(projectService.queryMine(userDataDto.getWxUserId(), status, projectCode, projectName, requirePart, pageNo, pageSize));
     }
 }

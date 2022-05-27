@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 
@@ -25,7 +26,8 @@ public class FilterConfiguration {
 
     private static AntPathMatcher matcher = new AntPathMatcher();
 
-//    @Bean
+    @Bean
+    @Order(1)
     public FilterRegistrationBean<AuthFilter> authFilter(@Autowired LoginService loginService, @Autowired FEConfig feConfig,
                                                          @Autowired ContextFactory contextFactory, @Autowired WhitelistConfig whitelistConfig) {
         FilterRegistrationBean<AuthFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
@@ -69,11 +71,12 @@ public class FilterConfiguration {
 
         @Override
         public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-            HttpServletRequest req = (HttpServletRequest) servletRequest;
+             HttpServletRequest req = (HttpServletRequest) servletRequest;
             HttpServletResponse resp = (HttpServletResponse) servletResponse;
+            String method = req.getMethod();
             String uri = req.getRequestURI();
             try {
-                if (!skippable(uri)) {
+                if (!skippable(uri) && !method.equals("OPTIONS")) {
                     if (!loginService.isValid(req)) {
                         resp.sendRedirect(loginURL);
                         return;

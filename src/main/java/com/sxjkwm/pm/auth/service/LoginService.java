@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
@@ -42,11 +44,15 @@ public class LoginService {
         this.userDataService = userDataService;
     }
 
-    public boolean isValid(HttpServletRequest req) {
+    public boolean isValid(HttpServletRequest req) throws UnsupportedEncodingException {
         String token = req.getHeader(tokenKey);
         if (StringUtils.isBlank(token)) {
-            return false;
+            token = req.getParameter(tokenKey);
+            if (StringUtils.isBlank(token)) {
+                return false;
+            }
         }
+        token = URLDecoder.decode(token, "UTF-8");
         JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
         String userId = jsonObject.getString("userId");
         String userDataDtoString = cacheService.getString(userId);

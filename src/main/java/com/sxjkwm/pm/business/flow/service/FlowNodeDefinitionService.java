@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -21,6 +22,7 @@ public class FlowNodeDefinitionService {
 
     private final FlowNodeDefinitionDao flowNodeDefinitionDao;
 
+    @Autowired
     public FlowNodeDefinitionService(FlowNodeDefinitionDao flowNodeDefinitionDao) {
         this.flowNodeDefinitionDao = flowNodeDefinitionDao;
     }
@@ -29,11 +31,11 @@ public class FlowNodeDefinitionService {
     public List<FlowNodeDefinitionDto> create(Long flowNodeId, List<FlowNodeDefinitionDto> flowNodeDefinitionDtos) {
         FlowNodeDefinition flowNodeDefinition;
         Long flowNodeDefinitionId;
-        for (FlowNodeDefinitionDto dto : flowNodeDefinitionDtos) {
+        for (FlowNodeDefinitionDto dto: flowNodeDefinitionDtos) {
             flowNodeDefinition = new FlowNodeDefinition(flowNodeId, dto);
             flowNodeDefinition = flowNodeDefinitionDao.save(flowNodeDefinition);
             flowNodeDefinitionId = flowNodeDefinition.getId();
-            dto.setId(flowNodeId);
+            dto.setId(flowNodeDefinitionId);
         }
         return flowNodeDefinitionDtos;
     }

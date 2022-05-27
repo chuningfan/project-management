@@ -9,6 +9,8 @@ import com.sxjkwm.pm.business.flow.service.FlowNodeDefinitionService;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
 import org.apache.commons.compress.utils.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +22,7 @@ public class FlowNodeDefinitionController {
 
     private final FlowNodeDefinitionService flowNodeDefinitionService;
 
+    @Autowired
     public FlowNodeDefinitionController(FlowNodeDefinitionService flowNodeDefinitionService) {
         this.flowNodeDefinitionService = flowNodeDefinitionService;
     }
