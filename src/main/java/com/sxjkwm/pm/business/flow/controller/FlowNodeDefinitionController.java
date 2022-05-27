@@ -28,12 +28,16 @@ public class FlowNodeDefinitionController {
     }
 
     @PostMapping("/{flowNodeId}")
-    public RestResponse<List<FlowNodeDefinitionDto>> createDefinitions(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody List<FlowNodeDefinitionDto> flowNodeDefinitionDtos) {
+    public RestResponse<List<FlowNodeDefinitionDto>> createDefinitions(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody FlowNodeDefinitionDto flowNodeDefinitionDto) {
+        List<FlowNodeDefinitionDto> flowNodeDefinitionDtos = Lists.newArrayList();
+        flowNodeDefinitionDtos.add(flowNodeDefinitionDto);
         return RestResponse.of(flowNodeDefinitionService.create(flowNodeId, flowNodeDefinitionDtos));
     }
 
     @PutMapping("/{flowNodeId}")
-    public RestResponse<List<FlowNodeDefinitionDto>> updateDefinitions(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody List<FlowNodeDefinitionDto> flowNodeDefinitionDtos) {
+    public RestResponse<List<FlowNodeDefinitionDto>> updateDefinitions(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody FlowNodeDefinitionDto flowNodeDefinitionDto) {
+        List<FlowNodeDefinitionDto> flowNodeDefinitionDtos = Lists.newArrayList();
+        flowNodeDefinitionDtos.add(flowNodeDefinitionDto);
         return RestResponse.of(flowNodeDefinitionService.update(flowNodeId, flowNodeDefinitionDtos));
     }
 

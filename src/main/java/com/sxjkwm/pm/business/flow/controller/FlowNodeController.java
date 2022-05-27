@@ -1,5 +1,6 @@
 package com.sxjkwm.pm.business.flow.controller;
 
+import com.google.common.collect.Lists;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
 import com.sxjkwm.pm.business.flow.dto.NodeIndexDto;
 import com.sxjkwm.pm.business.flow.entity.Flow;
@@ -26,13 +27,15 @@ public class FlowNodeController {
     }
 
     @PostMapping("/{flowId}")
-    public RestResponse<List<FlowNodeDto>> createNodes(@PathVariable("flowId") Long flowId, @RequestBody List<FlowNodeDto> projectFlowNodeDtos) {
-        return RestResponse.of(flowNodeService.create(flowId, projectFlowNodeDtos));
+    public RestResponse<List<FlowNodeDto>> createNodes(@PathVariable("flowId") Long flowId, @RequestBody FlowNodeDto flowNodeDto) {
+        List<FlowNodeDto> flowNodeDtos = Lists.newArrayList();
+        flowNodeDtos.add(flowNodeDto);
+        return RestResponse.of(flowNodeService.create(flowId, flowNodeDtos));
     }
 
     @PutMapping("/{flowId}")
-    public RestResponse<List<FlowNodeDto>> updateNodes(@PathVariable("flowId") Long flowId, @RequestBody List<FlowNodeDto> projectFlowNodeDtos) {
-        return RestResponse.of(flowNodeService.update(flowId, projectFlowNodeDtos));
+    public RestResponse<List<FlowNodeDto>> updateNodes(@PathVariable("flowId") Long flowId, @RequestBody FlowNodeDto flowNodeDto) {
+        return RestResponse.of(flowNodeService.update(flowId, flowNodeDto));
     }
 
     @GetMapping

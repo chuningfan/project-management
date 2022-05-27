@@ -37,6 +37,7 @@ public class FlowNodeService {
         Long flowNodeId;
         List<String> patternFilePaths;
         PatternFile patternFile;
+
         for (FlowNodeDto dto : flowNodeDtos) {
             flowNode = new FlowNode(flowId, dto);
             flowNode.setIsDeleted(Constant.YesOrNo.NO.getValue());
@@ -49,7 +50,9 @@ public class FlowNodeService {
     }
 
     @Transactional
-    public List<FlowNodeDto> update(Long flowId, List<FlowNodeDto> flowNodeDtos) {
+    public List<FlowNodeDto> update(Long flowId, FlowNodeDto flowNode) {
+        List<FlowNodeDto> flowNodeDtos = Lists.newArrayList();
+        flowNodeDtos.add(flowNode);
         FlowNode condition = new FlowNode();
         condition.setFlowId(flowId);
         condition.setIsDeleted(Constant.YesOrNo.NO.getValue());
@@ -69,7 +72,7 @@ public class FlowNodeService {
             // IDs not in flowNodeDtos
             List<Long> inputIds = flowNodeDtos.stream().filter(fnd -> Objects.nonNull(fnd.getId())).map(FlowNodeDto::getId).collect(Collectors.toList());
             sourceList.stream().filter(sfnd -> !inputIds.contains(sfnd.getId())).forEach(sfnd -> {
-                sfnd.setIsDeleted(Constant.YesOrNo.YES.getValue());
+                sfnd.setIsDeleted(Constant.YesOrNo.NO.getValue());
                 dataToSave.add(sfnd);
             });
             // find updated
