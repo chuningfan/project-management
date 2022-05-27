@@ -43,8 +43,8 @@ public class FlowNodeController {
         return RestResponse.of(flowNodeService.getByConditions(flowNode, Sort.by(Sort.Direction.fromString("ASC"), "nodeIndex")));
     }
 
-    @PostMapping(value = "/getFlowNodeList")
-    public RestResponse<List<FlowNode>> getFlowList(@RequestParam("flowId") Long flowId) {
+    @GetMapping(value = "/{flowId}")
+    public RestResponse<List<FlowNode>> getFlowList(@PathVariable("flowId") Long flowId) {
         return RestResponse.of(flowNodeService.getFlowNodeList(flowId));
     }
 

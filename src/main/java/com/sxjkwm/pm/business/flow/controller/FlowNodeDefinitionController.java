@@ -9,7 +9,6 @@ import com.sxjkwm.pm.business.flow.service.FlowNodeDefinitionService;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
 import org.apache.commons.compress.utils.Lists;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,21 +24,18 @@ public class FlowNodeDefinitionController {
         this.flowNodeDefinitionService = flowNodeDefinitionService;
     }
 
-    @PostMapping("/saveFlowNodeDefinition/{flowNodeId}")
+    @PostMapping("/{flowNodeId}")
     public RestResponse<List<FlowNodeDefinitionDto>> createDefinitions(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody List<FlowNodeDefinitionDto> flowNodeDefinitionDtos) {
         return RestResponse.of(flowNodeDefinitionService.create(flowNodeId, flowNodeDefinitionDtos));
     }
-//
-//    @PutMapping("/updateFlowNodeDefinition/{flowNodeId}")
-//    public RestResponse<List<FlowNodeDto>> updateDefinitions(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody List<FlowNodeDefinitionDto> flowNodeDefinitionDtos) {
-//        return RestResponse.of(flowNodeDefinitionService.update(flowNodeId, flowNodeDefinitionDtos));
-//    }
 
+    @PutMapping("/{flowNodeId}")
+    public RestResponse<List<FlowNodeDefinitionDto>> updateDefinitions(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody List<FlowNodeDefinitionDto> flowNodeDefinitionDtos) {
+        return RestResponse.of(flowNodeDefinitionService.update(flowNodeId, flowNodeDefinitionDtos));
+    }
 
-
-
-    @PostMapping(value = "/getFlowNodeDefinitionList")
-    public RestResponse<List<FlowNodeDefinition>> getFlowList( @RequestParam("flowNodeId") Long flowNodeId) {
+    @GetMapping(value = "/{flowNodeId}")
+    public RestResponse<List<FlowNodeDefinition>> getFlowList( @PathVariable("flowNodeId") Long flowNodeId) {
         return RestResponse.of(flowNodeDefinitionService.getFlowNodeDefinitionList(flowNodeId));
     }
 

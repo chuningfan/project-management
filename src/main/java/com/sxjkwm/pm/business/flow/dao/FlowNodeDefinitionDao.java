@@ -18,9 +18,6 @@ public interface FlowNodeDefinitionDao extends JpaRepository<FlowNodeDefinition,
     @Query("SELECT f FROM FlowNodeDefinition f WHERE f.isDeleted = 0 AND f.flowNodeId = ?1")
     List<FlowNodeDefinition> getByFlowNodeId(Long flowNodeId);
 
-
-    List<FlowNodeDefinition> getAllByFlowNodeId(Long flowNodeId);
-
     @Modifying
     @Query(value = "update FlowNodeDefinition fnd set fnd.isDeleted = :isDelete where fnd.id = :id")
     int updateFlowNodeDefinition(Integer isDelete, Long id);

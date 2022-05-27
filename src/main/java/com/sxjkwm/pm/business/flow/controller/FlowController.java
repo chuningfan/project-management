@@ -39,10 +39,10 @@ public class FlowController {
         return RestResponse.of(flowService.getFlow(id));
     }
 
-    @GetMapping
-    public RestResponse<List<Flow>> getAll() {
-        return RestResponse.of(flowService.getFlows(null));
-    }
+//    @GetMapping
+//    public RestResponse<List<Flow>> getAll() {
+//        return RestResponse.of(flowService.getFlows(null));
+//    }
 
     @GetMapping("/list")
     public RestResponse<List<Flow>> getByName(@Param("flowName") String flowName) {
@@ -50,13 +50,9 @@ public class FlowController {
     }
 
 
-    @PostMapping(value = "/getFlowList")
-    public RestResponse<Page<Flow>> getFlowList(@RequestParam("pageNum") Integer pageNum, @RequestParam("pageSize") Integer pageSize,
-                                                @RequestParam("flowName") String flowName) {
-        if (Objects.isNull(pageSize)) {
-            pageSize = 15;
-        }
-        return RestResponse.of(flowService.getFlowList(pageNum, pageSize, flowName));
+    @GetMapping
+    public RestResponse<List<Flow>> getFlowList() {
+        return RestResponse.of(flowService.getFlowList());
     }
 
     @DeleteMapping("/{id}")

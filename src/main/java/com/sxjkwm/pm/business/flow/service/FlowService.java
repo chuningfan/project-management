@@ -64,23 +64,9 @@ public class FlowService {
     }
 
 
-    public Page<Flow> getFlowList(Integer pageNum, Integer pageSize, String flowName) {
-        if (pageNum <= 1) {
-            pageNum = 0;
-        } else {
-            pageNum -= 1;
-        }
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
-        Page<Flow> page = null;
+    public List<Flow> getFlowList() {
         Integer isDelete = Constant.YesOrNo.NO.getValue();
-        if (StringUtils.isEmpty(flowName)) {
-            page = flowDao.findByIsDeleted(isDelete, pageable);
-        }
-        if (StringUtils.isNotEmpty(flowName)) {
-            page = flowDao.findByIsDeletedAndFlowNameLike(isDelete, "%" + flowName + "%", pageable);
-        }
-        return page;
+        return flowDao.findByIsDeleted(isDelete);
     }
 
     @Transactional

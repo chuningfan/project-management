@@ -111,7 +111,6 @@ public class FlowNodeService {
 
 
     public List<FlowNode> getFlowNodeList(Long flowId) {
-
         Integer isDelete = Constant.YesOrNo.NO.getValue();
         List<FlowNode> flowNodeList = flowNodeDao.getAllByFlowIdAndIsDeleted(flowId, isDelete);
         return flowNodeList;
