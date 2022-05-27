@@ -52,8 +52,8 @@ public class LoginService {
                 return false;
             }
         }
-        token = URLDecoder.decode(token, "UTF-8");
-        JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+        String _token = token.replace(token.substring(token.lastIndexOf("%")), "=");
+        JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(_token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
         String userId = jsonObject.getString("userId");
         String userDataDtoString = cacheService.getString(userId);
         if (StringUtils.isNotBlank(userDataDtoString)) {
