@@ -25,17 +25,17 @@ public class S3FileController {
         this.s3FileService = s3FileService;
     }
 
-    @PostMapping("/{projectId}/{flowNodeId}/{propertyKey}")
-    public RestResponse<Long> upload(@RequestParam("file") MultipartFile file,
+    @PostMapping("/{projectId}/{flowNodeId}/{propertyDefId}")
+    public RestResponse<Long> upload(MultipartFile file,
                                         @PathVariable("projectId") Long projectId,
                                         @PathVariable("flowNodeId") Long flowNodeId,
-                                        @PathVariable("propertyKey") String propertyKey) throws PmException {
-        return RestResponse.of(s3FileService.upload(projectId, file, flowNodeId, propertyKey));
+                                        @PathVariable("propertyDefId") Long propertyDefId) throws PmException {
+        return RestResponse.of(s3FileService.upload(projectId, file, flowNodeId, propertyDefId));
     }
 
     @GetMapping("/file")
-    public void downloadFileByKeys(HttpServletResponse response, @RequestParam("projectId") Long projectId, @RequestParam("flowNodeId") Long flowNodeId, @RequestParam("propertyKey") String propertyKey) throws PmException {
-        s3FileService.download(projectId, flowNodeId, propertyKey, response);
+    public void downloadFileByKeys(HttpServletResponse response, @RequestParam("projectId") Long projectId, @RequestParam("flowNodeId") Long flowNodeId, @RequestParam("propertyDefId") Long propertyDefId) throws PmException {
+        s3FileService.download(projectId, flowNodeId, propertyDefId, response);
     }
 
     @DeleteMapping("/{id}")

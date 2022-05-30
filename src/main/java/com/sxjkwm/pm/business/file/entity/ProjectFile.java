@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Proxy(lazy = false)
-@Table(name = "pm_project_attachment", indexes = {@Index(name = "pm_attach_union_indexes", columnList = "project_id,flow_node_id,property_key")})
+@Table(name = "pm_project_attachment", indexes = {@Index(name = "pm_attach_union_indexes", columnList = "project_id,flow_node_id,property_def_id")})
 public class ProjectFile extends BaseFile {
 
     @Column(name = "project_id")
@@ -18,8 +18,11 @@ public class ProjectFile extends BaseFile {
     @Column(name = "object_name")
     private String objectName;
 
-    @Column(name = "property_key")
-    private String propertyKey;
+//    @Column(name = "property_key")
+//    private String propertyKey;
+
+    @Column(name = "property_def_id")
+    private Long propertyDefId;
 
     @Column(name = "bucket_name")
     private String bucketName;
@@ -40,13 +43,13 @@ public class ProjectFile extends BaseFile {
         this.objectName = objectName;
     }
 
-    public String getPropertyKey() {
-        return propertyKey;
-    }
-
-    public void setPropertyKey(String propertyKey) {
-        this.propertyKey = propertyKey;
-    }
+//    public String getPropertyKey() {
+//        return propertyKey;
+//    }
+//
+//    public void setPropertyKey(String propertyKey) {
+//        this.propertyKey = propertyKey;
+//    }
 
     public String getBucketName() {
         return bucketName;
@@ -54,5 +57,13 @@ public class ProjectFile extends BaseFile {
 
     public void setBucketName(String bucketName) {
         this.bucketName = bucketName;
+    }
+
+    public Long getPropertyDefId() {
+        return propertyDefId;
+    }
+
+    public void setPropertyDefId(Long propertyDefId) {
+        this.propertyDefId = propertyDefId;
     }
 }

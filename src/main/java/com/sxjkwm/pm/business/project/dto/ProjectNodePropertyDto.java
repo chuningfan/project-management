@@ -1,8 +1,8 @@
 package com.sxjkwm.pm.business.project.dto;
 
-import com.sxjkwm.pm.common.BaseCollectionProperty;
+import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionDefDto;
+import com.sxjkwm.pm.business.flow.dto.FlowNodeSelectionDefinitionDto;
 
-import javax.persistence.Column;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +19,9 @@ public class ProjectNodePropertyDto implements Serializable {
 
     private Long projectNodeId;
 
-    private String propertyKey;
+    private Long flowNodePropertyDefId;
 
     private String propertyValue;
-
-    private String propertyType;
 
     private Integer propertyIndex;
 
@@ -31,9 +29,15 @@ public class ProjectNodePropertyDto implements Serializable {
 
     private String fileName;
 
+    private String propertyType;
+
+    private String propertyKey;
+
+    private List<FlowNodeCollectionDefDto> flowNodeCollectionDefDtos;
+
     private List<Map<String, Object>> collectionData;
 
-    private String collectionPropertyHandler;
+    private List<FlowNodeSelectionDefinitionDto> flowNodeSelectionDtos;
 
     public Long getId() {
         return id;
@@ -59,14 +63,6 @@ public class ProjectNodePropertyDto implements Serializable {
         this.projectNodeId = projectNodeId;
     }
 
-    public String getPropertyKey() {
-        return propertyKey;
-    }
-
-    public void setPropertyKey(String propertyKey) {
-        this.propertyKey = propertyKey;
-    }
-
     public String getPropertyValue() {
         return propertyValue;
     }
@@ -75,36 +71,12 @@ public class ProjectNodePropertyDto implements Serializable {
         this.propertyValue = propertyValue;
     }
 
-    public String getPropertyType() {
-        return propertyType;
-    }
-
-    public void setPropertyType(String propertyType) {
-        this.propertyType = propertyType;
-    }
-
     public Integer getPropertyIndex() {
         return propertyIndex;
     }
 
     public void setPropertyIndex(Integer propertyIndex) {
         this.propertyIndex = propertyIndex;
-    }
-
-    public List<Map<String, Object>> getCollectionData() {
-        return collectionData;
-    }
-
-    public void setCollectionData(List<Map<String, Object>> collectionData) {
-        this.collectionData = collectionData;
-    }
-
-    public String getCollectionPropertyHandler() {
-        return collectionPropertyHandler;
-    }
-
-    public void setCollectionPropertyHandler(String collectionPropertyHandler) {
-        this.collectionPropertyHandler = collectionPropertyHandler;
     }
 
     public String getPropertyName() {
@@ -121,5 +93,53 @@ public class ProjectNodePropertyDto implements Serializable {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public List<Map<String, Object>> getCollectionData() {
+        return collectionData;
+    }
+
+    public void setCollectionData(List<Map<String, Object>> collectionData) {
+        this.collectionData = collectionData;
+    }
+
+    public List<FlowNodeCollectionDefDto> getFlowNodeCollectionDefDtos() {
+        return flowNodeCollectionDefDtos;
+    }
+
+    public void setFlowNodeCollectionDefDtos(List<FlowNodeCollectionDefDto> flowNodeCollectionDefDtos) {
+        this.flowNodeCollectionDefDtos = flowNodeCollectionDefDtos;
+    }
+
+    public Long getFlowNodePropertyDefId() {
+        return flowNodePropertyDefId;
+    }
+
+    public void setFlowNodePropertyDefId(Long flowNodePropertyDefId) {
+        this.flowNodePropertyDefId = flowNodePropertyDefId;
+    }
+
+    public String getPropertyType() {
+        return propertyType;
+    }
+
+    public void setPropertyType(String propertyType) {
+        this.propertyType = propertyType;
+    }
+
+    public String getPropertyKey() {
+        return propertyKey;
+    }
+
+    public void setPropertyKey(String propertyKey) {
+        this.propertyKey = propertyKey;
+    }
+
+    public List<FlowNodeSelectionDefinitionDto> getFlowNodeSelectionDtos() {
+        return flowNodeSelectionDtos;
+    }
+
+    public void setFlowNodeSelectionDtos(List<FlowNodeSelectionDefinitionDto> flowNodeSelectionDtos) {
+        this.flowNodeSelectionDtos = flowNodeSelectionDtos;
     }
 }

@@ -26,11 +26,11 @@ public class FlowNodeCollectionDefinitionController {
         this.flowNodeCollectionDefinitionService = flowNodeCollectionDefinitionService;
     }
 
-    @PostMapping("/{flowNodeId}/{collectionPropKey}")
+    @PostMapping("/{flowNodeId}/{collectionPropDefId}")
     public RestResponse<List<FlowNodeCollectionDefinition>> saveOrUpdate(@PathVariable("flowNodeId") Long flowNodeId,
-                                                                   @PathVariable("collectionPropKey") String collectionPropKey,
+                                                                   @PathVariable("collectionPropDefId") Long collectionPropDefId,
                                                                    @RequestBody List<FlowNodeCollectionDefDto> dtoList) throws SQLException {
-        return RestResponse.of(flowNodeCollectionDefinitionService.saveOrUpdate(flowNodeId, collectionPropKey, dtoList));
+        return RestResponse.of(flowNodeCollectionDefinitionService.saveOrUpdate(flowNodeId, collectionPropDefId, dtoList));
     }
 
 }

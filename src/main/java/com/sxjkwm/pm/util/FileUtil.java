@@ -1,5 +1,8 @@
 package com.sxjkwm.pm.util;
 
+import com.artofsolving.jodconverter.DefaultDocumentFormatRegistry;
+import com.artofsolving.jodconverter.DocumentConverter;
+import com.artofsolving.jodconverter.DocumentFormat;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,6 +14,8 @@ import java.util.Collection;
 import java.util.Objects;
 
 public class FileUtil {
+
+    private static final String DEFAULT_SUFFIX = "pdf";
 
     public static String upload(MultipartFile file, String dir) throws IOException {
         String originalFileName = file.getOriginalFilename();
@@ -96,6 +101,22 @@ public class FileUtil {
                 }
             }
         }
+    }
+
+    public static InputStream covertCommonByStream(InputStream inputStream, String suffix) throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DocumentConverter converter = ContextUtil.getBean(DocumentConverter.class);
+        DefaultDocumentFormatRegistry formatReg = new DefaultDocumentFormatRegistry();
+        DocumentFormat targetFormat = formatReg.getFormatByFileExtension(DEFAULT_SUFFIX);
+        DocumentFormat sourceFormat = formatReg.getFormatByFileExtension(suffix);
+        converter.convert(inputStream, sourceFormat, out, targetFormat);
+//        connection.disconnect();
+        return outputStreamConvertInputStream(out);
+    }
+
+    public static ByteArrayInputStream outputStreamConvertInputStream(final OutputStream out) throws Exception {
+        ByteArrayOutputStream baos=(ByteArrayOutputStream) out;
+        return new ByteArrayInputStream(baos.toByteArray());
     }
 
 }

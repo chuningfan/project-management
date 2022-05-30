@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @Service
 public class ContextFactoryImpl implements ContextFactory<UserDataDto> {
-    private static final ThreadLocal<Context<UserDataDto>> contextThreadLocal = new ThreadLocal<>();
+    static final ThreadLocal<Context<UserDataDto>> contextThreadLocal = new ThreadLocal<>();
     @Override
     public Context<UserDataDto> get() {
         Context<UserDataDto> context = contextThreadLocal.get();

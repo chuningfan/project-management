@@ -12,7 +12,7 @@ import javax.persistence.Table;
  * @date 2022/5/15 12:43
  */
 @Entity
-@Table(name = "pm_project_node_property", indexes = {@Index(name = "projectnodeprop_projectInfo", columnList = "project_id,project_node_id,property_key")})
+@Table(name = "pm_project_node_property", indexes = {@Index(name = "projectnodeprop_projectInfo", columnList = "project_id,project_node_id,flow_node_property_def_id")})
 public class ProjectNodeProperty extends BaseEntity {
 
     @Column(name = "project_id")
@@ -21,14 +21,11 @@ public class ProjectNodeProperty extends BaseEntity {
     @Column(name = "project_node_id")
     private Long projectNodeId;
 
-    @Column(name = "property_key")
-    private String propertyKey;
+    @Column(name = "flow_node_property_def_id")
+    private Long flowNodePropertyDefId;
 
     @Column(name = "property_value")
     private String propertyValue;
-
-    @Column(name = "property_type")
-    private String propertyType;
 
     public Long getProjectId() {
         return projectId;
@@ -36,30 +33,6 @@ public class ProjectNodeProperty extends BaseEntity {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
-    }
-
-    public String getPropertyKey() {
-        return propertyKey;
-    }
-
-    public String getPropertyValue() {
-        return propertyValue;
-    }
-
-    public void setPropertyValue(String propertyValue) {
-        this.propertyValue = propertyValue;
-    }
-
-    public void setPropertyKey(String propertyKey) {
-        this.propertyKey = propertyKey;
-    }
-
-    public String getPropertyType() {
-        return propertyType;
-    }
-
-    public void setPropertyType(String propertyType) {
-        this.propertyType = propertyType;
     }
 
     public Long getProjectNodeId() {
@@ -70,4 +43,19 @@ public class ProjectNodeProperty extends BaseEntity {
         this.projectNodeId = projectNodeId;
     }
 
+    public Long getFlowNodePropertyDefId() {
+        return flowNodePropertyDefId;
+    }
+
+    public void setFlowNodePropertyDefId(Long flowNodePropertyDefId) {
+        this.flowNodePropertyDefId = flowNodePropertyDefId;
+    }
+
+    public String getPropertyValue() {
+        return propertyValue;
+    }
+
+    public void setPropertyValue(String propertyValue) {
+        this.propertyValue = propertyValue;
+    }
 }

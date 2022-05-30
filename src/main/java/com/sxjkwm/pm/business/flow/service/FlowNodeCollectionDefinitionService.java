@@ -2,8 +2,11 @@ package com.sxjkwm.pm.business.flow.service;
 
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeCollectionDefinitionDao;
+import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionDefDto;
+import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeCollectionDefinition;
+import com.sxjkwm.pm.business.project.entity.Project;
 import com.sxjkwm.pm.util.DBUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,21 +29,22 @@ import java.util.stream.Collectors;
 @Service
 public class FlowNodeCollectionDefinitionService {
 
-    public static final String collectionTableNamePrefix = "coll_tb_";
-
     private final FlowNodeCollectionDefinitionDao flowNodeCollectionDefinitionDao;
 
+    private final FlowNodeDao flowNodeDao;
+
     @Autowired
-    public FlowNodeCollectionDefinitionService(FlowNodeCollectionDefinitionDao flowNodeCollectionDefinitionDao) {
+    public FlowNodeCollectionDefinitionService(FlowNodeCollectionDefinitionDao flowNodeCollectionDefinitionDao, FlowNodeDao flowNodeDao) {
         this.flowNodeCollectionDefinitionDao = flowNodeCollectionDefinitionDao;
+        this.flowNodeDao = flowNodeDao;
     }
 
-
     @Transactional
-    public List<FlowNodeCollectionDefinition> saveOrUpdate(Long flowNodeId, String collectionPropKey, List<FlowNodeCollectionDefDto> dtoList) throws SQLException {
+    public List<FlowNodeCollectionDefinition> saveOrUpdate(Long flowNodeId, Long collectionPropDefId, List<FlowNodeCollectionDefDto> dtoList) throws SQLException {
         if (CollectionUtils.isNotEmpty(dtoList)) {
+            FlowNode flowNode = flowNodeDao.getOne(flowNodeId);
             FlowNodeCollectionDefinition condition = new FlowNodeCollectionDefinition();
-            condition.setCollectionPropKey(collectionPropKey);
+            condition.setCollectionPropertyDefId(collectionPropDefId);
             condition.setFlowNodeId(flowNodeId);
             List<FlowNodeCollectionDefinition> existingDefs = flowNodeCollectionDefinitionDao.findAll(Example.of(condition));
             Map<Long, FlowNodeCollectionDefinition> existingMap = null;
@@ -53,18 +57,22 @@ public class FlowNodeCollectionDefinitionService {
             FlowNodeCollectionDefinition definition;
             for (FlowNodeCollectionDefDto dto: dtoList) {
                 definition = new FlowNodeCollectionDefinition();
-                definition.setCollectionPropKey(collectionPropKey);
+                definition.setCollectionPropertyDefId(collectionPropDefId);
                 definition.setFlowNodeId(flowNodeId);
                 definition.setIsDeleted(dto.getIsDeleted());
                 definition.setHeaderIndex(dto.getHeaderIndex());
-                definition.setHeaderKey(dto.getHeaderKey());
+                String headerKey = dto.getHeaderKey();
+                if (StringUtils.isBlank(headerKey)) {
+                    headerKey = "col_" + flowNodeId + "_" + collectionPropDefId;
+                }
+                definition.setHeaderKey(headerKey);
                 definition.setHeaderName(dto.getHeaderName());
                 if (Objects.nonNull(dto.getId()) && definition.getIsDeleted().intValue() == 0) {
                     definition.setId(dto.getId());
                     if (Objects.nonNull(existingMap)) {
                         FlowNodeCollectionDefinition originDef = existingMap.get(dto.getId());
-                        if (Objects.nonNull(originDef) && !originDef.getCollectionPropKey().equals(dto.getCollectionPropKey())) {
-                            String modifyStr = originDef.getCollectionPropKey() + "," + dto.getCollectionPropKey();
+                        if (Objects.nonNull(originDef) && !originDef.getCollectionPropertyDefId().equals(dto.getCollectionPropertyDefId())) {
+                            String modifyStr = originDef.getCollectionPropertyDefId() + "," + dto.getCollectionPropertyDefId();
                             modifyColumns.add(modifyStr);
                         }
                     }
@@ -75,7 +83,7 @@ public class FlowNodeCollectionDefinitionService {
             }
             definitions = flowNodeCollectionDefinitionDao.saveAll(definitions);
             // create table;
-            String tableName = collectionTableNamePrefix + collectionPropKey;
+            String tableName = DBUtil.getTableName(flowNode.getFlowId(), flowNodeId, collectionPropDefId);
             Integer tableCount = flowNodeCollectionDefinitionDao.tryCreateTable(tableName);
             if (tableCount > 0) {
                 // 表已存在
@@ -99,11 +107,13 @@ public class FlowNodeCollectionDefinitionService {
                     for (String newColumn: newColumns) {
                         builder.append(newColumn + " VARCHAR(255),");
                     }
-                    builder.append("collection_prop_key       VARCHAR(255),");
+                    builder.append("collection_prop_def_id       BIGINT(20),");
                     builder.append("flow_node_id       BIGINT(20),");
                     builder.append("project_id       BIGINT(20),");
                     builder.append("created_by       VARCHAR(255),");
                     builder.append("created_at       BIGINT(20)");
+                    builder.append("modified_by       VARCHAR(255),");
+                    builder.append("modified_at       BIGINT(20)");
                     builder.append(" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
                     DBUtil.executeSQL(builder.toString());
                 }
@@ -127,6 +137,18 @@ public class FlowNodeCollectionDefinitionService {
         }
         String alterSql = "ALTER TABLE " + tableName + " ADD " + newColumnName + " " + def;
         DBUtil.executeSQL(alterSql);
+    }
+
+    public List<FlowNodeCollectionDefDto> getFlowNodeCollectionDefDotsByPropDefIds(List<Long> propDefIds) {
+        List<FlowNodeCollectionDefinition> collectionDefinitionList = flowNodeCollectionDefinitionDao.findByPropDefIds(propDefIds);
+        if (CollectionUtils.isNotEmpty(collectionDefinitionList)) {
+            List<FlowNodeCollectionDefDto> dtoList = Lists.newArrayList();
+            for (FlowNodeCollectionDefinition definition: collectionDefinitionList) {
+                dtoList.add(new FlowNodeCollectionDefDto(definition));
+            }
+            return dtoList;
+        }
+        return Collections.emptyList();
     }
 
 }

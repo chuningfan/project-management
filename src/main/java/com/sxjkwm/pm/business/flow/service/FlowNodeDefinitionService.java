@@ -1,20 +1,21 @@
 package com.sxjkwm.pm.business.flow.service;
 
+import com.google.common.collect.Lists;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
+import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionDefDto;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDefinitionDto;
+import com.sxjkwm.pm.business.flow.dto.FlowNodeSelectionDefinitionDto;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.constants.Constant;
+import com.sxjkwm.pm.exception.PmException;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,27 +23,83 @@ public class FlowNodeDefinitionService {
 
     private final FlowNodeDefinitionDao flowNodeDefinitionDao;
 
+    private final FlowNodeCollectionDefinitionService flowNodeCollectionDefinitionService;
+
+    private final FlowNodeSelectionDefinitionService flowNodeSelectionDefinitionService;
+
+
     @Autowired
-    public FlowNodeDefinitionService(FlowNodeDefinitionDao flowNodeDefinitionDao) {
+    public FlowNodeDefinitionService(FlowNodeDefinitionDao flowNodeDefinitionDao, FlowNodeCollectionDefinitionService flowNodeCollectionDefinitionService, FlowNodeSelectionDefinitionService flowNodeSelectionDefinitionService) {
         this.flowNodeDefinitionDao = flowNodeDefinitionDao;
+        this.flowNodeCollectionDefinitionService = flowNodeCollectionDefinitionService;
+        this.flowNodeSelectionDefinitionService = flowNodeSelectionDefinitionService;
     }
 
     @Transactional
-    public List<FlowNodeDefinitionDto> create(Long flowNodeId, List<FlowNodeDefinitionDto> flowNodeDefinitionDtos) {
-        FlowNodeDefinition flowNodeDefinition;
-        Long flowNodeDefinitionId;
-        for (FlowNodeDefinitionDto dto: flowNodeDefinitionDtos) {
-            flowNodeDefinition = new FlowNodeDefinition(flowNodeId, dto);
-            flowNodeDefinition = flowNodeDefinitionDao.save(flowNodeDefinition);
-            flowNodeDefinitionId = flowNodeDefinition.getId();
-            dto.setId(flowNodeDefinitionId);
+    public FlowNodeDefinitionDto saveOrUpdate(Long flowNodeId, FlowNodeDefinitionDto dto) throws SQLException, PmException {
+        String propKey = dto.getPropertyKey();
+        if (StringUtils.isBlank(propKey)) {
+            propKey = dto.getPropertyType() + "_" + flowNodeId + "_" + (UUID.randomUUID().toString().toLowerCase().replace("-", ""));
+            dto.setPropertyKey(propKey);
         }
-        return flowNodeDefinitionDtos;
+        String propType = dto.getPropertyType();
+        FlowNodeDefinition flowNodeDefinition = new FlowNodeDefinition(flowNodeId, dto);
+        flowNodeDefinition = flowNodeDefinitionDao.save(flowNodeDefinition);
+        Long flowNodeDefinitionId = flowNodeDefinition.getId();
+        dto.setId(flowNodeDefinitionId);
+        if (propType.equals("COLLECTION")) {
+            List<FlowNodeCollectionDefDto> flowNodeCollectionDefDtos = dto.getFlowNodeCollectionDefDtoList();
+            flowNodeCollectionDefinitionService.saveOrUpdate(dto.getFlowNodeId(), flowNodeDefinition.getId(), flowNodeCollectionDefDtos);
+        }
+        if (propType.equals("CHECKBOX") || propType.equals("RADIO")) {
+            List<FlowNodeSelectionDefinitionDto> selectionDefinitionDtos = dto.getSelectionDtos();
+            if (CollectionUtils.isNotEmpty(selectionDefinitionDtos)) {
+                flowNodeSelectionDefinitionService.saveOrUpdate(flowNodeId, flowNodeDefinition.getId(), selectionDefinitionDtos);
+            }
+        }
+        return dto;
     }
 
     public List<FlowNodeDefinition> getFlowNodeDefinitionList(Long flowId) {
         List<FlowNodeDefinition> nodeDefinitions = flowNodeDefinitionDao.getByFlowNodeId(flowId);
         return nodeDefinitions;
+    }
+
+    public List<FlowNodeDefinitionDto> getFlowNodeDefinitionDtoList(Long flowId) {
+        List<FlowNodeDefinition> nodeDefinitions = this.getFlowNodeDefinitionList(flowId);
+        if (CollectionUtils.isNotEmpty(nodeDefinitions)) {
+            String collectionType = Constant.PropertyType.COLLECTION.name();
+            Map<Long, List<FlowNodeCollectionDefDto>> collectionMap = null;
+            if (nodeDefinitions.stream().anyMatch(d -> d.getPropertyType().equals(collectionType))) {
+                List<Long> collectionTypeIds = nodeDefinitions.stream().filter(d -> d.getPropertyType().equals(collectionType)).map(FlowNodeDefinition::getId).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(collectionTypeIds)) {
+                    List<FlowNodeCollectionDefDto> collectionDefDtos = flowNodeCollectionDefinitionService.getFlowNodeCollectionDefDotsByPropDefIds(collectionTypeIds);
+                    if (CollectionUtils.isNotEmpty(collectionDefDtos)) {
+                        collectionMap = collectionDefDtos.stream().collect(Collectors.groupingBy(FlowNodeCollectionDefDto::getCollectionPropertyDefId));
+                    }
+                }
+            }
+            String checkboxType = Constant.PropertyType.CHECKBOX.name();
+            String radioType = Constant.PropertyType.RADIO.name();
+            Map<Long, List<FlowNodeSelectionDefinitionDto>> selectionDefMap = null;
+            if (nodeDefinitions.stream().anyMatch(d -> d.getPropertyType().equals(checkboxType) || d.getPropertyType().equals(radioType))) {
+                List<Long> selectionTypeIds = nodeDefinitions.stream().filter(d -> d.getPropertyType().equals(checkboxType) || d.getPropertyType().equals(radioType)).map(FlowNodeDefinition::getId).collect(Collectors.toList());
+                selectionDefMap = flowNodeSelectionDefinitionService.getDefinitionsByDefIds(selectionTypeIds);
+            }
+            List<FlowNodeDefinitionDto> flowNodeDefinitionDtos = Lists.newArrayList();
+            for (FlowNodeDefinition definition: nodeDefinitions) {
+                FlowNodeDefinitionDto dto = new FlowNodeDefinitionDto(definition);
+                if (dto.getPropertyType().equals(collectionType) && Objects.nonNull(collectionMap)) {
+                    dto.setFlowNodeCollectionDefDtoList(collectionMap.get(dto.getId()));
+                }
+                if (Objects.nonNull(selectionDefMap) && (dto.getPropertyType().equals(checkboxType) || dto.getPropertyType().equals(radioType))) {
+                    dto.setSelectionDtos(selectionDefMap.get(dto.getId()));
+                }
+                flowNodeDefinitionDtos.add(dto);
+            }
+            return flowNodeDefinitionDtos;
+        }
+        return Collections.emptyList();
     }
 
     @Transactional
@@ -52,55 +109,23 @@ public class FlowNodeDefinitionService {
     }
 
     @Transactional
-    public List<FlowNodeDefinitionDto> update(Long flowNodeId, List<FlowNodeDefinitionDto> flowNodeDefinitionDtos) {
-        // 1、查询当前flowNodeId对应的数据
-        FlowNodeDefinition condition = new FlowNodeDefinition();
-        condition.setFlowNodeId(flowNodeId);
-        condition.setIsDeleted(Constant.YesOrNo.NO.getValue());
-        Example<FlowNodeDefinition> example = Example.of(condition);
-        List<FlowNodeDefinition> sourceList = flowNodeDefinitionDao.findAll(example);
-        // 2、根据flowNodeId查询数据为空，新增数据
-        if (CollectionUtils.isEmpty(sourceList)) {
-            return create(flowNodeId, flowNodeDefinitionDtos);
-        } else {
-            // id为空，新增数据
-            List<FlowNodeDefinitionDto> res = Lists.newArrayList();
-            List<FlowNodeDefinitionDto> newNodeDefinitionDtos = flowNodeDefinitionDtos.stream().filter(fnd -> Objects.isNull(fnd.getId())).collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(newNodeDefinitionDtos)) {
-                res.addAll(create(flowNodeId, flowNodeDefinitionDtos));
+    public Boolean sort(List<Long> ids) {
+        List<FlowNodeDefinition> definitions = flowNodeDefinitionDao.findByIds(ids);
+        if (CollectionUtils.isNotEmpty(definitions)) {
+            Map<Long, FlowNodeDefinition> flowNodeDefinitionMap = definitions.stream().collect(Collectors.toMap(FlowNodeDefinition::getId, fnd -> fnd));
+            List<FlowNodeDefinition> saveList = Lists.newArrayList();
+            for (int i = 0; i < ids.size(); i ++) {
+                Long id = ids.get(i);
+                FlowNodeDefinition flowNodeDefinition = flowNodeDefinitionMap.get(id);
+                if (Objects.nonNull(flowNodeDefinition)) {
+                    flowNodeDefinition.setPropertyIndex(i);
+                    saveList.add(flowNodeDefinition);
+                }
             }
-            List<FlowNodeDefinition> dataToSave = Lists.newArrayList();
-            List<Long> inputIds = flowNodeDefinitionDtos.stream().filter(fnd -> Objects.nonNull(fnd.getId())).map(FlowNodeDefinitionDto::getId).collect(Collectors.toList());
-            sourceList.stream().filter(sfnd -> !inputIds.contains(sfnd.getId())).forEach(sfnd -> {
-                sfnd.setIsDeleted(Constant.YesOrNo.NO.getValue());
-                dataToSave.add(sfnd);
-            });
-            Map<Long, FlowNodeDefinitionDto> dtoMap = flowNodeDefinitionDtos.stream().filter(fnd -> Objects.nonNull(fnd.getId())).collect(Collectors.toMap(FlowNodeDefinitionDto::getId, fnd -> fnd, (k1, k2) -> k1));
-            sourceList.stream().filter(sfnd -> inputIds.contains(sfnd.getId())).forEach(sfnd -> {
-                Long id = sfnd.getId();
-                FlowNodeDefinitionDto flowNodeDefinitionDto = dtoMap.get(id);
-                if (StringUtils.isNotEmpty(flowNodeDefinitionDto.getCollectionPropertyHandler())) {
-                    sfnd.setCollectionPropertyHandler(flowNodeDefinitionDto.getCollectionPropertyHandler());
-                }
-                if (!Objects.isNull(flowNodeDefinitionDto.getPropertyIndex())) {
-                    sfnd.setPropertyIndex(flowNodeDefinitionDto.getPropertyIndex());
-                }
-                if (StringUtils.isNotEmpty(flowNodeDefinitionDto.getPropertyKey())) {
-                    sfnd.setPropertyKey(flowNodeDefinitionDto.getPropertyKey());
-                }
-                if (StringUtils.isNotEmpty(flowNodeDefinitionDto.getPropertyName())) {
-                    sfnd.setPropertyName(flowNodeDefinitionDto.getPropertyName());
-                }
-                if (StringUtils.isNotEmpty(flowNodeDefinitionDto.getPropertyType())) {
-                    sfnd.setPropertyType(flowNodeDefinitionDto.getPropertyType());
-                }
-                dataToSave.add(sfnd);
-                res.add(flowNodeDefinitionDto);
-            });
-            if (CollectionUtils.isNotEmpty(dataToSave)) {
-                flowNodeDefinitionDao.saveAll(dataToSave);
-            }
-            return res;
+            flowNodeDefinitionDao.saveAll(saveList);
+            return true;
         }
+        return false;
     }
+
 }

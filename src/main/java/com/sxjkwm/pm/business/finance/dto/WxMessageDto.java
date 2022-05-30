@@ -10,7 +10,7 @@ public class WxMessageDto implements Serializable {
 
     private String projectName;
 
-    private String taskNum;
+    private String projectCode;
 
     public String getUserId() {
         return userId;
@@ -36,11 +36,11 @@ public class WxMessageDto implements Serializable {
         this.projectName = projectName;
     }
 
-    public String getTaskNum() {
-        return taskNum;
+    public String getProjectCode() {
+        return projectCode;
     }
 
-    public void setTaskNum(String taskNum) {
-        this.taskNum = taskNum;
+    public void setProjectCode(String projectCode) {
+        this.projectCode = projectCode;
     }
 }

@@ -71,7 +71,7 @@ public class OrderEntity extends BaseEntity {
     private String clerk; // 开票人
 
     @Column(name = "list_flag")
-    private String listFlag = "1"; // 是否清单
+    private String listFlag = "0"; // 是否清单
 
     @Column(name = "list_name")
     private String listName; // 清单名称

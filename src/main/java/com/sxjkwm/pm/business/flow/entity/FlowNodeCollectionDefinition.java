@@ -12,14 +12,14 @@ import javax.persistence.Table;
  * @date 2022/5/25 7:26
  */
 @Entity
-@Table(name = "pm_flow_node_collection_definition", indexes = {@Index(name = "flow_nodeid", columnList = "flow_node_id"), @Index(name = "coll_propkey", columnList = "collection_prop_key")})
+@Table(name = "pm_flow_node_collection_definition", indexes = {@Index(name = "flow_nodeid", columnList = "flow_node_id"), @Index(name = "coll_propkey", columnList = "collection_property_def_id")})
 public class FlowNodeCollectionDefinition extends BaseEntity {
 
     @Column(name = "flow_node_id")
     private Long flowNodeId;
 
-    @Column(name = "collection_prop_key")
-    private String collectionPropKey;
+    @Column(name = "collection_property_def_id")
+    private Long collectionPropertyDefId;
 
     @Column(name = "header_key")
     private String headerKey;
@@ -38,12 +38,12 @@ public class FlowNodeCollectionDefinition extends BaseEntity {
         this.flowNodeId = flowNodeId;
     }
 
-    public String getCollectionPropKey() {
-        return collectionPropKey;
+    public Long getCollectionPropertyDefId() {
+        return collectionPropertyDefId;
     }
 
-    public void setCollectionPropKey(String collectionPropKey) {
-        this.collectionPropKey = collectionPropKey;
+    public void setCollectionPropertyDefId(Long collectionPropertyDefId) {
+        this.collectionPropertyDefId = collectionPropertyDefId;
     }
 
     public String getHeaderKey() {

@@ -21,6 +21,15 @@ public class OssConfig {
     @Value("${oss.accessKey}")
     private String accessKey;
 
+    @Value("${oss.timeout.connection:60000}")
+    private String connectionTimeout;
+
+    @Value("${oss.timeout.write:60000}")
+    private String writeTimeout;
+
+    @Value("${oss.timeout.read:60000}")
+    private String readTimeout;
+
     public String getOssAddress() {
         return ossAddress;
     }
@@ -43,5 +52,29 @@ public class OssConfig {
 
     public void setAccessKey(String accessKey) {
         this.accessKey = accessKey;
+    }
+
+    public String getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(String connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    public String getWriteTimeout() {
+        return writeTimeout;
+    }
+
+    public void setWriteTimeout(String writeTimeout) {
+        this.writeTimeout = writeTimeout;
+    }
+
+    public String getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(String readTimeout) {
+        this.readTimeout = readTimeout;
     }
 }

@@ -6,6 +6,9 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author Vic.Chu
  * @date 2022/5/13 21:04
@@ -13,29 +16,31 @@ import org.springframework.stereotype.Service;
 @Service
 public class RedisService implements CacheService {
 
-    private final RedissonClient redissonClient;
+    private static final long expireTime = 3600 * 5;
 
-    private final RMap<String, String> rMap;
+    private static final TimeUnit expireTimeUnit = TimeUnit.SECONDS;
+
+    private final RedissonClient redissonClient;
 
     @Autowired
     public RedisService(RedissonClient redissonClient) {
         this.redissonClient = redissonClient;
-        rMap = redissonClient.getMap("sxjkwm_authUser");
     }
 
     @Override
     public String getString(String key) {
-        return rMap.get(key);
+        Object obj = redissonClient.getBucket(key).get();
+        return Objects.isNull(obj) ? null : obj.toString();
     }
 
     @Override
     public void store(String key, String data) {
-        rMap.put(key, data);
+        redissonClient.getBucket(key).set(data, expireTime, expireTimeUnit);
     }
 
     @Override
     public void remove(String key) {
-        rMap.remove(key);
+        redissonClient.getBucket(key).delete();
     }
 
 }

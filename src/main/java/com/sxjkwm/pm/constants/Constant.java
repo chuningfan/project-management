@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public interface Constant<K, V> {
@@ -116,17 +117,8 @@ public interface Constant<K, V> {
         },
         FILE("文件", "file", Long.class) {
             @Override
-            public String getValue(String val) {
-                if (StringUtils.isBlank(val)) {
-                    return null;
-                }
-                Long fileId = Long.valueOf(val);
-                ProjectFileDao projectFileDao = ContextUtil.getBean(ProjectFileDao.class);
-                ProjectFile projectFile = projectFileDao.getOne(fileId);
-                String objName = projectFile.getObjectName();
-                ProjectFileService projectFileService = ContextUtil.getBean(ProjectFileService.class);
-//                projectFileService.
-                return null;
+            public Long getValue(String val) {
+                return Objects.nonNull(val) ? Long.valueOf(val) : null;
             }
         },
         COLLECTION("集合", "collection", List.class) {
@@ -152,6 +144,18 @@ public interface Constant<K, V> {
                     return null;
                 }
                 return Integer.valueOf(val);
+            }
+        },
+        TEXT("文本域", "text", String.class) {
+            @Override
+            public Object getValue(String val) {
+                return val;
+            }
+        },
+        TIME("时间", "time", Long.class) {
+            @Override
+            public Object getValue(String val) {
+                return Long.valueOf(val);
             }
         },
         ;

@@ -26,6 +26,7 @@ public class FlowNode extends BaseFlowNode {
         this.skippable = dto.getSkippable();
         this.formId = dto.getFormId();
         this.flowNodeValue = dto.getFlowNodeValue();
+        this.id = dto.getId();
     }
 
     public FlowNode() {

@@ -34,6 +34,9 @@ public class FlowNodeDefinition extends BaseEntity {
     @Column(name = "collection_property_handler")
     private String collectionPropertyHandler;
 
+    @Column(name = "non_null")
+    private Integer nonNull;
+
     public FlowNodeDefinition(Long flowNodeId, FlowNodeDefinitionDto flowNodeDefinitionDto) {
         this.flowNodeId = flowNodeId;
         this.collectionPropertyHandler = flowNodeDefinitionDto.getCollectionPropertyHandler();
@@ -41,6 +44,9 @@ public class FlowNodeDefinition extends BaseEntity {
         this.propertyKey = flowNodeDefinitionDto.getPropertyKey();
         this.propertyName = flowNodeDefinitionDto.getPropertyName();
         this.propertyType = flowNodeDefinitionDto.getPropertyType();
+        this.isDeleted = flowNodeDefinitionDto.getIsDeleted();
+        this.id = flowNodeDefinitionDto.getId();
+        this.nonNull = flowNodeDefinitionDto.getNonNull();
     }
 
     public FlowNodeDefinition() {
@@ -92,5 +98,13 @@ public class FlowNodeDefinition extends BaseEntity {
 
     public void setCollectionPropertyHandler(String collectionPropertyHandler) {
         this.collectionPropertyHandler = collectionPropertyHandler;
+    }
+
+    public Integer getNonNull() {
+        return nonNull;
+    }
+
+    public void setNonNull(Integer nonNull) {
+        this.nonNull = nonNull;
     }
 }

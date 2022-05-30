@@ -1,18 +1,17 @@
 package com.sxjkwm.pm.business.flow.controller;
 
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDefinitionDto;
-import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
 import com.sxjkwm.pm.business.flow.dto.PropertyTypeDto;
-import com.sxjkwm.pm.business.flow.entity.Flow;
-import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.business.flow.service.FlowNodeDefinitionService;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
+import com.sxjkwm.pm.constants.PmError;
+import com.sxjkwm.pm.exception.PmException;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,39 +27,30 @@ public class FlowNodeDefinitionController {
     }
 
     @PostMapping("/{flowNodeId}")
-    public RestResponse<List<FlowNodeDefinitionDto>> createDefinitions(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody FlowNodeDefinitionDto flowNodeDefinitionDto) {
-        List<FlowNodeDefinitionDto> flowNodeDefinitionDtos = Lists.newArrayList();
-        flowNodeDefinitionDtos.add(flowNodeDefinitionDto);
-        return RestResponse.of(flowNodeDefinitionService.create(flowNodeId, flowNodeDefinitionDtos));
-    }
-
-    @PutMapping("/{flowNodeId}")
-    public RestResponse<List<FlowNodeDefinitionDto>> updateDefinitions(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody FlowNodeDefinitionDto flowNodeDefinitionDto) {
-        List<FlowNodeDefinitionDto> flowNodeDefinitionDtos = Lists.newArrayList();
-        flowNodeDefinitionDtos.add(flowNodeDefinitionDto);
-        return RestResponse.of(flowNodeDefinitionService.update(flowNodeId, flowNodeDefinitionDtos));
+    public RestResponse<FlowNodeDefinitionDto> saveOrUpdate(@PathVariable("flowNodeId") Long flowNodeId, @RequestBody FlowNodeDefinitionDto flowNodeDefinitionDto) throws SQLException, PmException {
+        return RestResponse.of(flowNodeDefinitionService.saveOrUpdate(flowNodeId, flowNodeDefinitionDto));
     }
 
     @GetMapping(value = "/{flowNodeId}")
-    public RestResponse<List<FlowNodeDefinition>> getFlowList( @PathVariable("flowNodeId") Long flowNodeId) {
-        return RestResponse.of(flowNodeDefinitionService.getFlowNodeDefinitionList(flowNodeId));
+    public RestResponse<List<FlowNodeDefinitionDto>> getFlowList( @PathVariable("flowNodeId") Long flowNodeId) {
+        return RestResponse.of(flowNodeDefinitionService.getFlowNodeDefinitionDtoList(flowNodeId));
     }
 
     @DeleteMapping("/{id}")
-    public RestResponse<Object> removeFlow(@PathVariable("id") Long id) {
-        try {
-            if (Objects.isNull(id)) {
-                return new RestResponse<>().setCode("500").setMessage("流程ID不能为空");
-            }
-            int count = flowNodeDefinitionService.remove(id);
-            if (count > 0) {
-                return new RestResponse<>().setCode("200").setMessage("删除成功");
-            } else {
-                return new RestResponse<>().setCode("500").setMessage("删除失败");
-            }
-        } catch (Exception e) {
-            return new RestResponse<>().setCode("500").setMessage("删除失败");
+    public RestResponse<Integer> removeFlow(@PathVariable("id") Long id) throws PmException {
+        if (Objects.isNull(id)) {
+            throw new PmException(PmError.ILLEGAL_PARAMETER);
         }
+        int count = flowNodeDefinitionService.remove(id);
+        if (count == 0) {
+            throw new PmException(PmError.NO_DATA_FOUND);
+        }
+        return RestResponse.of(count);
+    }
+
+    @PostMapping("/sort")
+    public RestResponse<Boolean> sort(@RequestBody List<Long> ids) {
+        return RestResponse.of(flowNodeDefinitionService.sort(ids));
     }
 
     @GetMapping("/propTypes")

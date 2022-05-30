@@ -48,8 +48,8 @@ public class InvoiceMessageAnnouncer implements PmListener<WxMessageDto> {
             String userId = event.getUserId();
             String username = event.getUsername();
             String projectName = event.getProjectName();
-            String taskNum = event.getTaskNum();
-            String msg = String.format(msgPattern, username, projectName, taskNum);
+            String projectCode = event.getProjectCode();
+            String msg = String.format(msgPattern, username, projectName, projectCode);
             try {
                 sendWxWorkMsg(msg, userId);
             } catch (PmException e) {

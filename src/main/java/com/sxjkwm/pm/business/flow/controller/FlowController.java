@@ -5,6 +5,8 @@ import com.sxjkwm.pm.business.flow.dto.FlowDto;
 import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.service.FlowService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.PmError;
+import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
@@ -56,20 +58,15 @@ public class FlowController {
     }
 
     @DeleteMapping("/{id}")
-    public RestResponse<Object> removeFlow(@PathVariable("id") Long id) {
-        try {
-            if (Objects.isNull(id)) {
-                return new RestResponse<>().setCode("500").setMessage("流程ID不能为空");
-            }
-            int count = flowService.remove(id);
-            if (count > 0) {
-                return new RestResponse<>().setCode("200").setMessage("删除成功");
-            } else {
-                return new RestResponse<>().setCode("500").setMessage("删除失败");
-            }
-        } catch (Exception e) {
-            return new RestResponse<>().setCode("500").setMessage("删除失败");
+    public RestResponse<Integer> removeFlow(@PathVariable("id") Long id) throws PmException {
+        if (Objects.isNull(id)) {
+            throw new PmException(PmError.ILLEGAL_PARAMETER);
         }
+        int count = flowService.remove(id);
+        if (count == 0) {
+            throw new PmException(PmError.NO_DATA_FOUND);
+        }
+        return RestResponse.of(count);
     }
 
 }

@@ -6,10 +6,12 @@ import com.sxjkwm.pm.business.project.entity.Project;
 import com.sxjkwm.pm.business.project.service.ProjectService;
 import com.sxjkwm.pm.common.BaseController;
 import com.sxjkwm.pm.common.RestResponse;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -26,6 +28,10 @@ public class ProjectController extends BaseController {
     @PostMapping
     public RestResponse<ProjectDto> saveOrUpdate(@RequestBody ProjectDto projectDto) {
         projectDto.setOwnerUserId(getAuthUser().getWxUserId());
+        List<String> deptNames = getAuthUser().getDeptNames();
+        if (CollectionUtils.isNotEmpty(deptNames)) {
+            projectDto.setDeptName(deptNames.get(0));
+        }
         return RestResponse.of(projectService.saveOrUpdate(projectDto));
     }
 
@@ -40,9 +46,6 @@ public class ProjectController extends BaseController {
             status = null;
         }
         UserDataDto userDataDto = getUserData();
-//        if (Objects.isNull(userDataDto)) {
-//            return RestResponse.of(projectService.queryMine("chuningfan", status, projectCode, projectName, requirePart, pageNo, pageSize));
-//        }
         return RestResponse.of(projectService.queryMine(userDataDto.getWxUserId(), status, projectCode, projectName, requirePart, pageNo, pageSize));
     }
 }

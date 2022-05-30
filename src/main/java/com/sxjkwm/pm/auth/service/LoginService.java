@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.sxjkwm.pm.auth.context.Context;
 import com.sxjkwm.pm.auth.context.ContextFactory;
+import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.auth.dto.UserDataDto;
 import com.sxjkwm.pm.common.CacheService;
 import com.sxjkwm.pm.configuration.WxConfig;
@@ -15,9 +16,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
@@ -44,6 +46,17 @@ public class LoginService {
         this.userDataService = userDataService;
     }
 
+    public Boolean logout() {
+        try {
+            UserDataDto userDataDto = ContextHelper.getUserData();
+            String userId = userDataDto.getWxUserId();
+            cacheService.remove(userId);
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            return Boolean.FALSE;
+        }
+    }
+
     public boolean isValid(HttpServletRequest req) throws UnsupportedEncodingException {
         String token = req.getHeader(tokenKey);
         if (StringUtils.isBlank(token)) {
@@ -52,10 +65,14 @@ public class LoginService {
                 return false;
             }
         }
-        String _token = token.replace(token.substring(token.lastIndexOf("%")), "=");
+        String _token = token;
+        if (token.indexOf("%") > -1) {
+            _token = token.replace(token.substring(token.lastIndexOf("%")), "=");
+        }
         JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(_token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
         String userId = jsonObject.getString("userId");
         String userDataDtoString = cacheService.getString(userId);
+
         if (StringUtils.isNotBlank(userDataDtoString)) {
             fillContext(JSONObject.parseObject(userDataDtoString, UserDataDto.class), req);
             return true;
@@ -95,20 +112,11 @@ public class LoginService {
     }
 
     public String processToken(JSONObject jsonObject, HttpServletRequest request) {
-//        String username = jsonObject.getString("name");
-//        List<Integer> deptIds = (List<Integer>) jsonObject.get("department");
-//        String avatar = jsonObject.getString("avatar");
-//        String mobile = jsonObject.getString("mobile");
         String wxUserId = jsonObject.getString("userid");
         Map<String, Object> dataMap = Maps.newHashMap();
-//        dataMap.put("username", username);
-//        dataMap.put("deptIds", deptIds);
-//        dataMap.put("avatar", avatar);
-//        dataMap.put("mobile", mobile);
         dataMap.put("userId", wxUserId);
         String jsonString = JSONObject.toJSONString(dataMap);
         String encoded = new String(Base64.getEncoder().encode(jsonString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
-//        request.getSession().setAttribute(tokenKey, encoded);
         UserDataDto dataDto = userDataService.getUserDataByWxUserId(wxUserId);
         if (Objects.isNull(dataDto)) {
             return null;

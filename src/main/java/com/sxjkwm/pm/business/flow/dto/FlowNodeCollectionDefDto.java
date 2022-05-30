@@ -1,5 +1,6 @@
 package com.sxjkwm.pm.business.flow.dto;
 
+import com.sxjkwm.pm.business.flow.entity.FlowNodeCollectionDefinition;
 import com.sxjkwm.pm.constants.Constant;
 
 import java.io.Serializable;
@@ -14,7 +15,7 @@ public class FlowNodeCollectionDefDto implements Serializable {
 
     private Long flowNodeId;
 
-    private String collectionPropKey;
+    private Long collectionPropertyDefId;
 
     private String headerKey;
 
@@ -23,6 +24,19 @@ public class FlowNodeCollectionDefDto implements Serializable {
     private Integer headerIndex;
 
     private Integer isDeleted = Constant.YesOrNo.NO.getValue();
+
+    public FlowNodeCollectionDefDto(FlowNodeCollectionDefinition definition) {
+        this.id = definition.getId();
+        this.flowNodeId = definition.getFlowNodeId();
+        this.collectionPropertyDefId = definition.getCollectionPropertyDefId();
+        this.headerKey = definition.getHeaderKey();
+        this.headerName = definition.getHeaderName();
+        this.headerIndex = definition.getHeaderIndex();
+        this.isDeleted = definition.getIsDeleted();
+    }
+
+    public FlowNodeCollectionDefDto() {
+    }
 
     public Long getId() {
         return id;
@@ -40,12 +54,12 @@ public class FlowNodeCollectionDefDto implements Serializable {
         this.flowNodeId = flowNodeId;
     }
 
-    public String getCollectionPropKey() {
-        return collectionPropKey;
+    public Long getCollectionPropertyDefId() {
+        return collectionPropertyDefId;
     }
 
-    public void setCollectionPropKey(String collectionPropKey) {
-        this.collectionPropKey = collectionPropKey;
+    public void setCollectionPropertyDefId(Long collectionPropertyDefId) {
+        this.collectionPropertyDefId = collectionPropertyDefId;
     }
 
     public String getHeaderKey() {

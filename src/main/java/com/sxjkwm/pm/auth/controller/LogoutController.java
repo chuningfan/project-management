@@ -9,23 +9,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 
 @RestController
-@RequestMapping("/loginData")
-public class LoginDataController {
+@RequestMapping("/logout")
+public class LogoutController {
 
     private final LoginService loginService;
 
     @Autowired
-    public LoginDataController(LoginService loginService) {
+    public LogoutController(LoginService loginService) {
         this.loginService = loginService;
     }
 
 
     @GetMapping
-    public RestResponse<Boolean> validate(HttpServletRequest req) throws UnsupportedEncodingException {
-        return RestResponse.of(loginService.isValid(req));
+    public RestResponse<Boolean> validate() {
+        return RestResponse.of(loginService.logout());
     }
 
 }

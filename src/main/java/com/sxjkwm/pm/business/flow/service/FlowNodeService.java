@@ -32,67 +32,20 @@ public class FlowNodeService {
     }
 
     @Transactional
-    public List<FlowNodeDto> create(Long flowId, List<FlowNodeDto> flowNodeDtos) {
-        FlowNode flowNode;
-        Long flowNodeId;
-        List<String> patternFilePaths;
-        PatternFile patternFile;
-
-        for (FlowNodeDto dto : flowNodeDtos) {
-            flowNode = new FlowNode(flowId, dto);
-            flowNode.setIsDeleted(Constant.YesOrNo.NO.getValue());
-            flowNode.setFlowNodeValue("fnv" + dto.getNodeName().hashCode());
-            flowNode = flowNodeDao.save(flowNode);
-            flowNodeId = flowNode.getId();
-            dto.setId(flowNodeId);
-        }
-        return flowNodeDtos;
+    public FlowNodeDto create(Long flowId, FlowNodeDto flowNodeDto) {
+        FlowNode flowNode = new FlowNode(flowId, flowNodeDto);
+        flowNode.setIsDeleted(Constant.YesOrNo.NO.getValue());
+        flowNode = flowNodeDao.save(flowNode);
+        Long flowNodeId = flowNode.getId();
+        flowNodeDto.setId(flowNodeId);
+        return flowNodeDto;
     }
 
     @Transactional
-    public List<FlowNodeDto> update(Long flowId, FlowNodeDto flowNode) {
-        List<FlowNodeDto> flowNodeDtos = Lists.newArrayList();
-        flowNodeDtos.add(flowNode);
-        FlowNode condition = new FlowNode();
-        condition.setFlowId(flowId);
-        condition.setIsDeleted(Constant.YesOrNo.NO.getValue());
-        condition.setSkippable(null);
-        List<FlowNode> sourceList = getByConditions(condition);
-        if (CollectionUtils.isEmpty(sourceList)) {
-            return create(flowId, flowNodeDtos);
-        } else {
-            List<FlowNodeDto> res = Lists.newArrayList();
-            // find new added
-            List<FlowNodeDto> newNodeDtos = flowNodeDtos.stream().filter(fnd -> Objects.isNull(fnd.getId())).collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(newNodeDtos)) {
-                res.addAll(create(flowId, newNodeDtos));
-            }
-            List<FlowNode> dataToSave = Lists.newArrayList();
-            // find removed
-            // IDs not in flowNodeDtos
-            List<Long> inputIds = flowNodeDtos.stream().filter(fnd -> Objects.nonNull(fnd.getId())).map(FlowNodeDto::getId).collect(Collectors.toList());
-            sourceList.stream().filter(sfnd -> !inputIds.contains(sfnd.getId())).forEach(sfnd -> {
-                sfnd.setIsDeleted(Constant.YesOrNo.NO.getValue());
-                dataToSave.add(sfnd);
-            });
-            // find updated
-            // IDs in flowNodeDtos
-            Map<Long, FlowNodeDto> dtoMap = flowNodeDtos.stream().filter(fnd -> Objects.nonNull(fnd.getId())).collect(Collectors.toMap(FlowNodeDto::getId, fnd -> fnd, (k1, k2) -> k1));
-            sourceList.stream().filter(sfnd -> inputIds.contains(sfnd.getId())).forEach(sfnd -> {
-                Long id = sfnd.getId();
-                FlowNodeDto flowNodeDto = dtoMap.get(id);
-                sfnd.setDescription(flowNodeDto.getDescription());
-                sfnd.setFormId(flowNodeDto.getFormId());
-                sfnd.setNodeName(flowNodeDto.getNodeName());
-                sfnd.setSkippable(flowNodeDto.getSkippable());
-                dataToSave.add(sfnd);
-                res.add(flowNodeDto);
-            });
-            if (CollectionUtils.isNotEmpty(dataToSave)) {
-                flowNodeDao.saveAll(dataToSave);
-            }
-            return res;
-        }
+    public FlowNodeDto update(Long flowId, FlowNodeDto flowNodeDto) {
+        FlowNode flowNode = new FlowNode(flowId, flowNodeDto);
+        flowNodeDao.save(flowNode);
+        return flowNodeDto;
     }
 
     public FlowNode get(Long id) {
@@ -102,16 +55,12 @@ public class FlowNodeService {
         return flowNodeDao.findOne(example).get();
     }
 
-    public List<FlowNode> getByConditions(FlowNode condition, Sort sort) {
+    public List<FlowNode> getByFlowId(Long flowId) {
+        FlowNode condition = new FlowNode();
+        condition.setFlowId(flowId);
         Example<FlowNode> example = Example.of(condition);
-        return flowNodeDao.findAll(example, sort);
+        return flowNodeDao.findAll(example, Sort.by(Sort.Direction.fromString("ASC"), "nodeIndex"));
     }
-
-    public List<FlowNode> getByConditions(FlowNode condition) {
-        Example<FlowNode> example = Example.of(condition);
-        return flowNodeDao.findAll(example);
-    }
-
 
     public List<FlowNode> getFlowNodeList(Long flowId) {
         Integer isDelete = Constant.YesOrNo.NO.getValue();
@@ -127,16 +76,26 @@ public class FlowNodeService {
 
 
     @Transactional
-    public List<FlowNode> sort(List<NodeIndexDto> nodeIndexDtos) {
+    public Boolean sort(List<Long> nodeIds) {
         List<FlowNode> list = Lists.newArrayList();
-        nodeIndexDtos.forEach(nodeIndexDto -> {
-            Optional<FlowNode> flowNodeOptional = flowNodeDao.findById(nodeIndexDto.getId());
-            FlowNode flowNode = flowNodeOptional.get();
-            flowNode.setId(nodeIndexDto.getId());
-            flowNode.setNodeIndex(nodeIndexDto.getNodeIndex());
-            list.add(flowNodeDao.save(flowNode));
-        });
-        return list.stream().sorted(Comparator.comparing(FlowNode::getNodeIndex)).collect(Collectors.toList());
+        List<FlowNode> flowNodes = flowNodeDao.getByIds(nodeIds);
+        if (CollectionUtils.isNotEmpty(flowNodes)) {
+            List<FlowNode> saveList = Lists.newArrayList();
+            Map<Long, FlowNode> flowNodeMap = flowNodes.stream().collect(Collectors.toMap(FlowNode::getId, fn -> fn));
+            for (int i = 0; i < nodeIds.size(); i ++) {
+                Long id = nodeIds.get(i);
+                FlowNode flowNode = flowNodeMap.get(id);
+                if (Objects.nonNull(flowNode)) {
+                    flowNode.setNodeIndex(i);
+                    saveList.add(flowNode);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(saveList)) {
+                flowNodeDao.saveAll(saveList);
+            }
+            return true;
+        }
+        return false;
     }
 
 }

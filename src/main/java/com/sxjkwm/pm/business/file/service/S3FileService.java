@@ -1,9 +1,9 @@
 package com.sxjkwm.pm.business.file.service;
 
+import cn.hutool.core.lang.UUID;
 import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
 import com.sxjkwm.pm.business.file.entity.ProjectFile;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
-import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.business.project.dao.ProjectDao;
 import com.sxjkwm.pm.business.project.dao.ProjectNodeDao;
@@ -11,9 +11,9 @@ import com.sxjkwm.pm.business.project.dao.ProjectNodePropertyDao;
 import com.sxjkwm.pm.business.project.entity.Project;
 import com.sxjkwm.pm.business.project.entity.ProjectNode;
 import com.sxjkwm.pm.business.project.entity.ProjectNodeProperty;
-import com.sxjkwm.pm.configuration.MinioClientConfig;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
+import com.sxjkwm.pm.util.OSSUtil;
 import com.sxjkwm.pm.util.S3FileUtil;
 import io.minio.GetObjectResponse;
 import io.minio.errors.*;
@@ -32,10 +32,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author Vic.Chu
@@ -81,24 +78,23 @@ public class S3FileService {
     }
 
     @Transactional
-    public Long upload(Long projectId, MultipartFile file, Long flowNodeId, String propertyKey) throws PmException {
+    public Long upload(Long projectId, MultipartFile file, Long flowNodeId, Long propertyDefId) throws PmException {
+        String bucketName = OSSUtil.getBucketName(projectId);
+        String objectName = projectId + "/" + flowNodeId + "/" + (UUID.fastUUID().toString().replace("-", "").toLowerCase());
         try {
+            if (file.isEmpty()) {
+                throw new PmException(PmError.NO_FILE_PROVIDED);
+            }
             String fileName = file.getOriginalFilename();
             Project project = projectDao.getOne(projectId);
-            Long flowId = project.getFlowId();
             ProjectFile condition = new ProjectFile();
             condition.setFlowNodeId(flowNodeId);
             condition.setProjectId(projectId);
-            condition.setPropertyKey(propertyKey);
+            condition.setPropertyDefId(propertyDefId);
             ProjectFile existingFile = projectFileDao.findOne(Example.of(condition)).orElse(null);
             if (Objects.nonNull(existingFile)) {
-//                String bucketName = MinioClientConfig.FLOW_VALUE_DIC.get(flowId) + MinioClientConfig.FLOW_NODE_VALUE_DIC.get(flowNodeId) + propertyKey.toLowerCase();
-//                projectFileDao.delete(existingFile);
-//                s3FileUtil.remove(bucketName, existingFile.getObjectName());
                 removeFileById(existingFile.getId());
             }
-            String bucketName = MinioClientConfig.FLOW_VALUE_DIC.get(flowId) + MinioClientConfig.FLOW_NODE_VALUE_DIC.get(flowNodeId) + propertyKey.toLowerCase();
-            String objectName = project.getId() + "/" + flowNodeId + "/" + propertyKey.toLowerCase();
             s3FileUtil.upload(bucketName, file, objectName);
             ProjectFile projectFile = new ProjectFile();
             projectFile.setObjectName(objectName);
@@ -106,33 +102,38 @@ public class S3FileService {
             projectFile.setProjectId(projectId);
             projectFile.setFlowNodeId(flowNodeId);
             projectFile.setBucketName(bucketName);
-            projectFile.setPropertyKey(propertyKey);
+            projectFile.setPropertyDefId(propertyDefId);
             projectFile = projectFileDao.save(projectFile);
             ProjectNode projectNodeCondition = new ProjectNode();
             projectNodeCondition.setProjectId(projectId);
             projectNodeCondition.setFlowNodeId(flowNodeId);
             ProjectNode projectNode = projectNodeDao.findOne(Example.of(projectNodeCondition)).orElse(null);
             ProjectNodeProperty projectNodeProperty = new ProjectNodeProperty();
+            projectNodeProperty.setProjectId(projectId);
+            projectNodeProperty.setFlowNodePropertyDefId(propertyDefId);
             if (Objects.nonNull(projectNode)) {
-                projectNodeProperty.setProjectId(projectId);
-                projectNodeProperty.setProjectNodeId(projectNode.getId());
-                projectNodeProperty.setPropertyKey(propertyKey);
                 ProjectNodeProperty existingProjectNodeProperty = projectNodePropertyDao.findOne(Example.of(projectNodeProperty)).orElse(null);
                 if (Objects.nonNull(existingProjectNodeProperty)) {
-                    projectNodeProperty.setPropertyType(existingProjectNodeProperty.getPropertyType());
+                    projectNodeProperty.setFlowNodePropertyDefId(existingProjectNodeProperty.getFlowNodePropertyDefId());
                     projectNodeProperty = existingProjectNodeProperty;
                 } else {
-                    List<FlowNodeDefinition> flowNodeDefinitions = flowNodeDefinitionDao.getByFlowNodeId(flowNodeId);
-                    Map<String, FlowNodeDefinition> definitionMap = flowNodeDefinitions.stream().collect(Collectors.toMap(FlowNodeDefinition::getPropertyKey, fnd -> fnd, (k1, k2) -> k1));
-                    FlowNodeDefinition flowNodeDefinition = definitionMap.get(propertyKey);
-                    projectNodeProperty.setPropertyType(flowNodeDefinition.getPropertyType());
+                    FlowNodeDefinition flowNodeDefinition = flowNodeDefinitionDao.getOne(propertyDefId);
+                    projectNodeProperty.setProjectNodeId(flowNodeDefinition.getId());
                     projectNodeProperty.setProjectNodeId(projectNode.getId());
                 }
+                projectNodeProperty.setProjectId(projectId);
+                projectNodeProperty.setProjectNodeId(projectNode.getId());
+                projectNodeProperty.setFlowNodePropertyDefId(propertyDefId);
                 projectNodeProperty.setPropertyValue(projectFile.getId() + "");
                 projectNodePropertyDao.save(projectNodeProperty);
             }
             return projectFile.getId();
         } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
+            try {
+                s3FileUtil.remove(bucketName, objectName);
+            } catch (Exception ex) {
+                throw getException(e);
+            }
             throw getException(e);
         }
     }
@@ -174,11 +175,11 @@ public class S3FileService {
         }
     }
 
-    public void download(Long projectId, Long flowNodeId, String propertyKey, HttpServletResponse response) throws PmException {
+    public void download(Long projectId, Long flowNodeId, Long propertyDefId, HttpServletResponse response) throws PmException {
         ProjectFile projectFile = new ProjectFile();
         projectFile.setFlowNodeId(flowNodeId);
         projectFile.setProjectId(projectId);
-        projectFile.setPropertyKey(propertyKey);
+        projectFile.setPropertyDefId(propertyDefId);
         projectFile = projectFileDao.findOne(Example.of(projectFile)).orElse(null);
         if (Objects.nonNull(projectFile)) {
             String bucketName = projectFile.getBucketName();

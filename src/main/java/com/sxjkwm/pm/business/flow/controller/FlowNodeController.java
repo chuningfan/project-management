@@ -7,6 +7,8 @@ import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.business.flow.service.FlowNodeService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.PmError;
+import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
@@ -27,23 +29,18 @@ public class FlowNodeController {
     }
 
     @PostMapping("/{flowId}")
-    public RestResponse<List<FlowNodeDto>> createNodes(@PathVariable("flowId") Long flowId, @RequestBody FlowNodeDto flowNodeDto) {
-        List<FlowNodeDto> flowNodeDtos = Lists.newArrayList();
-        flowNodeDtos.add(flowNodeDto);
-        return RestResponse.of(flowNodeService.create(flowId, flowNodeDtos));
+    public RestResponse<FlowNodeDto> createNodes(@PathVariable("flowId") Long flowId, @RequestBody FlowNodeDto flowNodeDto) {
+        return RestResponse.of(flowNodeService.create(flowId, flowNodeDto));
     }
 
     @PutMapping("/{flowId}")
-    public RestResponse<List<FlowNodeDto>> updateNodes(@PathVariable("flowId") Long flowId, @RequestBody FlowNodeDto flowNodeDto) {
+    public RestResponse<FlowNodeDto> updateNodes(@PathVariable("flowId") Long flowId, @RequestBody FlowNodeDto flowNodeDto) {
         return RestResponse.of(flowNodeService.update(flowId, flowNodeDto));
     }
 
     @GetMapping
     public RestResponse<List<FlowNode>> getNodes(@RequestParam("flowId") Long flowId) {
-        FlowNode flowNode = new FlowNode();
-        flowNode.setFlowId(flowId);
-        flowNode.setSkippable(null);
-        return RestResponse.of(flowNodeService.getByConditions(flowNode, Sort.by(Sort.Direction.fromString("ASC"), "nodeIndex")));
+        return RestResponse.of(flowNodeService.getByFlowId(flowId));
     }
 
     @GetMapping(value = "/{flowId}")
@@ -52,25 +49,20 @@ public class FlowNodeController {
     }
 
     @DeleteMapping("/{id}")
-    public RestResponse<Object> removeFlow(@PathVariable("id") Long id) {
-        try {
-            if (Objects.isNull(id)) {
-                return new RestResponse<>().setCode("500").setMessage("节点ID不能为空");
-            }
-            int count = flowNodeService.remove(id);
-            if (count > 0) {
-                return new RestResponse<>().setCode("200").setMessage("删除成功");
-            } else {
-                return new RestResponse<>().setCode("500").setMessage("删除失败");
-            }
-        } catch (Exception e) {
-            return new RestResponse<>().setCode("500").setMessage("删除失败");
+    public RestResponse<Integer> removeFlow(@PathVariable("id") Long id) throws PmException {
+        if (Objects.isNull(id)) {
+            throw new PmException(PmError.ILLEGAL_PARAMETER);
         }
+        int count = flowNodeService.remove(id);
+        if (count == 0) {
+            throw new PmException(PmError.NO_DATA_FOUND);
+        }
+        return RestResponse.of(count);
     }
 
     @PostMapping(value = "/sort")
-    public RestResponse<List<FlowNode>> sort(@RequestBody List<NodeIndexDto> nodeIndexDtos) {
-        return RestResponse.of(flowNodeService.sort(nodeIndexDtos));
+    public RestResponse<Boolean> sort(@RequestBody List<Long> nodeIds) {
+        return RestResponse.of(flowNodeService.sort(nodeIds));
     }
 
 }
