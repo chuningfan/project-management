@@ -18,7 +18,6 @@ public class LogoutController {
         this.loginService = loginService;
     }
 
-
     @GetMapping
     public RestResponse<Boolean> logout() {
         return RestResponse.of(loginService.logout());
