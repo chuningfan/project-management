@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface ProjectNodePropertyDao extends JpaRepository<ProjectNodeProperty, Long> {
 
-    @Query("SELECT pp FROM ProjectNodeProperty pp WHERE pp.flowNodePropertyDefId IN (?1)")
-    public List<ProjectNodeProperty> findByPropDefIds(List<Long> flowNodePropertyDefIds);
+    @Query("SELECT pp FROM ProjectNodeProperty pp WHERE pp.flowNodePropertyDefId IN (?1) AND project_id = ?2")
+    public List<ProjectNodeProperty> findByPropDefIdsAndProjectId(List<Long> flowNodePropertyDefIds, Long projectId);
 
 }

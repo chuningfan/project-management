@@ -204,7 +204,7 @@ public class ProjectNodeService {
         }
         Map<Long, FlowNodeDefinition> filePropertyDefMap = flowNodeDefinitions.stream().filter(f -> f.getPropertyType().equals("FILE")).collect(Collectors.toMap(FlowNodeDefinition::getId, f -> f, (k1, k2) -> k1));
         List<Long> flowNodePropDefIds = flowNodeDefinitions.stream().map(FlowNodeDefinition::getId).collect(Collectors.toList());
-        List<ProjectNodeProperty> propertyList = projectNodePropertyDao.findByPropDefIds(flowNodePropDefIds);
+        List<ProjectNodeProperty> propertyList = projectNodePropertyDao.findByPropDefIdsAndProjectId(flowNodePropDefIds, projectId);
         Map<Long, ProjectNodeProperty> defPropMap = null;
         if (CollectionUtils.isNotEmpty(propertyList)) {
             defPropMap = propertyList.stream().collect(Collectors.toMap(ProjectNodeProperty::getFlowNodePropertyDefId, p -> p, (k1, k2) -> k1));
@@ -265,6 +265,7 @@ public class ProjectNodeService {
                     if (flag == 1) {
                         StringBuilder builder = new StringBuilder("SELECT id,collection_prop_def_id, project_id, flow_node_id, created_at, created_by, modified_at, modified_by,");
                         builder.append(Joiner.on(",").join(flowNodeCollectionDefKeys)).append(" FROM ").append(tableName);
+                        builder.append(" WHERE project_id = ").append(projectId).append(" AND flow_node_id = ").append(flowNodeId);
                         List<Map<String, Object>> dataList = DBUtil.query(builder.toString(), flowNodeCollectionDefKeys);
                         propertyDto.setCollectionData(dataList);
                     }

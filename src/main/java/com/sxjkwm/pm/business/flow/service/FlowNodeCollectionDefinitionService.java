@@ -1,5 +1,6 @@
 package com.sxjkwm.pm.business.flow.service;
 
+import cn.hutool.core.lang.UUID;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeCollectionDefinitionDao;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
@@ -63,7 +64,7 @@ public class FlowNodeCollectionDefinitionService {
                 definition.setHeaderIndex(dto.getHeaderIndex());
                 String headerKey = dto.getHeaderKey();
                 if (StringUtils.isBlank(headerKey)) {
-                    headerKey = "col_" + flowNodeId + "_" + collectionPropDefId;
+                    headerKey = "col_" + flowNodeId + "_" + collectionPropDefId + "_" + UUID.fastUUID().toString().replace("-", "");
                 }
                 definition.setHeaderKey(headerKey);
                 definition.setHeaderName(dto.getHeaderName());
