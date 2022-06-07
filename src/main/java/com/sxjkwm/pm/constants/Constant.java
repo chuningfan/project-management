@@ -158,6 +158,12 @@ public interface Constant<K, V> {
                 return Long.valueOf(val);
             }
         },
+        MATERIAL("物料", "material", Long.class) {
+            @Override
+            public Object getValue(String val) {
+                return Long.valueOf(val);
+            }
+        },
         ;
 
         private String type;

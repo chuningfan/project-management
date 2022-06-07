@@ -56,6 +56,7 @@ public class FlowNodeCollectionDefinitionService {
             List<String> newColumns = Lists.newArrayList();
             List<String> modifyColumns = Lists.newArrayList();
             FlowNodeCollectionDefinition definition;
+            int colNo = 1;
             for (FlowNodeCollectionDefDto dto: dtoList) {
                 definition = new FlowNodeCollectionDefinition();
                 definition.setCollectionPropertyDefId(collectionPropDefId);
@@ -64,7 +65,7 @@ public class FlowNodeCollectionDefinitionService {
                 definition.setHeaderIndex(dto.getHeaderIndex());
                 String headerKey = dto.getHeaderKey();
                 if (StringUtils.isBlank(headerKey)) {
-                    headerKey = "col_" + flowNodeId + "_" + collectionPropDefId + "_" + UUID.fastUUID().toString().replace("-", "");
+                    headerKey = "col_" + flowNodeId + "_" + collectionPropDefId + "_" + (colNo ++);
                 }
                 definition.setHeaderKey(headerKey);
                 definition.setHeaderName(dto.getHeaderName());

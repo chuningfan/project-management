@@ -1,6 +1,7 @@
 package com.sxjkwm.pm;
 
 import cn.hutool.core.date.StopWatch;
+import com.sxjkwm.pm.business.material.service.MaterialCacheService;
 import com.sxjkwm.pm.business.org.service.OrganizationService;
 import com.sxjkwm.pm.configuration.AspectConfig;
 import com.sxjkwm.pm.logging.LoggingAfterInvocation;
@@ -33,8 +34,10 @@ public class ProjectManagementStarter {
             AspectConfig aspectConfig = ContextUtil.context.getBean(AspectConfig.class);
             aspectConfig.addBeforeWorker(new LoggingBeforeInvocation());
             aspectConfig.addAfterWorker(new LoggingAfterInvocation());
-            OrganizationService organizationService = ContextUtil.context.getBean(OrganizationService.class);
-            organizationService.initDataToRedis();
+//            OrganizationService organizationService = ContextUtil.context.getBean(OrganizationService.class);
+//            organizationService.init();
+            MaterialCacheService materialCacheService = ContextUtil.context.getBean(MaterialCacheService.class);
+            materialCacheService.init();
             logger.info("Spring is fully started, context-util is ready!");
         }, new ApplicationPidFileWriter());
         builder.bannerMode(Banner.Mode.OFF);

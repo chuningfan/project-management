@@ -8,7 +8,6 @@ import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.business.project.dao.ProjectDao;
 import com.sxjkwm.pm.business.project.dao.ProjectNodeDao;
 import com.sxjkwm.pm.business.project.dao.ProjectNodePropertyDao;
-import com.sxjkwm.pm.business.project.entity.Project;
 import com.sxjkwm.pm.business.project.entity.ProjectNode;
 import com.sxjkwm.pm.business.project.entity.ProjectNodeProperty;
 import com.sxjkwm.pm.constants.PmError;
@@ -17,7 +16,6 @@ import com.sxjkwm.pm.util.OSSUtil;
 import com.sxjkwm.pm.util.S3FileUtil;
 import io.minio.GetObjectResponse;
 import io.minio.errors.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -86,7 +84,6 @@ public class S3FileService {
                 throw new PmException(PmError.NO_FILE_PROVIDED);
             }
             String fileName = file.getOriginalFilename();
-            Project project = projectDao.getOne(projectId);
             ProjectFile condition = new ProjectFile();
             condition.setFlowNodeId(flowNodeId);
             condition.setProjectId(projectId);

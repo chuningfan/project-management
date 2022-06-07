@@ -23,6 +23,8 @@ public class FlowNodeCollectionDefDto implements Serializable {
 
     private Integer headerIndex;
 
+    private String propertyType;
+
     private Integer isDeleted = Constant.YesOrNo.NO.getValue();
 
     public FlowNodeCollectionDefDto(FlowNodeCollectionDefinition definition) {
@@ -33,6 +35,7 @@ public class FlowNodeCollectionDefDto implements Serializable {
         this.headerName = definition.getHeaderName();
         this.headerIndex = definition.getHeaderIndex();
         this.isDeleted = definition.getIsDeleted();
+        this.propertyType = definition.getPropertyType();
     }
 
     public FlowNodeCollectionDefDto() {
@@ -93,4 +96,13 @@ public class FlowNodeCollectionDefDto implements Serializable {
     public void setIsDeleted(Integer isDeleted) {
         this.isDeleted = isDeleted;
     }
+
+    public String getPropertyType() {
+        return propertyType;
+    }
+
+    public void setPropertyType(String propertyType) {
+        this.propertyType = propertyType;
+    }
+
 }

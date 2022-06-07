@@ -8,7 +8,6 @@ import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,16 +40,10 @@ public class FlowController {
         return RestResponse.of(flowService.getFlow(id));
     }
 
-//    @GetMapping
-//    public RestResponse<List<Flow>> getAll() {
-//        return RestResponse.of(flowService.getFlows(null));
-//    }
-
     @GetMapping("/list")
     public RestResponse<List<Flow>> getByName(@Param("flowName") String flowName) {
         return RestResponse.of(flowService.getFlows(flowName));
     }
-
 
     @GetMapping
     public RestResponse<List<Flow>> getFlowList() {

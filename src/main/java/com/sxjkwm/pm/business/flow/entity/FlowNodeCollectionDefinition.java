@@ -30,6 +30,9 @@ public class FlowNodeCollectionDefinition extends BaseEntity {
     @Column(name = "header_index")
     private Integer headerIndex;
 
+    @Column(name = "property_type")
+    private String propertyType;
+
     public Long getFlowNodeId() {
         return flowNodeId;
     }
@@ -68,5 +71,13 @@ public class FlowNodeCollectionDefinition extends BaseEntity {
 
     public void setHeaderIndex(Integer headerIndex) {
         this.headerIndex = headerIndex;
+    }
+
+    public String getPropertyType() {
+        return propertyType;
+    }
+
+    public void setPropertyType(String propertyType) {
+        this.propertyType = propertyType;
     }
 }

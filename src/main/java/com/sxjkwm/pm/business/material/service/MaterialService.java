@@ -48,4 +48,20 @@ public class MaterialService {
         return dataList;
     }
 
+    public List<MaterialDto> fetchAll() {
+        List<Material> materials = materialDao.findAll();
+        List<MaterialDto> dataList = Lists.newArrayList();
+        if (CollectionUtils.isNotEmpty(materials)) {
+            MaterialDto materialDto;
+            for (Material material: materials) {
+                materialDto = new MaterialDto();
+                materialDto.setMaterialName(material.getMaterialName());
+                materialDto.setParentId(material.getParentId());
+                materialDto.setId(material.getId());
+                dataList.add(materialDto);
+            }
+        }
+        return dataList;
+    }
+
 }
