@@ -35,7 +35,7 @@ public class MessageServiceImpl implements MessageService {
         messageDto.setTouser(toUser);
         messageDto.getText().getContent();
         MessageContent content = new MessageContent();
-        content.setContent("您有新的审批单，请及时处理：" + messageDto.getText().getContent());
+        content.setContent(messageConfig.getMsgContent() + messageDto.getText().getContent());
         messageDto.setText(content);
         // 推送消息
         String param = JSON.toJSONString(messageDto);

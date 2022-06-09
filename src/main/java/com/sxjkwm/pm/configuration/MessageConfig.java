@@ -6,11 +6,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:message.properties")
+@PropertySource(value = "classpath:message.properties", encoding = "utf-8")
 public class MessageConfig {
 
     @Value("${WXMessage_URL}")
     private String WXMessageURL;
+
+    @Value("${msg_content}")
+    private String msgContent;
 
     public String getWXMessageURL() {
         return WXMessageURL;
@@ -20,4 +23,11 @@ public class MessageConfig {
         this.WXMessageURL = WXMessageURL;
     }
 
+    public String getMsgContent() {
+        return msgContent;
+    }
+
+    public void setMsgContent(String msgContent) {
+        this.msgContent = msgContent;
+    }
 }
