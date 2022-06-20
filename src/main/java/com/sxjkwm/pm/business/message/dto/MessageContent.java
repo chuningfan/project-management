@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class MessageContent implements Serializable {
     /**
-     * 销售内容
+     * 消息内容
      */
     private String content;
 

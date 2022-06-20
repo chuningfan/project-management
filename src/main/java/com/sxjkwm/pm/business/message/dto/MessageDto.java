@@ -9,26 +9,17 @@ public class MessageDto implements Serializable {
      */
     private String touser;
     /**
-     * 接受消息部门
+     * 接收消息部门
      */
     private String toparty;
     /**
-     * 接受消息标签
+     * 接收消息标签
      */
     private String totag;
-    /**
-     * 消息类型
-     */
-    private String msgtype = "text";
     /**
      * 企业应用ID
      */
     private Integer agentid = 1000009;
-    /**
-     * 消息体
-     */
-      private MessageContent text;
-
 
 
     public String getTouser() {
@@ -55,13 +46,6 @@ public class MessageDto implements Serializable {
         this.totag = totag;
     }
 
-    public String getMsgtype() {
-        return msgtype;
-    }
-
-    public void setMsgtype(String msgtype) {
-        this.msgtype = msgtype;
-    }
 
     public Integer getAgentid() {
         return agentid;
@@ -71,12 +55,5 @@ public class MessageDto implements Serializable {
         this.agentid = agentid;
     }
 
-    public MessageContent getText() {
-        return text;
-    }
-
-    public void setText(MessageContent text) {
-        this.text = text;
-    }
 
 }
