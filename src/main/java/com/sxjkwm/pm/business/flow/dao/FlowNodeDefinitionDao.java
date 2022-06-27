@@ -26,4 +26,7 @@ public interface FlowNodeDefinitionDao extends JpaRepository<FlowNodeDefinition,
     @Query("SELECT fnd FROM FlowNodeDefinition fnd WHERE isDeleted = 0 AND id IN (?1)")
     List<FlowNodeDefinition> findByIds(List<Long> ids);
 
+    @Query("SELECT fnd FROM FlowNodeDefinition fnd WHERE isDeleted = 0 AND flowNodeId IN (?1) AND needToAudit = 1")
+    List<FlowNodeDefinition> auditableFlowNodeDefinitions(List<Long> flowNodeIds);
+
 }

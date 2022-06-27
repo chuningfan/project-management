@@ -5,11 +5,11 @@ import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
 import com.sxjkwm.pm.business.flow.dto.FlowDto;
 import com.sxjkwm.pm.business.flow.entity.Flow;
-import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -26,10 +26,10 @@ public class FlowService {
     }
 
     public Flow createFlow(Flow flow) {
-        String flowVal = flow.getFlowValue();
-        if (StringUtils.isBlank(flowVal)) {
-            flow.setFlowValue("fv" + flow.getFlowName().hashCode());
-        }
+//        String flowVal = flow.getFlowValue();
+//        if (StringUtils.isBlank(flowVal)) {
+//            flow.setFlowValue("fv" + flow.getFlowName().hashCode());
+//        }
         return flowDao.save(flow);
     }
 

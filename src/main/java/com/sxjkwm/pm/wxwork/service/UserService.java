@@ -93,4 +93,8 @@ public class UserService {
         return userDao.findAll(pageable);
     }
 
+    public User findByUserId(String userId) {
+        return userDao.findUserByWxUserId(userId);
+    }
+
 }

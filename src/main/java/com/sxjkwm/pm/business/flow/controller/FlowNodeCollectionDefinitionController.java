@@ -33,4 +33,15 @@ public class FlowNodeCollectionDefinitionController {
         return RestResponse.of(flowNodeCollectionDefinitionService.saveOrUpdate(flowNodeId, collectionPropDefId, dtoList));
     }
 
+    @GetMapping("/{flowNodeId}/{collectionPropDefId}")
+    public RestResponse<List<FlowNodeCollectionDefDto>> findAll(@PathVariable("flowNodeId") Long flowNodeId,
+                                                                 @PathVariable("collectionPropDefId") Long collectionPropDefId) {
+        return RestResponse.of(flowNodeCollectionDefinitionService.findByFlowNodeIdAndCollectionDefId(flowNodeId, collectionPropDefId));
+    }
+
+    @PostMapping(value = "/sort")
+    public RestResponse<Boolean> sort(@RequestBody List<Long> nodeIds) {
+        return RestResponse.of(flowNodeCollectionDefinitionService.sort(nodeIds));
+    }
+
 }

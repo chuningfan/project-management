@@ -22,4 +22,7 @@ public interface FlowNodeDao extends JpaRepository<FlowNode, Long> {
 
     @Query("SELECT fn FROM FlowNode fn WHERE isDeleted = 0 AND id IN (?1)")
     List<FlowNode> getByIds(List<Long> id);
+
+    @Query("SELECT fn FROM FlowNode fn WHERE isDeleted = 0 AND flowId = ?1 AND nodeIndex <= ?2")
+    List<FlowNode> getEqualAndLessThanIndex(Long flowId, Integer indexLimitation);
 }

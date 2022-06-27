@@ -18,7 +18,8 @@ public interface FlowNodeCollectionDefinitionDao extends JpaRepository<FlowNodeC
     @Query("SELECT fc FROM FlowNodeCollectionDefinition fc WHERE isDeleted = 0 AND fc.collectionPropertyDefId IN (?1)")
     List<FlowNodeCollectionDefinition> findByPropDefIds(List<Long> flowNodePropertyDefIds);
 
-
+    @Query("SELECT fc FROM FlowNodeCollectionDefinition fc WHERE isDeleted = 0 AND fc.id IN (?1)")
+    List<FlowNodeCollectionDefinition> findByIds(List<Long> ids);
 
 
 }

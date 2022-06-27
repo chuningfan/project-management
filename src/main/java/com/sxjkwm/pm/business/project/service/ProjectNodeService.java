@@ -3,16 +3,18 @@ package com.sxjkwm.pm.business.project.service;
 import cn.hutool.core.map.MapUtil;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.sxjkwm.pm.auditing.dao.AuditingRecordDao;
+import com.sxjkwm.pm.auditing.entity.AuditingRecord;
 import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
 import com.sxjkwm.pm.business.file.entity.ProjectFile;
+import com.sxjkwm.pm.business.flow.dao.FlowDao;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeCollectionDefinitionDao;
+import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionDefDto;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeSelectionDefinitionDto;
-import com.sxjkwm.pm.business.flow.entity.FlowNodeCollectionDefinition;
-import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
-import com.sxjkwm.pm.business.flow.entity.FlowNodeSelectionDefinition;
+import com.sxjkwm.pm.business.flow.entity.*;
 import com.sxjkwm.pm.business.flow.service.FlowNodeSelectionDefinitionService;
 import com.sxjkwm.pm.business.project.dao.ProjectDao;
 import com.sxjkwm.pm.business.project.dao.ProjectNodeDao;
@@ -23,6 +25,7 @@ import com.sxjkwm.pm.business.project.entity.Project;
 import com.sxjkwm.pm.business.project.entity.ProjectNode;
 import com.sxjkwm.pm.business.project.entity.ProjectNodeProperty;
 import com.sxjkwm.pm.common.PropertyHandler;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.ContextUtil;
 import com.sxjkwm.pm.util.DBUtil;
@@ -65,8 +68,14 @@ public class ProjectNodeService {
 
     private final FlowNodeSelectionDefinitionService flowNodeSelectionDefinitionService;
 
+    private final AuditingRecordDao auditingRecordDao;
+
+    private final FlowNodeDao flowNodeDao;
+
+    private final FlowDao flowDao;
+
     @Autowired
-    public ProjectNodeService(ProjectNodeDao projectNodeDao, ProjectNodePropertyDao projectNodePropertyDao, FlowNodeDefinitionDao flowNodeDefinitionDao, ProjectDao projectDao, ProjectFileDao projectFileDao, FlowNodeCollectionDefinitionDao flowNodeCollectionDefinitionDao, FlowNodeSelectionDefinitionService flowNodeSelectionDefinitionService) {
+    public ProjectNodeService(ProjectNodeDao projectNodeDao, ProjectNodePropertyDao projectNodePropertyDao, FlowNodeDefinitionDao flowNodeDefinitionDao, ProjectDao projectDao, ProjectFileDao projectFileDao, FlowNodeCollectionDefinitionDao flowNodeCollectionDefinitionDao, FlowNodeSelectionDefinitionService flowNodeSelectionDefinitionService, AuditingRecordDao auditingRecordDao, FlowNodeDao flowNodeDao, FlowDao flowDao) {
         this.projectNodeDao = projectNodeDao;
         this.projectNodePropertyDao = projectNodePropertyDao;
         this.flowNodeDefinitionDao = flowNodeDefinitionDao;
@@ -74,6 +83,9 @@ public class ProjectNodeService {
         this.projectFileDao = projectFileDao;
         this.flowNodeCollectionDefinitionDao = flowNodeCollectionDefinitionDao;
         this.flowNodeSelectionDefinitionService = flowNodeSelectionDefinitionService;
+        this.auditingRecordDao = auditingRecordDao;
+        this.flowNodeDao = flowNodeDao;
+        this.flowDao = flowDao;
         handlerMap = ContextUtil.getBeansOfType(PropertyHandler.class);
     }
 
@@ -106,7 +118,6 @@ public class ProjectNodeService {
             flowNodeCollectionDefKeyMap = flowNodeCollectionDefinitions.stream().collect(Collectors.groupingBy(FlowNodeCollectionDefinition::getCollectionPropertyDefId));
         }
         Long projectNodeId = projectNode.getId();
-        List<Long> removeIds = Lists.newArrayList();
         List<ProjectNodeProperty> projectNodePropertyList = Lists.newArrayList();
         for (ProjectNodePropertyDto dto: propertyDtos) {
             String tableName = DBUtil.getTableName(project.getFlowId(), projectNode.getFlowNodeId(), dto.getFlowNodePropertyDefId());
@@ -129,8 +140,6 @@ public class ProjectNodeService {
                         for (Map<String, Object> dataMap : collectionData) {
                             Long dataId = Objects.isNull(dataMap.get("id")) ? null : Long.valueOf(dataMap.get("id").toString()) ;
                             if (Objects.nonNull(dataId)) {
-                                removeIds.add(dataId);
-                                dataMap.remove("id");
                                 createdAt = MapUtil.get(dataMap, "createdAt", Long.class);
                                 createdBy = MapUtil.get(dataMap, "createdBy", String.class);
                             }
@@ -151,9 +160,9 @@ public class ProjectNodeService {
                             builder.append(",'" + modifiedBy + "'");
                             builder.append("),");
                         }
-                        if (CollectionUtils.isNotEmpty(removeIds)) {
-                            DBUtil.executeSQL("DELETE FROM " + tableName + " WHERE ID IN (" + Joiner.on(",").join(removeIds) + ")");
-                        }
+//                        if (CollectionUtils.isNotEmpty(removeIds)) {
+                            DBUtil.executeSQL("DELETE FROM " + tableName + " WHERE flow_node_id = " + projectNodeDto.getFlowNodeId() + " AND project_id = " + projectNodeDto.getProjectId() + " AND collection_prop_def_id = " + propDefId);
+//                        }
                         DBUtil.executeSQL(builder.substring(0, builder.toString().lastIndexOf(",")));
                     }
                 }
@@ -164,6 +173,9 @@ public class ProjectNodeService {
 //
 //                }
 //            }
+            if (Constant.PropertyType.FILE.name().equals(dto.getPropertyType())) {
+                continue;
+            }
             ProjectNodeProperty projectNodeProperty = new ProjectNodeProperty();
             projectNodeProperty.setProjectId(projectNodeDto.getProjectId());
             dto.setProjectNodeId(projectNodeId);
@@ -311,7 +323,41 @@ public class ProjectNodeService {
             }
             propertyDtos.add(propertyDto);
         }
+        FlowNode flowNode = flowNodeDao.getOne(flowNodeId);
+        if (Objects.nonNull(flowNode)) {
+            Long auditingFlowId = flowNode.getAuditingFlowId();
+            if (Objects.nonNull(auditingFlowId)) {
+                Long flowId = project.getFlowId();
+                Flow flow = flowDao.getOne(flowId);
+                Long dataId = projectId;
+                Integer auditingDataType = flow.getDataType();
+                if (Objects.isNull(auditingDataType)) {
+                    auditingDataType = 1;
+                }
+                AuditingRecord AuditingRecordCondition = new AuditingRecord();
+                AuditingRecordCondition.setAuditingFlowId(auditingFlowId);
+                AuditingRecordCondition.setIsDeleted(0);
+                AuditingRecordCondition.setBusinessFlowNodeId(flowNodeId);
+                AuditingRecordCondition.setDataType(auditingDataType);
+                AuditingRecordCondition.setDataId(dataId);
+                AuditingRecord auditingRecord = auditingRecordDao.findOne(Example.of(AuditingRecordCondition)).orElse(null);
+                if (Objects.nonNull(auditingRecord)) {
+                    dto.setAuditingStatus(auditingRecord.getAuditingStatus());
+                }
+            }
+        }
         return dto;
+    }
+
+
+    public boolean deleteDataById(Long flowId, Long flowNodeId, Long flowNodeDefinitionId, Long dataId) {
+        String tableName = DBUtil.getTableName(flowId, flowNodeId, flowNodeDefinitionId);
+        try {
+            DBUtil.executeSQL("DELETE FROM " + tableName + " WHERE id = " + dataId);
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
 }

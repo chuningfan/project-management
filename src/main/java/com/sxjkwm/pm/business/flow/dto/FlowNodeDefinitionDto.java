@@ -31,6 +31,8 @@ public class FlowNodeDefinitionDto implements Serializable {
 
     private List<FlowNodeSelectionDefinitionDto> selectionDtos;
 
+    private Integer needAudit;
+
     public FlowNodeDefinitionDto(FlowNodeDefinition definition) {
         this.id = definition.getId();
         this.flowNodeId = definition.getFlowNodeId();
@@ -41,6 +43,7 @@ public class FlowNodeDefinitionDto implements Serializable {
         this.collectionPropertyHandler = definition.getCollectionPropertyHandler();
         this.isDeleted = definition.getIsDeleted();
         this.nonNull = definition.getNonNull();
+        this.needAudit = definition.getNeedAudit();
     }
 
     public FlowNodeDefinitionDto() {
@@ -132,5 +135,13 @@ public class FlowNodeDefinitionDto implements Serializable {
 
     public void setSelectionDtos(List<FlowNodeSelectionDefinitionDto> selectionDtos) {
         this.selectionDtos = selectionDtos;
+    }
+
+    public Integer getNeedAudit() {
+        return needAudit;
+    }
+
+    public void setNeedAudit(Integer needAudit) {
+        this.needAudit = needAudit;
     }
 }

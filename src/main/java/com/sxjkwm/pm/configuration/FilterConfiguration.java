@@ -9,6 +9,7 @@ import com.sxjkwm.pm.auth.dto.UserDataDto;
 import com.sxjkwm.pm.auth.service.LoginService;
 import com.sxjkwm.pm.cache.ReqTokenService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.common.XssFilterRequestWrapper;
 import com.sxjkwm.pm.constants.PmError;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,8 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
 
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
@@ -62,13 +64,21 @@ public class FilterConfiguration {
         FilterRegistrationBean<ReqTokenFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
         filterFilterRegistrationBean.setFilter(new ReqTokenFilter(reqTokenService, reqTokenUrisConfig, legalUris));
         filterFilterRegistrationBean.setUrlPatterns(Lists.newArrayList("/*"));
-        filterFilterRegistrationBean.setOrder(0);
+        filterFilterRegistrationBean.setOrder(1);
         filterFilterRegistrationBean.setName("GlobalReqTokenFilter");
         return filterFilterRegistrationBean;
     }
 
+    @Bean
+    public FilterRegistrationBean<PmXssFilter> pmXssFilter(@Autowired MultipartResolver multipartResolver) {
+        FilterRegistrationBean<PmXssFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
+        filterFilterRegistrationBean.setFilter(new PmXssFilter(multipartResolver));
+        filterFilterRegistrationBean.setUrlPatterns(Lists.newArrayList("/*"));
+        filterFilterRegistrationBean.setOrder(2);
+        filterFilterRegistrationBean.setName("PmXssFilter");
+        return filterFilterRegistrationBean;
+    }
 
-    @Order(1)
     public static class AuthFilter implements Filter {
 
         private final LoginService loginService;
@@ -133,7 +143,6 @@ public class FilterConfiguration {
 
     }
 
-    @Order(2)
     public class ReqTokenFilter implements Filter {
 
         public static final String reqTokenKey = "reqToken";
@@ -213,6 +222,36 @@ public class FilterConfiguration {
                 }
             }
             return true;
+        }
+    }
+
+    public static class PmXssFilter implements Filter {
+
+        private final MultipartResolver multipartResolver;
+
+        public PmXssFilter(MultipartResolver multipartResolver) {
+            this.multipartResolver = multipartResolver;
+        }
+
+        @Override
+        public void init(FilterConfig filterConfig) throws ServletException {
+        }
+
+        @Override
+        public void doFilter(ServletRequest request , ServletResponse response , FilterChain chain) throws IOException, ServletException {
+            String contentType = request.getContentType();
+            if(StringUtils.isNotBlank(contentType) && contentType.contains("multipart/form-data")){
+                MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart((HttpServletRequest) request);
+                XssFilterRequestWrapper xssRequest = new XssFilterRequestWrapper(multipartRequest);
+                chain.doFilter(xssRequest, response);
+            }else{
+                XssFilterRequestWrapper xssRequest = new XssFilterRequestWrapper((HttpServletRequest)request);
+                chain.doFilter(xssRequest, response);
+            }
+        }
+
+        @Override
+        public void destroy() {
         }
     }
 

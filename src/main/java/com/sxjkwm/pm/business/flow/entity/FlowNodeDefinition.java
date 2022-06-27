@@ -37,6 +37,9 @@ public class FlowNodeDefinition extends BaseEntity {
     @Column(name = "non_null")
     private Integer nonNull;
 
+    @Column(name = "need_to_audit")
+    private Integer needAudit;
+
     public FlowNodeDefinition(Long flowNodeId, FlowNodeDefinitionDto flowNodeDefinitionDto) {
         this.flowNodeId = flowNodeId;
         this.collectionPropertyHandler = flowNodeDefinitionDto.getCollectionPropertyHandler();
@@ -47,6 +50,7 @@ public class FlowNodeDefinition extends BaseEntity {
         this.isDeleted = flowNodeDefinitionDto.getIsDeleted();
         this.id = flowNodeDefinitionDto.getId();
         this.nonNull = flowNodeDefinitionDto.getNonNull();
+        this.needAudit = flowNodeDefinitionDto.getNeedAudit();
     }
 
     public FlowNodeDefinition() {
@@ -106,5 +110,13 @@ public class FlowNodeDefinition extends BaseEntity {
 
     public void setNonNull(Integer nonNull) {
         this.nonNull = nonNull;
+    }
+
+    public Integer getNeedAudit() {
+        return needAudit;
+    }
+
+    public void setNeedAudit(Integer needAudit) {
+        this.needAudit = needAudit;
     }
 }

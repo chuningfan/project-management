@@ -1,13 +1,11 @@
 package com.sxjkwm.pm.util;
 
+import cn.hutool.core.map.MapUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.zaxxer.hikari.HikariDataSource;
-import com.zaxxer.hikari.pool.ProxyConnection;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
@@ -19,41 +17,41 @@ public class DBUtil {
 
     private static final String collectionTableNamePrefix = "coll_tb_";
 
+    private static JdbcTemplate jdbcTemplate = null;
+
+    public static void init(JdbcTemplate jdbcTemplate) {
+        DBUtil.jdbcTemplate = jdbcTemplate;
+    }
+
     public static boolean executeSQL(String sql) throws SQLException {
-        HikariDataSource ds = ContextUtil.getBean(HikariDataSource.class);
-        ProxyConnection connection = (ProxyConnection) ds.getConnection();
-        Statement statement = connection.createStatement();
-        boolean res = statement.execute(sql);
-        statement.close();
-        return res;
+        jdbcTemplate.execute(sql);
+        return true;
     }
 
     public static List<Map<String, Object>> query(String sql, List<String> otherColumnNames) throws SQLException {
-        HikariDataSource ds = ContextUtil.getBean(HikariDataSource.class);
-        ProxyConnection connection = (ProxyConnection) ds.getConnection();
-        ResultSet resultSet = connection.prepareStatement(sql).executeQuery();
+        List<Map<String, Object>> resultList = jdbcTemplate.queryForList(sql);
         List<Map<String, Object>> dataList = Lists.newArrayList();
         Map<String, Object> dataMap;
-        while (resultSet.next()) {
+        for (Map<String, Object> resultSet: resultList) {
             dataMap = Maps.newHashMap();
-            Long id = resultSet.getLong("id");
+            Long id = MapUtil.getLong(resultSet, "id");
             dataMap.put("id", id);
-            Long flowNodeId = resultSet.getLong("flow_node_id");
+            Long flowNodeId = MapUtil.getLong(resultSet, "flow_node_id");
             dataMap.put("flowNodeId", flowNodeId);
-            Long projectId = resultSet.getLong("project_id");
+            Long projectId = MapUtil.getLong(resultSet, "project_id");
             dataMap.put("projectId", projectId);
-            Long collectionPropDefId = resultSet.getLong("collection_prop_def_id");
+            Long collectionPropDefId = MapUtil.getLong(resultSet, "collection_prop_def_id");
             dataMap.put("collectionPropDefId", collectionPropDefId);
-            Long createdAt = resultSet.getLong("created_at");
+            Long createdAt = MapUtil.getLong(resultSet, "created_at");
             dataMap.put("createdAt", createdAt);
-            Long modifiedAt = resultSet.getLong("modified_at");
+            Long modifiedAt = MapUtil.getLong(resultSet, "modified_at");
             dataMap.put("modifiedAt", modifiedAt);
-            String createdBy = resultSet.getString("created_by");
+            String createdBy = MapUtil.getStr(resultSet, "created_by");
             dataMap.put("createdBy", createdBy);
-            String modifiedBy = resultSet.getString("modified_by");
+            String modifiedBy = MapUtil.getStr(resultSet, "modified_by");
             dataMap.put("modifiedBy", modifiedBy);
             for (String column: otherColumnNames) {
-                dataMap.put(column, resultSet.getString(column));
+                dataMap.put(column, MapUtil.getStr(resultSet, column));
             }
             dataList.add(dataMap);
         }

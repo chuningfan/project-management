@@ -20,8 +20,9 @@ public class FlowNodeDto implements Serializable {
 
     private String flowNodeValue;
 
-    // 道一云审批表单
-    private String formId;
+    private Integer needAudit;
+
+    private Long auditingFlowId;
 
     public Long getId() {
         return id;
@@ -79,14 +80,6 @@ public class FlowNodeDto implements Serializable {
         this.description = description;
     }
 
-    public String getFormId() {
-        return formId;
-    }
-
-    public void setFormId(String formId) {
-        this.formId = formId;
-    }
-
     public String getFlowNodeValue() {
         return flowNodeValue;
     }
@@ -94,4 +87,21 @@ public class FlowNodeDto implements Serializable {
     public void setFlowNodeValue(String flowNodeValue) {
         this.flowNodeValue = flowNodeValue;
     }
+
+    public Integer getNeedAudit() {
+        return needAudit;
+    }
+
+    public void setNeedAudit(Integer needAudit) {
+        this.needAudit = needAudit;
+    }
+
+    public Long getAuditingFlowId() {
+        return auditingFlowId;
+    }
+
+    public void setAuditingFlowId(Long auditingFlowId) {
+        this.auditingFlowId = auditingFlowId;
+    }
+
 }

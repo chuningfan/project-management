@@ -19,7 +19,7 @@ public class GlobalExceptionConfig {
             PmException pmException = (PmException) e;
             return restResponse.setCode(pmException.getCode()).setMessage(pmException.getErrorMessage());
         } else {
-            return restResponse.setCode("500").setMessage("Unknown exception, please check logs");
+            return restResponse.setCode("500").setMessage("Exception: " + e.getMessage());
         }
     }
 

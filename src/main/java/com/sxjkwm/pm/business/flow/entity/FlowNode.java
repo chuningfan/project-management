@@ -2,6 +2,7 @@ package com.sxjkwm.pm.business.flow.entity;
 
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
 import com.sxjkwm.pm.common.BaseFlowNode;
+import org.hibernate.annotations.Proxy;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +11,7 @@ import javax.persistence.Table;
 
 @Table(name = "pm_flow_node", indexes = {@Index(name = "flownode_flowId", columnList = "flow_id")})
 @Entity
+@Proxy(lazy = false)
 public class FlowNode extends BaseFlowNode {
 
     @Column(name="description", length = 4000)
@@ -24,9 +26,10 @@ public class FlowNode extends BaseFlowNode {
         this.nodeIndex = dto.getNodeIndex();
         this.description = dto.getDescription();
         this.skippable = dto.getSkippable();
-        this.formId = dto.getFormId();
         this.flowNodeValue = dto.getFlowNodeValue();
         this.id = dto.getId();
+        this.needAudit = dto.getNeedAudit();
+        this.auditingFlowId = dto.getAuditingFlowId();
     }
 
     public FlowNode() {

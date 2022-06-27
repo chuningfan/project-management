@@ -35,4 +35,9 @@ public class ProjectNodeController extends BaseController {
         return RestResponse.of(projectNodeService.getOne(projectId, flowNodeId));
     }
 
+    @DeleteMapping("/{flowId}/{flowNodeId}/{flowNodeDefinitionId}/{dataId}")
+    public RestResponse<Boolean> deleteDataById(@PathVariable("flowId") Long flowId, @PathVariable("flowNodeId") Long flowNodeId, @PathVariable("flowNodeDefinitionId") Long flowNodeDefinitionId, @PathVariable("dataId") Long dataId) {
+        return RestResponse.of(projectNodeService.deleteDataById(flowId, flowNodeId, flowNodeDefinitionId, dataId));
+    }
+
 }

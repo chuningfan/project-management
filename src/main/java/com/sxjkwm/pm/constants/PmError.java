@@ -30,6 +30,7 @@ public enum PmError implements Constant<String, String> {
     FILE_PREVIEW_NOT_SUPPORTED("4002", "File is not supported to be previewed"),
     USER_NOT_LOGGED_IN("4003", "User not logged in"),
     INVALID_DATA_STATUS("4004", "Data status is invalid"),
+    NO_PRIVILEGES("4005", "User has no privileges"),
     ;
 
     private String code;

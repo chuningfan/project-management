@@ -1,5 +1,6 @@
 package com.sxjkwm.pm.auditing.entity;
 
+import com.sxjkwm.pm.auditing.dto.AuditingFlowNodeDto;
 import com.sxjkwm.pm.common.BaseEntity;
 import com.sxjkwm.pm.constants.Constant;
 
@@ -18,11 +19,21 @@ public class AuditingFlowNode extends BaseEntity {
     @Column(name = "auditing_flow_id")
     private Long auditingFlowId;
 
-    @Column(name = "node_index")
-    private Integer nodeIndex;
+    @Column(name = "auditing_step")
+    private Integer auditingStep;
 
-    @Column(name = "auditing_status")
-    private Integer auditingStatus = Constant.YesOrNo.NO.getValue();
+    @Column(name = "auditing_type")
+    private Integer auditingType;
+
+    public AuditingFlowNode(AuditingFlowNodeDto auditingFlowNodeDto) {
+        this.id = auditingFlowNodeDto.getId();
+        this.auditingFlowId = auditingFlowNodeDto.getAuditingFlowId();
+        this.auditingStep = auditingFlowNodeDto.getStep();
+        this.auditingType = auditingFlowNodeDto.getAuditingType();
+    }
+
+    public AuditingFlowNode() {
+    }
 
     public Long getAuditingFlowId() {
         return auditingFlowId;
@@ -32,19 +43,19 @@ public class AuditingFlowNode extends BaseEntity {
         this.auditingFlowId = auditingFlowId;
     }
 
-    public Integer getNodeIndex() {
-        return nodeIndex;
+    public Integer getAuditingStep() {
+        return auditingStep;
     }
 
-    public void setNodeIndex(Integer nodeIndex) {
-        this.nodeIndex = nodeIndex;
+    public void setAuditingStep(Integer auditingStep) {
+        this.auditingStep = auditingStep;
     }
 
-    public Integer getAuditingStatus() {
-        return auditingStatus;
+    public Integer getAuditingType() {
+        return auditingType;
     }
 
-    public void setAuditingStatus(Integer auditingStatus) {
-        this.auditingStatus = auditingStatus;
+    public void setAuditingType(Integer auditingType) {
+        this.auditingType = auditingType;
     }
 }

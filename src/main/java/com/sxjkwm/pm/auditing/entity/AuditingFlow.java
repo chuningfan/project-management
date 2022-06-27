@@ -17,6 +17,9 @@ public class AuditingFlow extends BaseEntity {
     @Column(name = "auditing_flow_name")
     private String name;
 
+    @Column(name = "description", columnDefinition = "varchar(2000)")
+    private String description;
+
     public String getName() {
         return name;
     }
@@ -24,4 +27,5 @@ public class AuditingFlow extends BaseEntity {
     public void setName(String name) {
         this.name = name;
     }
+
 }

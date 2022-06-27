@@ -77,7 +77,6 @@ public class FlowNodeService {
 
     @Transactional
     public Boolean sort(List<Long> nodeIds) {
-        List<FlowNode> list = Lists.newArrayList();
         List<FlowNode> flowNodes = flowNodeDao.getByIds(nodeIds);
         if (CollectionUtils.isNotEmpty(flowNodes)) {
             List<FlowNode> saveList = Lists.newArrayList();

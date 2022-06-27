@@ -2,11 +2,11 @@ package com.sxjkwm.pm;
 
 import cn.hutool.core.date.StopWatch;
 import com.sxjkwm.pm.business.material.service.MaterialCacheService;
-import com.sxjkwm.pm.business.org.service.OrganizationService;
 import com.sxjkwm.pm.configuration.AspectConfig;
 import com.sxjkwm.pm.logging.LoggingAfterInvocation;
 import com.sxjkwm.pm.logging.LoggingBeforeInvocation;
 import com.sxjkwm.pm.util.ContextUtil;
+import com.sxjkwm.pm.util.DBUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;
@@ -16,6 +16,7 @@ import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootApplication
 @EnableJpaRepositories
@@ -31,13 +32,13 @@ public class ProjectManagementStarter {
         // setup something
         builder.listeners((ApplicationListener<ContextRefreshedEvent>) contextRefreshedEvent -> {
             ContextUtil.context = contextRefreshedEvent.getApplicationContext();
-            AspectConfig aspectConfig = ContextUtil.context.getBean(AspectConfig.class);
+            AspectConfig aspectConfig = ContextUtil.getBean(AspectConfig.class);
             aspectConfig.addBeforeWorker(new LoggingBeforeInvocation());
             aspectConfig.addAfterWorker(new LoggingAfterInvocation());
-//            OrganizationService organizationService = ContextUtil.context.getBean(OrganizationService.class);
-//            organizationService.init();
             MaterialCacheService materialCacheService = ContextUtil.context.getBean(MaterialCacheService.class);
             materialCacheService.init();
+            JdbcTemplate jdbcTemplate = ContextUtil.getBean(JdbcTemplate.class);
+            DBUtil.init(jdbcTemplate);
             logger.info("Spring is fully started, context-util is ready!");
         }, new ApplicationPidFileWriter());
         builder.bannerMode(Banner.Mode.OFF);

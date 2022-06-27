@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.common;
 
 import com.sxjkwm.pm.constants.Constant;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
@@ -20,9 +21,11 @@ public class BaseFlowNode extends BaseEntity {
     @Column(name = "node_index")
     protected Integer nodeIndex;
 
-    // 集成道一云审批流
-    @Column(name = "form_id")
-    protected String formId;
+    @Column(name = "need_to_audit")
+    protected Integer needAudit;
+
+    @Column(name = "auditing_flow_id")
+    protected Long auditingFlowId;
 
     public Long getFlowId() {
         return flowId;
@@ -56,12 +59,20 @@ public class BaseFlowNode extends BaseEntity {
         this.nodeIndex = nodeIndex;
     }
 
-    public String getFormId() {
-        return formId;
+    public Integer getNeedAudit() {
+        return needAudit;
     }
 
-    public void setFormId(String formId) {
-        this.formId = formId;
+    public void setNeedAudit(Integer needAudit) {
+        this.needAudit = needAudit;
+    }
+
+    public Long getAuditingFlowId() {
+        return auditingFlowId;
+    }
+
+    public void setAuditingFlowId(Long auditingFlowId) {
+        this.auditingFlowId = auditingFlowId;
     }
 
 }

@@ -114,7 +114,7 @@ public class FileUtil {
         return outputStreamConvertInputStream(out);
     }
 
-    public static ByteArrayInputStream outputStreamConvertInputStream(final OutputStream out) throws Exception {
+    public static ByteArrayInputStream outputStreamConvertInputStream(final OutputStream out) {
         ByteArrayOutputStream baos=(ByteArrayOutputStream) out;
         return new ByteArrayInputStream(baos.toByteArray());
     }
