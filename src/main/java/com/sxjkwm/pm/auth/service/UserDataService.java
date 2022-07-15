@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @Service
 public class UserDataService {
 
+    static final String userCachePrefix = "user:";
+
     private final UserDao userDao;
 
     private final RoleDao roleDao;
@@ -54,7 +56,7 @@ public class UserDataService {
     }
 
     public UserDataDto getUserDataByWxUserId(String wxUserId) {
-        String userDataJson = cacheService.getString(wxUserId);
+        String userDataJson = cacheService.getString(userCachePrefix + wxUserId);
         if (StringUtils.isNotBlank(userDataJson)) {
             return JSONObject.parseObject(userDataJson, UserDataDto.class);
         }

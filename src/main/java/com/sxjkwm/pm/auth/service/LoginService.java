@@ -71,7 +71,7 @@ public class LoginService {
         }
         JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(_token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
         String userId = jsonObject.getString("userId");
-        String userDataDtoString = cacheService.getString(userId);
+        String userDataDtoString = cacheService.getString(UserDataService.userCachePrefix + userId);
 
         if (StringUtils.isNotBlank(userDataDtoString)) {
             fillContext(JSONObject.parseObject(userDataDtoString, UserDataDto.class), req);
@@ -122,7 +122,7 @@ public class LoginService {
             return null;
         }
         String userDataString = JSONObject.toJSONString(dataDto);
-        cacheService.store(wxUserId, userDataString);
+        cacheService.store(UserDataService.userCachePrefix + wxUserId, userDataString);
         return encoded;
     }
 
