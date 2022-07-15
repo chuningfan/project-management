@@ -12,6 +12,12 @@ public class PmException extends Exception {
     public PmException() {
     }
 
+    public PmException(Throwable e) {
+        super(e.getMessage());
+        this.code = "500";
+        this.errorMessage = e.getMessage();
+    }
+
     public PmException(String errorMessage) {
         super(errorMessage);
         this.code = "500";

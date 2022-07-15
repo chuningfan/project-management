@@ -1,21 +1,21 @@
 package com.sxjkwm.pm.business.flow.service;
 
 import com.sxjkwm.pm.business.file.dao.PatternFileDao;
-import com.sxjkwm.pm.business.file.entity.PatternFile;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
-import com.sxjkwm.pm.business.flow.dto.NodeIndexDto;
 import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.constants.Constant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,8 +63,7 @@ public class FlowNodeService {
     }
 
     public List<FlowNode> getFlowNodeList(Long flowId) {
-        Integer isDelete = Constant.YesOrNo.NO.getValue();
-        List<FlowNode> flowNodeList = flowNodeDao.getAllByFlowIdAndIsDeleted(flowId, isDelete);
+        List<FlowNode> flowNodeList = flowNodeDao.getAvailableNodes(flowId);
         return flowNodeList;
     }
 

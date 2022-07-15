@@ -3,7 +3,9 @@ package com.sxjkwm.pm.util;
 
 import io.minio.*;
 import io.minio.errors.*;
+import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,11 +29,20 @@ public class S3FileUtil {
         this.minioClient = minioClient;
     }
 
-    public String upload(String bucketName, MultipartFile file, String objectName) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public String upload(String bucketName, String objectName, MultipartFile file) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         try (InputStream inputStream = file.getInputStream()) {
             String fileName = file.getOriginalFilename();
             PutObjectArgs objectArgs = PutObjectArgs.builder().bucket(bucketName).object(objectName)
                     .stream(file.getInputStream(), file.getSize(), -1).contentType(file.getContentType()).build();
+            minioClient.putObject(objectArgs);
+            return objectName;
+        }
+    }
+
+    public String upload(String bucketName, String objectName, String fileName, InputStream fileInputStream) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        try (InputStream inputStream = fileInputStream) {
+            PutObjectArgs objectArgs = PutObjectArgs.builder().bucket(bucketName).object(objectName)
+                    .stream(inputStream, fileInputStream.available(), -1).contentType(MediaTypeFactory.getMediaType(fileName).get().toString()).build();
             minioClient.putObject(objectArgs);
             return objectName;
         }
@@ -46,5 +57,10 @@ public class S3FileUtil {
     public void remove(String bucketName, String objectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(objectName).build());
     }
+
+//    public GetObjectResponse getFile(String bucketName) {
+//        GetObjectArgs.builder().bucket(bucketName).
+//
+//    }
 
 }

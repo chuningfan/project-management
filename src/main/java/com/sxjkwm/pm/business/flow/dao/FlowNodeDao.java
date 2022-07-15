@@ -11,10 +11,8 @@ import java.util.List;
 
 public interface FlowNodeDao extends JpaRepository<FlowNode, Long> {
 
-    @Query("SELECT fn FROM FlowNode fn WHERE fn.flowId = ?1 AND fn.isDeleted = 0")
+    @Query("SELECT fn FROM FlowNode fn WHERE fn.flowId = ?1 AND fn.isDeleted = 0 ORDER BY fn.nodeIndex")
     List<FlowNode> getAvailableNodes(Long flowId);
-
-    List<FlowNode> getAllByFlowIdAndIsDeleted(Long flowId,Integer isDelete);
 
     @Modifying
     @Query(value = "update FlowNode fn set fn.isDeleted = :isDelete where fn.id = :id")

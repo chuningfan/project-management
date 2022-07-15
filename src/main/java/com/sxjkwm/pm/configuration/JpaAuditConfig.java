@@ -2,6 +2,9 @@ package com.sxjkwm.pm.configuration;
 
 import com.sxjkwm.pm.auth.context.Context;
 import com.sxjkwm.pm.auth.context.ContextFactory;
+import com.sxjkwm.pm.auth.context.impl.ContextFactoryImpl;
+import com.sxjkwm.pm.auth.context.impl.OpenApiContextFactoryImpl;
+import com.sxjkwm.pm.auth.dto.ExternalRPCDataDto;
 import com.sxjkwm.pm.auth.dto.UserDataDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,21 +19,30 @@ import java.util.Optional;
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 public class JpaAuditConfig {
 
-    private final ContextFactory<UserDataDto> contextFactory;
+    private final ContextFactoryImpl userContextFactory;
+
+    private final OpenApiContextFactoryImpl openApiContextFactory;
 
     @Autowired
-    public JpaAuditConfig(ContextFactory<UserDataDto> contextFactory) {
-        this.contextFactory = contextFactory;
+    public JpaAuditConfig(ContextFactoryImpl userContextFactory, OpenApiContextFactoryImpl openApiContextFactory) {
+        this.userContextFactory = userContextFactory;
+        this.openApiContextFactory = openApiContextFactory;
     }
 
     @Bean
     public AuditorAware<String> auditorProvider() {
         return () -> {
             String operator = "system";
-            Context<UserDataDto> context = contextFactory.get();
+            Context<UserDataDto> context = userContextFactory.get();
             UserDataDto authUser = context.unwrap();
             if (Objects.nonNull(authUser)) {
                 operator = authUser.getWxUserId();
+            } else {
+                Context<ExternalRPCDataDto> rpcContext = openApiContextFactory.get();
+                ExternalRPCDataDto rpcDataDto = rpcContext.unwrap();
+                if (Objects.nonNull(rpcDataDto)) {
+                    operator = rpcDataDto.getAppKey();
+                }
             }
             return Optional.ofNullable(operator);
         };

@@ -56,6 +56,30 @@ public class Project extends BaseEntity {
     @Column(name = "project_time")
     private Long projectTime;
 
+    @Column(name = "goods_receive_time")
+    private Long goodsReceiveTime;
+
+    @Column(name = "goods_receive_address")
+    private String goodsReceiveAddress;
+
+    @Column(name = "goods_receiver")
+    private String goodsReceiver;
+
+    @Column(name = "goods_receiver_mobile")
+    private String goodsReceiverMobile;
+
+    @Column(name = "supply_period")
+    private String supplyPeriod;
+
+    @Column(name = "purchase_scope")
+    private String purchaseScope;
+
+    @Column(name = "deadline")
+    private Long deadLine;
+
+    @Column(name = "projectType")
+    private Integer projectType;
+
     public String getProjectName() {
         return projectName;
     }
@@ -158,5 +182,69 @@ public class Project extends BaseEntity {
 
     public void setProjectTime(Long projectTime) {
         this.projectTime = projectTime;
+    }
+
+    public Long getGoodsReceiveTime() {
+        return goodsReceiveTime;
+    }
+
+    public void setGoodsReceiveTime(Long goodsReceiveTime) {
+        this.goodsReceiveTime = goodsReceiveTime;
+    }
+
+    public String getGoodsReceiveAddress() {
+        return goodsReceiveAddress;
+    }
+
+    public void setGoodsReceiveAddress(String goodsReceiveAddress) {
+        this.goodsReceiveAddress = goodsReceiveAddress;
+    }
+
+    public String getGoodsReceiver() {
+        return goodsReceiver;
+    }
+
+    public void setGoodsReceiver(String goodsReceiver) {
+        this.goodsReceiver = goodsReceiver;
+    }
+
+    public String getGoodsReceiverMobile() {
+        return goodsReceiverMobile;
+    }
+
+    public void setGoodsReceiverMobile(String goodsReceiverMobile) {
+        this.goodsReceiverMobile = goodsReceiverMobile;
+    }
+
+    public String getSupplyPeriod() {
+        return supplyPeriod;
+    }
+
+    public void setSupplyPeriod(String supplyPeriod) {
+        this.supplyPeriod = supplyPeriod;
+    }
+
+    public String getPurchaseScope() {
+        return purchaseScope;
+    }
+
+    public void setPurchaseScope(String purchaseScope) {
+        this.purchaseScope = purchaseScope;
+    }
+
+    public Long getDeadLine() {
+        return deadLine;
+    }
+
+    public void setDeadLine(Long deadLine) {
+        this.deadLine = deadLine;
+    }
+
+    public Integer getProjectType() {
+        return projectType;
+    }
+
+    public void setProjectType(Integer projectType) {
+        this.projectType = projectType;
     }
 }

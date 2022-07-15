@@ -105,8 +105,17 @@ public class ProjectNodeService {
         projectNode.setFlowNodeId(projectNodeDto.getFlowNodeId());
         projectNodeDao.save(projectNode);
         Project project = projectDao.getOne(projectNodeDto.getProjectId());
+        boolean saveProject = false;
         if (Objects.isNull(project.getCurrentNodeId()) || project.getCurrentNodeId() < projectNodeDto.getFlowNodeId()) {
             project.setCurrentNodeId(projectNodeDto.getFlowNodeId());
+            saveProject = true;
+        }
+        Integer projectStatus = projectNodeDto.getProjectStatus();
+        if (Objects.nonNull(projectStatus)) {
+            project.setProjectStatus(projectStatus);
+            saveProject = true;
+        }
+        if (saveProject) {
             projectDao.save(project);
         }
         FlowNodeCollectionDefinition condition = new FlowNodeCollectionDefinition();
@@ -200,6 +209,11 @@ public class ProjectNodeService {
         if (CollectionUtils.isEmpty(flowNodeDefinitions)) {
             return null;
         }
+        Long flowId = project.getFlowId();
+        List<FlowNode> flowNodes = flowNodeDao.getAvailableNodes(flowId);
+        if (flowNodes.get(flowNodes.size() - 1).getId().equals(flowNodeId)) {
+            dto.setLastNode(true);
+        }
         Map<Long, FlowNodeDefinition> collectionPropertyDefMap = flowNodeDefinitions.stream().filter(f -> f.getPropertyType().equals("COLLECTION")).collect(Collectors.toMap(FlowNodeDefinition::getId, f -> f, (k1, k2) -> k1));
         Map<Long, List<FlowNodeCollectionDefinition>> collDefMap = null;
         if (Objects.nonNull(collectionPropertyDefMap) && !collectionPropertyDefMap.isEmpty()) {
@@ -276,7 +290,7 @@ public class ProjectNodeService {
                     Integer flag = flowNodeCollectionDefinitionDao.tryCreateTable(tableName);
                     if (flag == 1) {
                         StringBuilder builder = new StringBuilder("SELECT id,collection_prop_def_id, project_id, flow_node_id, created_at, created_by, modified_at, modified_by,");
-                        builder.append(Joiner.on(",").join(flowNodeCollectionDefKeys)).append(" FROM ").append(tableName);
+                        builder.append(Joiner.on(",").join(flowNodeCollectionDefKeys)).append(" FROM ").append("project_management." + tableName);
                         builder.append(" WHERE project_id = ").append(projectId).append(" AND flow_node_id = ").append(flowNodeId);
                         List<Map<String, Object>> dataList = DBUtil.query(builder.toString(), flowNodeCollectionDefKeys);
                         propertyDto.setCollectionData(dataList);
@@ -289,6 +303,7 @@ public class ProjectNodeService {
                         Long fileId = Long.valueOf(propVal);
                         ProjectFile projectFile = projectFileDao.getOne(fileId);
                         propertyDto.setFileName(projectFile.getFileName());
+                        propertyDto.setPatternFileCategory(flowNodeDefinition.getPatternFileCategory());
                     }
                     propertyDto.setPropertyValue(propVal);
                 }
@@ -327,7 +342,6 @@ public class ProjectNodeService {
         if (Objects.nonNull(flowNode)) {
             Long auditingFlowId = flowNode.getAuditingFlowId();
             if (Objects.nonNull(auditingFlowId)) {
-                Long flowId = project.getFlowId();
                 Flow flow = flowDao.getOne(flowId);
                 Long dataId = projectId;
                 Integer auditingDataType = flow.getDataType();

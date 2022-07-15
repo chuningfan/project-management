@@ -4,6 +4,7 @@ package com.sxjkwm.pm.business.flow.dto;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.constants.Constant;
 
+import javax.persistence.Column;
 import java.io.Serializable;
 import java.util.List;
 
@@ -33,6 +34,8 @@ public class FlowNodeDefinitionDto implements Serializable {
 
     private Integer needAudit;
 
+    private Integer patternFileCategory;
+
     public FlowNodeDefinitionDto(FlowNodeDefinition definition) {
         this.id = definition.getId();
         this.flowNodeId = definition.getFlowNodeId();
@@ -44,6 +47,7 @@ public class FlowNodeDefinitionDto implements Serializable {
         this.isDeleted = definition.getIsDeleted();
         this.nonNull = definition.getNonNull();
         this.needAudit = definition.getNeedAudit();
+        this.patternFileCategory = definition.getPatternFileCategory();
     }
 
     public FlowNodeDefinitionDto() {
@@ -143,5 +147,13 @@ public class FlowNodeDefinitionDto implements Serializable {
 
     public void setNeedAudit(Integer needAudit) {
         this.needAudit = needAudit;
+    }
+
+    public Integer getPatternFileCategory() {
+        return patternFileCategory;
+    }
+
+    public void setPatternFileCategory(Integer patternFileCategory) {
+        this.patternFileCategory = patternFileCategory;
     }
 }

@@ -1,10 +1,14 @@
 package com.sxjkwm.pm.common;
 
+import com.sxjkwm.pm.exception.PmException;
+
 import java.io.Serializable;
 
 public class RestResponse<T> implements Serializable {
 
     private static final String successful_code = "200";
+
+    private static final String error_code = "500";
 
     private T data;
 
@@ -41,6 +45,18 @@ public class RestResponse<T> implements Serializable {
 
     public static <T> RestResponse<T> of(T data) {
         return new RestResponse<T>().setData(data).setCode(successful_code);
+    }
+
+    public static RestResponse of(Exception e) {
+        RestResponse response = new RestResponse();
+        if (e instanceof PmException) {
+            PmException pmException = (PmException) e;
+            response.setCode(pmException.getCode())
+            .setMessage(pmException.getErrorMessage());
+        } else {
+            response.setCode(error_code).setMessage(e.getMessage());
+        }
+        return response;
     }
 
 }

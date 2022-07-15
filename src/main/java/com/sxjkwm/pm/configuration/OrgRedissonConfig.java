@@ -17,21 +17,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OrgRedissonConfig {
 
-    @Bean
-    public RedissonClient orgRedissonClient(@Autowired RedisConfig redisConfig) {
-        Config config = new Config();
-        config.setCodec(new StringCodec());
-        SingleServerConfig serverConfig = config.useSingleServer()
-                .setAddress(redisConfig.getAddress())
-                .setTimeout(redisConfig.getTimeout())
-                .setConnectionPoolSize(redisConfig.getConnectionPoolSize())
-                .setConnectionMinimumIdleSize(redisConfig.getConnectionMinimumIdleSize())
-                .setDatabase(1); // org use database 1
-
-        if(StringUtils.isNotEmpty(redisConfig.getPassword())) {
-            serverConfig.setPassword(redisConfig.getPassword());
-        }
-        return Redisson.create(config);
-    }
+//    @Bean
+//    public RedissonClient orgRedissonClient(@Autowired RedisConfig redisConfig) {
+//        Config config = new Config();
+//        config.setCodec(new StringCodec());
+//        SingleServerConfig serverConfig = config.useSingleServer()
+//                .setAddress(redisConfig.getAddress())
+//                .setTimeout(redisConfig.getTimeout())
+//                .setConnectionPoolSize(redisConfig.getConnectionPoolSize())
+//                .setConnectionMinimumIdleSize(redisConfig.getConnectionMinimumIdleSize())
+//                .setDatabase(1); // org use database 1
+//
+//        if(StringUtils.isNotEmpty(redisConfig.getPassword())) {
+//            serverConfig.setPassword(redisConfig.getPassword());
+//        }
+//        return Redisson.create(config);
+//    }
 
 }

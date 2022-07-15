@@ -1,8 +1,5 @@
 package com.sxjkwm.pm.business.project.dto;
 
-import com.sxjkwm.pm.constants.Constant;
-
-import javax.persistence.Column;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -34,7 +31,23 @@ public class ProjectDto implements Serializable {
 
     private Long projectTime;
 
+    private Long goodsReceiveTime;
+
+    private String goodsReceiveAddress;
+
+    private String goodsReceiver;
+
+    private String goodsReceiverMobile;
+
+    private String supplyPeriod;
+
+    private String purchaseScope;
+
     private Integer isDeleted;
+
+    private Long deadLine;
+
+    private Integer projectType;
 
     public Long getId() {
         return id;
@@ -146,5 +159,69 @@ public class ProjectDto implements Serializable {
 
     public void setIsDeleted(Integer isDeleted) {
         this.isDeleted = isDeleted;
+    }
+
+    public Long getGoodsReceiveTime() {
+        return goodsReceiveTime;
+    }
+
+    public void setGoodsReceiveTime(Long goodsReceiveTime) {
+        this.goodsReceiveTime = goodsReceiveTime;
+    }
+
+    public String getGoodsReceiveAddress() {
+        return goodsReceiveAddress;
+    }
+
+    public void setGoodsReceiveAddress(String goodsReceiveAddress) {
+        this.goodsReceiveAddress = goodsReceiveAddress;
+    }
+
+    public String getGoodsReceiver() {
+        return goodsReceiver;
+    }
+
+    public void setGoodsReceiver(String goodsReceiver) {
+        this.goodsReceiver = goodsReceiver;
+    }
+
+    public String getGoodsReceiverMobile() {
+        return goodsReceiverMobile;
+    }
+
+    public void setGoodsReceiverMobile(String goodsReceiverMobile) {
+        this.goodsReceiverMobile = goodsReceiverMobile;
+    }
+
+    public String getSupplyPeriod() {
+        return supplyPeriod;
+    }
+
+    public void setSupplyPeriod(String supplyPeriod) {
+        this.supplyPeriod = supplyPeriod;
+    }
+
+    public String getPurchaseScope() {
+        return purchaseScope;
+    }
+
+    public void setPurchaseScope(String purchaseScope) {
+        this.purchaseScope = purchaseScope;
+    }
+
+    public Long getDeadLine() {
+        return deadLine;
+    }
+
+    public void setDeadLine(Long deadLine) {
+        this.deadLine = deadLine;
+    }
+
+    public Integer getProjectType() {
+        return projectType;
+    }
+
+    public void setProjectType(Integer projectType) {
+        this.projectType = projectType;
     }
 }

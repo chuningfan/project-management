@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @ConditionalOnMissingBean(RedisService.class)
@@ -26,5 +27,10 @@ public class DefaultCacheService implements CacheService {
     @Override
     public void remove(String key) {
         userDataCache.remove(key);
+    }
+
+    @Override
+    public void store(String key, String data, long expireTime, TimeUnit expireTimeUnit) {
+        throw new UnsupportedOperationException();
     }
 }

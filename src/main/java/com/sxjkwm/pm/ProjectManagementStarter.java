@@ -37,7 +37,7 @@ public class ProjectManagementStarter {
             aspectConfig.addAfterWorker(new LoggingAfterInvocation());
             MaterialCacheService materialCacheService = ContextUtil.context.getBean(MaterialCacheService.class);
             materialCacheService.init();
-            JdbcTemplate jdbcTemplate = ContextUtil.getBean(JdbcTemplate.class);
+            JdbcTemplate jdbcTemplate = ContextUtil.getBean("jdbcTemplate");
             DBUtil.init(jdbcTemplate);
             logger.info("Spring is fully started, context-util is ready!");
         }, new ApplicationPidFileWriter());

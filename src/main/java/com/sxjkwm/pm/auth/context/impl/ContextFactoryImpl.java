@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-@Service
+@Service("userContextFactory")
 public class ContextFactoryImpl implements ContextFactory<UserDataDto> {
     static final ThreadLocal<Context<UserDataDto>> contextThreadLocal = new ThreadLocal<>();
     @Override

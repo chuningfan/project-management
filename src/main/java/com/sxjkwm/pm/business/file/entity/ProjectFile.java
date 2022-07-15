@@ -18,12 +18,6 @@ public class ProjectFile extends BaseFile {
     @Column(name = "object_name")
     private String objectName;
 
-//    @Column(name = "property_key")
-//    private String propertyKey;
-
-    @Column(name = "property_def_id")
-    private Long propertyDefId;
-
     @Column(name = "bucket_name")
     private String bucketName;
 
@@ -43,14 +37,6 @@ public class ProjectFile extends BaseFile {
         this.objectName = objectName;
     }
 
-//    public String getPropertyKey() {
-//        return propertyKey;
-//    }
-//
-//    public void setPropertyKey(String propertyKey) {
-//        this.propertyKey = propertyKey;
-//    }
-
     public String getBucketName() {
         return bucketName;
     }
@@ -59,11 +45,4 @@ public class ProjectFile extends BaseFile {
         this.bucketName = bucketName;
     }
 
-    public Long getPropertyDefId() {
-        return propertyDefId;
-    }
-
-    public void setPropertyDefId(Long propertyDefId) {
-        this.propertyDefId = propertyDefId;
-    }
 }

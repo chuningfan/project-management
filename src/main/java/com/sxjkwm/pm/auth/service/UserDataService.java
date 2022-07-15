@@ -64,6 +64,7 @@ public class UserDataService {
             result.setUsername(user.getName());
             result.setUserId(user.getId());
             result.setWxUserId(user.getWxUserId());
+            result.setMobile(user.getMobile());
             result.setAvatar(user.getAvatar());
             String deptIdStr = user.getDeptIds();
             if (StringUtils.isNotBlank(deptIdStr)) {

@@ -66,7 +66,7 @@ public class FlowNodeCollectionDefinitionService {
                 definition.setHeaderIndex(dto.getHeaderIndex());
                 String headerKey = dto.getHeaderKey();
                 if (StringUtils.isBlank(headerKey)) {
-                    headerKey = "col_" + flowNodeId + "_" + collectionPropDefId + "_" + PinYinUtil.convertChineseWordToPinYin(dto.getHeaderName());
+                    headerKey = "col_" + flowNodeId + "_" + collectionPropDefId + "_" + PinYinUtil.convertChineseWordToPinYin(dto.getHeaderName(), "_");
                 }
                 definition.setHeaderKey(headerKey);
                 definition.setHeaderName(dto.getHeaderName());

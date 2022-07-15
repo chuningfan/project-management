@@ -92,7 +92,7 @@ public class S3FileService {
             if (Objects.nonNull(existingFile)) {
                 removeFileById(existingFile.getId());
             }
-            s3FileUtil.upload(bucketName, file, objectName);
+            s3FileUtil.upload(bucketName, objectName, file);
             ProjectFile projectFile = new ProjectFile();
             projectFile.setObjectName(objectName);
             projectFile.setFileName(fileName);

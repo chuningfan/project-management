@@ -21,7 +21,11 @@ public class ProjectNodeDto implements Serializable {
 
     private List<ProjectNodePropertyDto> propertyDtos;
 
+    private Integer projectStatus = 0;
+
     private Integer auditingStatus;
+
+    private Boolean lastNode = false;
 
     public Long getId() {
         return id;
@@ -69,5 +73,21 @@ public class ProjectNodeDto implements Serializable {
 
     public void setAuditingStatus(Integer auditingStatus) {
         this.auditingStatus = auditingStatus;
+    }
+
+    public Integer getProjectStatus() {
+        return projectStatus;
+    }
+
+    public void setProjectStatus(Integer projectStatus) {
+        this.projectStatus = projectStatus;
+    }
+
+    public Boolean getLastNode() {
+        return lastNode;
+    }
+
+    public void setLastNode(Boolean lastNode) {
+        this.lastNode = lastNode;
     }
 }

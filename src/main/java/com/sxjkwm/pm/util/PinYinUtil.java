@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class PinYinUtil {
 
-    public static String convertChineseWordToPinYin(String chineseWords) {
+    public static String convertChineseWordToPinYin(String chineseWords, String splitWith) {
         if (StringUtils.isBlank(chineseWords)) {
             return null;
         }
@@ -28,7 +28,10 @@ public class PinYinUtil {
             if (Character.toString(c).matches("[\\u4e00-\\u9fa5]")) {
                 try {
                     String[] temp = PinyinHelper.toHanyuPinyinStringArray(c, format);
-                    builder.append(temp[0]).append("_");
+                    builder.append(temp[0]);
+                    if (StringUtils.isNotBlank(splitWith)) {
+                        builder.append(splitWith);
+                    }
                 } catch (BadHanyuPinyinOutputFormatCombination e) {
                 }
             } else {

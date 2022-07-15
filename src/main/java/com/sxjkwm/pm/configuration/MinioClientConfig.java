@@ -22,21 +22,21 @@ public class MinioClientConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(MinioClientConfig.class);
 
-    private static final String[] bucketNames = {"oddbucket", "evenbucket"};
+    private static final String[] bucketNames = {"oddbucket", "evenbucket", "pattern", "finance"};
 
     @Bean
-    public MinioClient minioClient(@Autowired OssConfig ossConfig, @Autowired FlowDao flowDao, @Autowired FlowNodeDao flowNodeDao, @Autowired FlowNodeDefinitionDao flowNodeDefinitionDao) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public MinioClient minioClient(@Autowired OssConfig ossConfig) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         MinioClient minioClient = MinioClient.builder()
                 .endpoint(ossConfig.getOssAddress())
                 .credentials(ossConfig.getAccessKey(), ossConfig.getSecretKey())
                 .build();
         logger.info("Initializing file buckets");
         minioClient.setTimeout(Long.valueOf(ossConfig.getConnectionTimeout()), Long.valueOf(ossConfig.getWriteTimeout()), Long.valueOf(ossConfig.getReadTimeout()));
-        initBuckets(minioClient, flowDao, flowNodeDao, flowNodeDefinitionDao);
+        initBuckets(minioClient);
         return minioClient;
     }
 
-    public static void initBuckets(MinioClient minioClient, FlowDao flowDao, FlowNodeDao flowNodeDao, FlowNodeDefinitionDao flowNodeDefinitionDao) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public static void initBuckets(MinioClient minioClient) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         for (String bucketName: bucketNames) {
             BucketExistsArgs args = BucketExistsArgs.builder().bucket(bucketName).build();
             if (!minioClient.bucketExists(args)) {

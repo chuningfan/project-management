@@ -1,18 +1,23 @@
 package com.sxjkwm.pm.constants;
 
 import com.google.common.base.Splitter;
-import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
-import com.sxjkwm.pm.business.file.entity.ProjectFile;
-import com.sxjkwm.pm.business.file.service.ProjectFileService;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.sxjkwm.pm.auditing.handler.AuditingDataHandler;
+import com.sxjkwm.pm.auditing.handler.impl.ProjectAuditingDataHandler;
+import com.sxjkwm.pm.business.file.handler.PatternFileHandler;
+import com.sxjkwm.pm.business.file.handler.impl.SingleInquiryFileHandler;
+import com.sxjkwm.pm.business.project.dto.ProjectDto;
 import com.sxjkwm.pm.util.ContextUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public interface Constant<K, V> {
+
+    static final String OPEN_API_FEATURE = "/api/";
 
     V getValue();
 
@@ -45,8 +50,29 @@ public interface Constant<K, V> {
 
     enum ProjectType implements Constant<String, Integer> {
 
-        INQUIRY(0, "询价项目"), BIDDING(1, "招标项目"),
+        INQUIRY(0, "单一来源") {
+            @Override
+            public String getObjectName() {
+                return "inquiry-single-source.docx";
+            }
 
+            @Override
+            public Map<String, String> getDataMap(ProjectDto projectDto) {
+                Map<String, String> dataMap = Maps.newHashMap();
+//                dataMap
+                return null;
+            }
+        }, BIDDING(1, "全网询价") {
+            @Override
+            public String getObjectName() {
+                return null;
+            }
+
+            @Override
+            public Map<String, String> getDataMap(ProjectDto projectDto) {
+                return null;
+            }
+        },
         ;
 
         private Integer value;
@@ -67,34 +93,95 @@ public interface Constant<K, V> {
         public String getLabel() {
             return label;
         }
+
+        public abstract String getObjectName();
+
+        public abstract Map<String, String> getDataMap(ProjectDto projectDto);
+
+        public static ProjectType getFromVal(Integer val) {
+            for (ProjectType projectType: ProjectType.values()) {
+                if (projectType.getValue().equals(val)) {
+                    return projectType;
+                }
+            }
+            return null;
+        }
+
     }
 
-//    enum FileType implements Constant<String, String> {
-//        ISSUE("方案", "issue"), REPORT("评审报告", "report"),
-//        INQUIRY("询价文件", "inquiry"), ISSUE_INQUIRY("议题征询单", "issueinquiry"),
-//        PURCHASE_CONTRACT("采购合同", "purchasecontract"), SALES_CONTRACT("销售合同", "salescontract")
-//
-//        ;
-//
-//        private String type;
-//
-//        private String value;
-//
-//        FileType(String type, String value) {
-//            this.type = type;
-//            this.value = value;
-//        }
-//
-//        @Override
-//        public String getValue() {
-//            return value;
-//        }
-//
-//        @Override
-//        public String getLabel() {
-//            return type;
-//        }
-//    }
+    enum FileType implements Constant<String, Integer> {
+        SINGLE_INQUIRY(1, "询价文件", "单一来源询价文件", 1) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return SingleInquiryFileHandler.class;
+            }
+        },
+        NORMAL_INQUIRY(1, "询价文件", "全网询价文件", 2) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return SingleInquiryFileHandler.class;
+            }
+        },
+        SPECIF_INQUIRY(1, "询价文件", "指定供应商询价文件", 3) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return SingleInquiryFileHandler.class;
+            }
+        },
+        NORMAL_BUY_CONTRACT(2, "合同", "通用采购合同", 1) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return SingleInquiryFileHandler.class;
+            }
+        },
+        NORMAL_SALE_CONTRACT(2, "合同", "通用销售合同", 2) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return SingleInquiryFileHandler.class;
+            }
+        },
+        ;
+
+        private Integer category;
+
+        private String categoryName;
+
+        private String type;
+
+        private Integer value;
+
+        FileType(Integer category, String categoryName, String type, Integer value) {
+            this.category = category;
+            this.categoryName = categoryName;
+            this.type = type;
+            this.value = value;
+        }
+
+        public Integer getCategory() {
+            return category;
+        }
+
+        public String getCategoryName() {
+            return categoryName;
+        }
+
+        @Override
+        public Integer getValue() {
+            return value;
+        }
+
+        @Override
+        public String getLabel() {
+            return type;
+        }
+
+        public static FileType getFromVal(Integer targetcategory, Integer value) {
+            return Lists.newArrayList(Arrays.asList(FileType.values())).stream().filter(f -> f.getCategory().intValue() == targetcategory.intValue() && f.getValue().intValue() == value.intValue()).findFirst().orElse(null);
+        }
+
+        public abstract Class<? extends PatternFileHandler> fileHandlerClass();
+
+    }
 
     enum PropertyType implements Constant<String, String> {
         PRICE("金额", "price", BigDecimal.class) {
@@ -218,6 +305,59 @@ public interface Constant<K, V> {
         public String getLabel() {
             return status;
         }
+    }
+
+    enum DataType implements Constant<String, Integer> {
+        TRADITIONAL(1, "集采项目") {
+            @Override
+            public AuditingDataHandler dataHandler() {
+                return ContextUtil.getBean(ProjectAuditingDataHandler.class);
+            }
+        },
+        E_PLATFORM(2, "电商项目") {
+            @Override
+            public AuditingDataHandler dataHandler() {
+                return null;
+            }
+        },
+        ;
+
+        private Integer type;
+
+        private String lable;
+
+        DataType(Integer type, String lable) {
+            this.type = type;
+            this.lable = lable;
+        }
+
+        public Integer getType() {
+            return type;
+        }
+
+        public void setType(Integer type) {
+            this.type = type;
+        }
+
+        public String getLable() {
+            return lable;
+        }
+
+        public void setLable(String lable) {
+            this.lable = lable;
+        }
+
+        @Override
+        public Integer getValue() {
+            return type;
+        }
+
+        @Override
+        public String getLabel() {
+            return lable;
+        }
+
+        public abstract AuditingDataHandler dataHandler();
     }
 
 }

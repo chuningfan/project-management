@@ -43,4 +43,9 @@ public class RedisService implements CacheService {
         redissonClient.getBucket(key).delete();
     }
 
+    @Override
+    public void store(String key, String data, long expireTime, TimeUnit expireTimeUnit) {
+        redissonClient.getBucket(key).set(data, expireTime, expireTimeUnit);
+    }
+
 }

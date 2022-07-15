@@ -40,6 +40,9 @@ public class FlowNodeDefinition extends BaseEntity {
     @Column(name = "need_to_audit")
     private Integer needAudit;
 
+    @Column(name = "pattern_file_category")
+    private Integer patternFileCategory;
+
     public FlowNodeDefinition(Long flowNodeId, FlowNodeDefinitionDto flowNodeDefinitionDto) {
         this.flowNodeId = flowNodeId;
         this.collectionPropertyHandler = flowNodeDefinitionDto.getCollectionPropertyHandler();
@@ -51,6 +54,7 @@ public class FlowNodeDefinition extends BaseEntity {
         this.id = flowNodeDefinitionDto.getId();
         this.nonNull = flowNodeDefinitionDto.getNonNull();
         this.needAudit = flowNodeDefinitionDto.getNeedAudit();
+        this.patternFileCategory = flowNodeDefinitionDto.getPatternFileCategory();
     }
 
     public FlowNodeDefinition() {
@@ -118,5 +122,13 @@ public class FlowNodeDefinition extends BaseEntity {
 
     public void setNeedAudit(Integer needAudit) {
         this.needAudit = needAudit;
+    }
+
+    public Integer getPatternFileCategory() {
+        return patternFileCategory;
+    }
+
+    public void setPatternFileCategory(Integer patternFileCategory) {
+        this.patternFileCategory = patternFileCategory;
     }
 }

@@ -5,15 +5,23 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sxjkwm.pm.auth.context.ContextFactory;
+import com.sxjkwm.pm.auth.context.impl.ContextFactoryImpl;
+import com.sxjkwm.pm.auth.context.impl.OpenApiContextFactoryImpl;
+import com.sxjkwm.pm.auth.dto.ExternalRPCDataDto;
 import com.sxjkwm.pm.auth.dto.UserDataDto;
 import com.sxjkwm.pm.auth.service.LoginService;
+import com.sxjkwm.pm.auth.service.OpenAPIAuthService;
 import com.sxjkwm.pm.cache.ReqTokenService;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.common.XssFilterRequestWrapper;
+import com.sxjkwm.pm.constants.Constant;
+import com.sxjkwm.pm.constants.ErrorPage;
 import com.sxjkwm.pm.constants.PmError;
+import com.sxjkwm.pm.exception.PmException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,14 +45,15 @@ public class FilterConfiguration {
 
     @Bean
     public FilterRegistrationBean<AuthFilter> authFilter(@Autowired LoginService loginService, @Autowired FEConfig feConfig,
-                                                         @Autowired ContextFactory contextFactory, @Autowired WhitelistConfig whitelistConfig) {
+                                                         @Autowired ContextFactoryImpl userContextFactory, @Autowired WhitelistConfig whitelistConfig,
+                                                         @Autowired OpenApiContextFactoryImpl openApiContextFactory, @Autowired OpenAPIAuthService openAPIAuthService) {
         FilterRegistrationBean<AuthFilter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
         String whitelistStr = whitelistConfig.getWhitelistStr();
         Set<String> legalUris = Sets.newHashSet();
         if (StringUtils.isNotBlank(whitelistStr)) {
             legalUris.addAll(Arrays.asList(whitelistStr.split(";")));
         }
-        filterFilterRegistrationBean.setFilter(new AuthFilter(loginService, feConfig, contextFactory, legalUris));
+        filterFilterRegistrationBean.setFilter(new AuthFilter(loginService, feConfig, userContextFactory, legalUris, openApiContextFactory, openAPIAuthService));
         filterFilterRegistrationBean.setUrlPatterns(Lists.newArrayList("/*"));
         filterFilterRegistrationBean.setOrder(0);
         filterFilterRegistrationBean.setName("GlobalAuthFilter");
@@ -85,18 +94,24 @@ public class FilterConfiguration {
 
         private final FEConfig feConfig;
 
-        private final ContextFactory<UserDataDto> contextFactory;
+        private final ContextFactoryImpl userContextFactory;
 
         private final String loginURL;
 
         private final Set<String> legalUris;
 
-        public AuthFilter(LoginService loginService, FEConfig feConfig, ContextFactory<UserDataDto> contextFactory, Set<String> legalUris) {
+        private final OpenApiContextFactoryImpl openApiContextFactory;
+
+        private final OpenAPIAuthService openAPIAuthService;
+
+        public AuthFilter(LoginService loginService, FEConfig feConfig, ContextFactoryImpl userContextFactory, Set<String> legalUris, OpenApiContextFactoryImpl openApiContextFactory, OpenAPIAuthService openAPIAuthService) {
             this.loginService = loginService;
             this.feConfig = feConfig;
-            this.contextFactory = contextFactory;
+            this.userContextFactory = userContextFactory;
             loginURL = feConfig.getDomain() + feConfig.getProjectPath() + feConfig.getLoginPath();
             this.legalUris = legalUris;
+            this.openApiContextFactory = openApiContextFactory;
+            this.openAPIAuthService = openAPIAuthService;
         }
 
         @Override
@@ -109,19 +124,34 @@ public class FilterConfiguration {
             HttpServletResponse resp = (HttpServletResponse) servletResponse;
             String method = req.getMethod();
             String uri = req.getRequestURI();
-            try {
-                if (!skippable(uri) && !method.equals("OPTIONS")) {
-                    if (!loginService.isValid(req)) {
-                        Cookie cookie = new Cookie(LoginService.tokenKey, null);
-                        cookie.setMaxAge(0);
-                        resp.addCookie(cookie);
-                        resp.sendRedirect(loginURL);
+            if (!skippable(uri) && !method.equals("OPTIONS")) {
+                if (uri.toLowerCase().startsWith(Constant.OPEN_API_FEATURE)) {  // open API auth
+                    try {
+                        openAPIAuthService.auth(req);
+                        filterChain.doFilter(req, resp);
+                    } catch (PmException e) {
+                        ErrorPage.writeErrorAsJson(resp, e);
                         return;
+                    } finally {
+                        openApiContextFactory.remove();
+                    }
+                } else {
+                    try {
+                        if (!loginService.isValid(req)) {
+                            Cookie cookie = new Cookie(LoginService.tokenKey, null);
+                            cookie.setMaxAge(0);
+                            resp.addCookie(cookie);
+                            resp.sendRedirect(loginURL);
+                            return;
+                        } else {
+                            filterChain.doFilter(req, resp);
+                        }
+                    } finally {
+                        userContextFactory.remove();
                     }
                 }
+            } else {
                 filterChain.doFilter(req, resp);
-            } finally {
-                contextFactory.remove();
             }
         }
 

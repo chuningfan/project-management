@@ -23,6 +23,8 @@ public class UserDataDto implements Serializable {
 
     private String ipAddr;
 
+    private String mobile;
+
     public Long getUserId() {
         return userId;
     }
@@ -85,5 +87,13 @@ public class UserDataDto implements Serializable {
 
     public void setIpAddr(String ipAddr) {
         this.ipAddr = ipAddr;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
     }
 }

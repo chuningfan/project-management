@@ -33,6 +33,8 @@ public class ProjectNodePropertyDto implements Serializable {
 
     private String propertyKey;
 
+    private Integer patternFileCategory;
+
     private List<FlowNodeCollectionDefDto> flowNodeCollectionDefDtos;
 
     private List<Map<String, Object>> collectionData;
@@ -93,6 +95,14 @@ public class ProjectNodePropertyDto implements Serializable {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public Integer getPatternFileCategory() {
+        return patternFileCategory;
+    }
+
+    public void setPatternFileCategory(Integer patternFileCategory) {
+        this.patternFileCategory = patternFileCategory;
     }
 
     public List<Map<String, Object>> getCollectionData() {
