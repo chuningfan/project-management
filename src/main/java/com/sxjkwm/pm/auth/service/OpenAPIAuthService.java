@@ -9,6 +9,7 @@ import com.sxjkwm.pm.auth.dao.ExternalEnterpriseDao;
 import com.sxjkwm.pm.auth.dto.ExternalRPCDataDto;
 import com.sxjkwm.pm.auth.entity.ExternalEnterprise;
 import com.sxjkwm.pm.common.CacheService;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -39,8 +40,6 @@ public class OpenAPIAuthService {
     private static final String headerKeyAppSecret = "appSecret";
 
     private static final String salt = "sxjkwm2808";
-
-    private static final String openAPISignCachePrefix = "opas:";
 
     private static final String[] authKeys = {headerKeySign, headerKeyAppKey};
 
@@ -154,7 +153,7 @@ public class OpenAPIAuthService {
     }
 
     private String getCachedSignKey(String appKey) {
-        return openAPISignCachePrefix + DigestUtils.md5Hex(appKey);
+        return Constant.openAPISignCachePrefix + DigestUtils.md5Hex(appKey);
     }
 
 }

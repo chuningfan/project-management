@@ -10,6 +10,7 @@ import com.sxjkwm.pm.auth.entity.Role;
 import com.sxjkwm.pm.auth.entity.RoleAndFunctionRelation;
 import com.sxjkwm.pm.auth.entity.User;
 import com.sxjkwm.pm.common.CacheService;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.function.entity.Function;
 import com.sxjkwm.pm.function.service.FunctionService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,8 +26,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserDataService {
-
-    static final String userCachePrefix = "user:";
 
     private final UserDao userDao;
 
@@ -56,7 +55,7 @@ public class UserDataService {
     }
 
     public UserDataDto getUserDataByWxUserId(String wxUserId) {
-        String userDataJson = cacheService.getString(userCachePrefix + wxUserId);
+        String userDataJson = cacheService.getString(Constant.userCachePrefix + wxUserId);
         if (StringUtils.isNotBlank(userDataJson)) {
             return JSONObject.parseObject(userDataJson, UserDataDto.class);
         }

@@ -17,7 +17,11 @@ import java.util.stream.Collectors;
 
 public interface Constant<K, V> {
 
-    static final String OPEN_API_FEATURE = "/api/";
+    String openAPISignCachePrefix = "opas:";
+
+    String userCachePrefix = "user:";
+
+    String OPEN_API_FEATURE = "/api/";
 
     V getValue();
 

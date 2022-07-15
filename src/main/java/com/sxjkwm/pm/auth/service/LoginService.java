@@ -9,6 +9,7 @@ import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.auth.dto.UserDataDto;
 import com.sxjkwm.pm.common.CacheService;
 import com.sxjkwm.pm.configuration.WxConfig;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.WxWorkTokenUtil;
@@ -16,9 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -71,7 +70,7 @@ public class LoginService {
         }
         JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(_token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
         String userId = jsonObject.getString("userId");
-        String userDataDtoString = cacheService.getString(UserDataService.userCachePrefix + userId);
+        String userDataDtoString = cacheService.getString(Constant.userCachePrefix + userId);
 
         if (StringUtils.isNotBlank(userDataDtoString)) {
             fillContext(JSONObject.parseObject(userDataDtoString, UserDataDto.class), req);
@@ -122,7 +121,7 @@ public class LoginService {
             return null;
         }
         String userDataString = JSONObject.toJSONString(dataDto);
-        cacheService.store(UserDataService.userCachePrefix + wxUserId, userDataString);
+        cacheService.store(Constant.userCachePrefix + wxUserId, userDataString);
         return encoded;
     }
 
