@@ -53,7 +53,7 @@ public class ServletConfig {
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
             try {
                 JSONObject res = loginService.doLogin(req);
-                String token = loginService.processToken(res, req);
+                String token = loginService.processToken(res);
                 resp.sendRedirect(redirectURL + "?" + LoginService.tokenKey + "=" + token);
             } catch (PmException e) {
                 String code = e.getCode();

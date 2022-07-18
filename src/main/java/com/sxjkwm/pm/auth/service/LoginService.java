@@ -27,7 +27,13 @@ import java.util.Objects;
 @Service
 public class LoginService {
 
+    public static final String keyArchKey = "dejavu";
+
     public static final String tokenKey = "makata";
+
+    public static final String wxErrorKey = "errcode";
+
+    private static final String wxReturnCodeKey = "code";
 
     private final WxConfig wxConfig;
 
@@ -69,7 +75,7 @@ public class LoginService {
             _token = token.replace(token.substring(token.lastIndexOf("%")), "=");
         }
         JSONObject jsonObject = JSONObject.parseObject(new String(Base64.getDecoder().decode(_token.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
-        String userId = jsonObject.getString("userId");
+        String userId = jsonObject.getString(keyArchKey);
         String userDataDtoString = cacheService.getString(Constant.userCachePrefix + userId);
 
         if (StringUtils.isNotBlank(userDataDtoString)) {
@@ -87,21 +93,21 @@ public class LoginService {
     }
 
     public JSONObject doLogin(HttpServletRequest req) throws PmException {
-        String code = req.getParameter("code");
+        String code = req.getParameter(wxReturnCodeKey);
         String token = WxWorkTokenUtil.getToken();
         Map<String, Object> param = Maps.newHashMap();
         param.put("access_token", token);
-        param.put("code", code);
+        param.put(wxReturnCodeKey, code);
         String res = HttpUtil.get(wxConfig.getLoginCodeURL(), param, 30 * 1000);
         JSONObject jsonObject = JSONObject.parseObject(res);
-        Integer errCode = jsonObject.getInteger("errcode");
+        Integer errCode = jsonObject.getInteger(wxErrorKey);
         if (Objects.isNull(errCode) || errCode.intValue() == 0) {
             String wxUserId = jsonObject.getString("UserId");
             param.put("userid", wxUserId);
-            param.remove("code");
+            param.remove(wxReturnCodeKey);
             res = HttpUtil.get(wxConfig.getUserURL(), param, 30 * 1000);
             jsonObject = JSONObject.parseObject(res);
-            errCode = jsonObject.getInteger("errcode");
+            errCode = jsonObject.getInteger(wxErrorKey);
             if (Objects.isNull(errCode) || errCode.intValue() == 0) {
                 return jsonObject;
             }
@@ -110,10 +116,11 @@ public class LoginService {
         throw new PmException(PmError.WXWORK_LOGIN_FAILED);
     }
 
-    public String processToken(JSONObject jsonObject, HttpServletRequest request) {
+    public String processToken(JSONObject jsonObject) {
         String wxUserId = jsonObject.getString("userid");
         Map<String, Object> dataMap = Maps.newHashMap();
-        dataMap.put("userId", wxUserId);
+        dataMap.put(keyArchKey, wxUserId);
+        dataMap.put("time", System.currentTimeMillis());
         String jsonString = JSONObject.toJSONString(dataMap);
         String encoded = new String(Base64.getEncoder().encode(jsonString.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
         UserDataDto dataDto = userDataService.getUserDataByWxUserId(wxUserId);
