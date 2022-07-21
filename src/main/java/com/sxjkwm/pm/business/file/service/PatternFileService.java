@@ -1,7 +1,9 @@
 package com.sxjkwm.pm.business.file.service;
 
 import cn.hutool.core.lang.UUID;
+import com.google.common.collect.Lists;
 import com.sxjkwm.pm.business.file.dao.PatternFileDao;
+import com.sxjkwm.pm.business.file.dto.PatternFileDto;
 import com.sxjkwm.pm.business.file.entity.PatternFile;
 import com.sxjkwm.pm.business.file.handler.PatternFileHandler;
 import com.sxjkwm.pm.business.file.handler.replacement.BaseReplacement;
@@ -39,6 +41,10 @@ public class PatternFileService {
     public PatternFileService(S3FileUtil s3FileUtil, PatternFileDao patternFileDao) {
         this.s3FileUtil = s3FileUtil;
         this.patternFileDao = patternFileDao;
+    }
+
+    public PatternFile findById(Long patternFileId) {
+        return patternFileDao.findById(patternFileId).orElse(null);
     }
 
     /**
@@ -99,19 +105,30 @@ public class PatternFileService {
             }
             Constant.FileType fileType = Constant.FileType.getFromVal(patternFile.getFileCategory(), patternFile.getFileType());
             PatternFileHandler patternFileHandler = ContextUtil.getBean(fileType.fileHandlerClass());
-            return patternFileHandler.doHandle0(fileResponse, dataId, flowNodeId, propertyDefId);
+            return patternFileHandler.doHandle0(fileResponse, dataId, flowNodeId, propertyDefId, patternFile.getFileName());
         }
     }
 
-    public Map<Long, String> fetchPatternFilesByCategory(Integer category) {
+    public List<PatternFileDto> fetchPatternFilesByCategory(Integer category) {
         PatternFile condition = new PatternFile();
-        condition.setFileCategory(category);
+        if (Objects.nonNull(category)) {
+            condition.setFileCategory(category);
+        }
         condition.setIsDeleted(0);
         List<PatternFile> files = patternFileDao.findAll(Example.of(condition));
         if (CollectionUtils.isEmpty(files)) {
-            return Collections.emptyMap();
+            return Collections.emptyList();
         }
-        return files.stream().collect(Collectors.toMap(PatternFile::getId, PatternFile::getFileName, (k1, k2) -> k1));
+        List<PatternFileDto> patternFileDtos = Lists.newArrayList();
+        PatternFileDto dto;
+        for (PatternFile file: files) {
+            Integer categoryId = file.getFileCategory();
+            Integer typeId = file.getFileType();
+            Constant.FileType fileType = Constant.FileType.getFromVal(categoryId, typeId);
+            dto = new PatternFileDto(file.getId(), file.getFileName(), categoryId, fileType.getCategoryName(), fileType.getValue(), fileType.getLabel());
+            patternFileDtos.add(dto);
+        }
+        return patternFileDtos;
     }
 
 

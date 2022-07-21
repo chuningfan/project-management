@@ -303,10 +303,10 @@ public class ProjectNodeService {
                         Long fileId = Long.valueOf(propVal);
                         ProjectFile projectFile = projectFileDao.getOne(fileId);
                         propertyDto.setFileName(projectFile.getFileName());
-                        propertyDto.setPatternFileCategory(flowNodeDefinition.getPatternFileCategory());
                     }
                     propertyDto.setPropertyValue(propVal);
                 }
+                propertyDto.setPatternFileCategory(flowNodeDefinition.getPatternFileCategory());
             } else if ("CHECKBOX".equals(propType) || "RADIO".equals(propType)) {
                 if  (Objects.nonNull(flowNodeSelectinoDefKeyMap)) {
                     List<FlowNodeSelectionDefinitionDto> selectionDefinitionDtos = flowNodeSelectinoDefKeyMap.get(flowNodeDefinition.getId());

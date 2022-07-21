@@ -1,16 +1,24 @@
 package com.sxjkwm.pm.business.file.handler;
 
 import cn.hutool.core.lang.UUID;
+import com.google.common.collect.Lists;
 import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
 import com.sxjkwm.pm.business.file.entity.ProjectFile;
 import com.sxjkwm.pm.business.file.handler.replacement.BaseReplacement;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
+import com.sxjkwm.pm.business.project.dao.ProjectNodeDao;
+import com.sxjkwm.pm.business.project.dao.ProjectNodePropertyDao;
 import com.sxjkwm.pm.business.project.dto.ProjectDto;
+import com.sxjkwm.pm.business.project.entity.ProjectNode;
+import com.sxjkwm.pm.business.project.entity.ProjectNodeProperty;
 import com.sxjkwm.pm.business.project.service.ProjectService;
+import com.sxjkwm.pm.constants.PmError;
+import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.ContextUtil;
 import com.sxjkwm.pm.util.OSSUtil;
 import com.sxjkwm.pm.util.S3FileUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.data.domain.Example;
 
@@ -29,7 +37,7 @@ import java.util.Objects;
 public interface PatternFileHandler {
 
     @Transactional
-    default Long doHandle0(InputStream targetPatternFileStream, Long dataId, Long flowNodeId, Long propertyDefId) throws Throwable {
+    default Long doHandle0(InputStream targetPatternFileStream, Long dataId, Long flowNodeId, Long propertyDefId, String fileName) throws Throwable {
         try (InputStream inputStream = targetPatternFileStream; XWPFDocument document = new XWPFDocument(inputStream);) {
             FlowNodeDefinitionDao flowNodeDefinitionDao = ContextUtil.getBean(FlowNodeDefinitionDao.class);
             ProjectService projectService = ContextUtil.getBean(ProjectService.class);
@@ -44,10 +52,10 @@ public interface PatternFileHandler {
             condition.setProjectId(dataId);
             condition.setFlowId(projectDto.getFlowId());
             condition.setPropertyDefId(propertyDefId);
-            String fileName = projectDto.getProjectName() + "-" + flowNodeDefinition.getPropertyName() + ".docx";
+//            String fileName = projectDto.getProjectName() + "-" + flowNodeDefinition.getPropertyName() + ".docx";
             ProjectFile oldFile = projectFileDao.findOne(Example.of(condition)).orElse(null);
             if (Objects.nonNull(oldFile)) {
-                fileName = oldFile.getFileName();
+//                fileName = oldFile.getFileName();
                 String bucketName = oldFile.getBucketName();
                 String objectName = oldFile.getObjectName();
                 s3FileUtil.remove(bucketName, objectName);
@@ -69,6 +77,30 @@ public interface PatternFileHandler {
             newFile.setProjectId(projectDto.getId());
             newFile.setIsDeleted(0);
             projectFileDao.save(newFile);
+            // cover property value
+            ProjectNodePropertyDao projectNodePropertyDao = ContextUtil.getBean(ProjectNodePropertyDao.class);
+            List<ProjectNodeProperty> projectNodePropertyList = projectNodePropertyDao.findByPropDefIdsAndProjectId(Lists.newArrayList(propertyDefId), dataId);
+            ProjectNodeProperty projectNodeProperty;
+            if (CollectionUtils.isEmpty(projectNodePropertyList)) {
+                projectNodeProperty = new ProjectNodeProperty();
+                projectNodeProperty.setFlowNodePropertyDefId(propertyDefId);
+                projectNodeProperty.setProjectId(dataId);
+                projectNodeProperty.setIsDeleted(0);
+                ProjectNodeDao projectNodeDao = ContextUtil.getBean(ProjectNodeDao.class);
+                ProjectNode projectNodeCondition = new ProjectNode();
+                projectNodeCondition.setIsDeleted(0);
+                projectNodeCondition.setProjectId(dataId);
+                projectNodeCondition.setFlowNodeId(flowNodeId);
+                ProjectNode projectNode = projectNodeDao.findOne(Example.of(projectNodeCondition)).orElse(null);
+                if (Objects.isNull(projectNode)) {
+                    throw new PmException(PmError.NO_DATA_FOUND);
+                }
+                projectNodeProperty.setProjectNodeId(projectNode.getId());
+            } else {
+                projectNodeProperty = projectNodePropertyList.get(0);
+            }
+            projectNodeProperty.setPropertyValue(newFile.getId().toString());
+            projectNodePropertyDao.save(projectNodeProperty);
             return newFile.getId();
         }
     }

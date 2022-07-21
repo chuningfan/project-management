@@ -27,7 +27,12 @@ public class PreviewController {
 
     @GetMapping
     public void preview(@RequestParam("fileId") Long fileId, HttpServletResponse response) throws PmException {
-        previewService.preview(fileId, response);
+        previewService.preview(fileId, response, true);
+    }
+
+    @GetMapping("/pattern")
+    public void previewPatternFile(@RequestParam("fileId") Long fileId, HttpServletResponse response) throws PmException {
+        previewService.preview(fileId, response, false);
     }
 
 }

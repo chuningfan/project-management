@@ -3,6 +3,7 @@ package com.sxjkwm.pm.business.file.controller;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sxjkwm.pm.business.file.dto.FileCategoryAndType;
+import com.sxjkwm.pm.business.file.dto.PatternFileDto;
 import com.sxjkwm.pm.business.file.handler.replacement.BaseReplacement;
 import com.sxjkwm.pm.business.file.service.PatternFileService;
 import com.sxjkwm.pm.common.RestResponse;
@@ -67,10 +68,8 @@ public class PatternFileController {
         return RestResponse.of(categoryAndTypes);
     }
 
-
-
     @GetMapping("/files")
-    public RestResponse<Map<Long, String>> fetchFilesByCategory(@RequestParam("category") Integer category) {
+    public RestResponse<List<PatternFileDto>> fetchFilesByCategory(@RequestParam(value = "category", required = false) Integer category) {
         return RestResponse.of(patternFileService.fetchPatternFilesByCategory(category));
     }
 
