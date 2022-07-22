@@ -109,6 +109,9 @@ public interface PatternFileHandler {
     List<BaseReplacement> captureData(Long dataId, Long flowId, Long flowNodeId, Long propertyDefId);
 
     default void processDataAsDefault(XWPFDocument document, List<BaseReplacement> dataList) {
+        if (CollectionUtils.isEmpty(dataList)) {
+            return;
+        }
         for (BaseReplacement replacement: dataList) {
             replacement.getReplacementType().convert(document, replacement);
         }
