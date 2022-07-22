@@ -42,7 +42,6 @@ public interface PatternFileHandler {
             FlowNodeDefinitionDao flowNodeDefinitionDao = ContextUtil.getBean(FlowNodeDefinitionDao.class);
             ProjectService projectService = ContextUtil.getBean(ProjectService.class);
             ProjectDto projectDto = projectService.getId(dataId);
-            FlowNodeDefinition flowNodeDefinition = flowNodeDefinitionDao.findById(propertyDefId).get();
             S3FileUtil s3FileUtil = ContextUtil.getBean(S3FileUtil.class);
             List<BaseReplacement> dataList = captureData(dataId, projectDto.getFlowId(), flowNodeId, propertyDefId);
             processDataAsDefault(document, dataList);
@@ -52,10 +51,8 @@ public interface PatternFileHandler {
             condition.setProjectId(dataId);
             condition.setFlowId(projectDto.getFlowId());
             condition.setPropertyDefId(propertyDefId);
-//            String fileName = projectDto.getProjectName() + "-" + flowNodeDefinition.getPropertyName() + ".docx";
             ProjectFile oldFile = projectFileDao.findOne(Example.of(condition)).orElse(null);
             if (Objects.nonNull(oldFile)) {
-//                fileName = oldFile.getFileName();
                 String bucketName = oldFile.getBucketName();
                 String objectName = oldFile.getObjectName();
                 s3FileUtil.remove(bucketName, objectName);
