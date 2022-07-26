@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.wxwork.controller;
 
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.wxwork.service.DepartmentService;
 import com.sxjkwm.pm.wxwork.service.UserService;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/wxWork")
+@RequestMapping(Constant.API_FEATURE + "/wxWork")
 public class WxWorkController {
 
     private final DepartmentService departmentService;

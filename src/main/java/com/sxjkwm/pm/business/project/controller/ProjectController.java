@@ -6,6 +6,7 @@ import com.sxjkwm.pm.business.project.entity.Project;
 import com.sxjkwm.pm.business.project.service.ProjectService;
 import com.sxjkwm.pm.common.BaseController;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/project")
+@RequestMapping(Constant.API_FEATURE + "/project")
 public class ProjectController extends BaseController {
 
     private final ProjectService projectService;

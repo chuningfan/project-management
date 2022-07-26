@@ -4,13 +4,14 @@ import com.sxjkwm.pm.auth.dto.UserDataDto;
 import com.sxjkwm.pm.auth.service.UserDataService;
 import com.sxjkwm.pm.common.BaseController;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/userData")
+@RequestMapping(Constant.API_FEATURE + "/userData")
 public class UserDataController extends BaseController {
 
     private final UserDataService userDataService;

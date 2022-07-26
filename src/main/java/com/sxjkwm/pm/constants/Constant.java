@@ -21,7 +21,9 @@ public interface Constant<K, V> {
 
     String userCachePrefix = "user:";
 
-    String OPEN_API_FEATURE = "/api/";
+    String API_FEATURE = "/service";
+
+    String OPEN_API_FEATURE = API_FEATURE + "/openapi/";
 
     V getValue();
 

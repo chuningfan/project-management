@@ -6,12 +6,13 @@ import com.sxjkwm.pm.business.message.dto.MessageDto;
 import com.sxjkwm.pm.business.message.dto.TextMsgDto;
 import com.sxjkwm.pm.business.message.service.MessageService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/message")
+@RequestMapping(Constant.API_FEATURE + "/message")
 public class MessageController {
     @Autowired
     private MessageService messageService;

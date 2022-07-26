@@ -3,6 +3,7 @@ package com.sxjkwm.pm.business.org.controller;
 import com.sxjkwm.pm.business.org.dto.OrgDto;
 import com.sxjkwm.pm.business.org.service.OrganizationService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +18,7 @@ import java.util.List;
  * @date 2022/5/25 15:34
  */
 @RestController
-@RequestMapping("/org")
+@RequestMapping(Constant.API_FEATURE + "/org")
 public class OrganizationController {
 
     private final OrganizationService organizationService;

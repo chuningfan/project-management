@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/patternFile")
+@RequestMapping(Constant.API_FEATURE + "/patternFile")
 public class PatternFileController {
 
     private final PatternFileService patternFileService;

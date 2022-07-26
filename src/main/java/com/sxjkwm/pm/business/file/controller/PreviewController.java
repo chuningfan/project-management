@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.business.file.controller;
 
 import com.sxjkwm.pm.business.file.service.PreviewService;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
  * @date 2022/5/28 7:28
  */
 @RestController
-@RequestMapping("/preview")
+@RequestMapping(Constant.API_FEATURE + "/preview")
 public class PreviewController {
 
     private final PreviewService previewService;

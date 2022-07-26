@@ -4,6 +4,7 @@ import com.sxjkwm.pm.business.material.dto.CategoryDto;
 import com.sxjkwm.pm.business.material.service.CategoryService;
 import com.sxjkwm.pm.common.BaseController;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * @date 2022/5/31 16:17
  */
 @RestController
-@RequestMapping("/category")
+@RequestMapping(Constant.API_FEATURE + "/category")
 public class CategoryController extends BaseController {
 
     private final CategoryService categoryService;

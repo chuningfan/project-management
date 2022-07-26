@@ -2,13 +2,14 @@ package com.sxjkwm.pm.auth.controller;
 
 import com.sxjkwm.pm.auth.service.RoleAndFunctionRelationService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/roleFunction")
+@RequestMapping(Constant.API_FEATURE + "/roleFunction")
 public class RoleFunctionController {
 
     private final RoleAndFunctionRelationService roleAndFunctionRelationService;

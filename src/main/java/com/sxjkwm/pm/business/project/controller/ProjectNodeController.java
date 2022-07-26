@@ -4,6 +4,7 @@ import com.sxjkwm.pm.business.project.dto.ProjectNodeDto;
 import com.sxjkwm.pm.business.project.service.ProjectNodeService;
 import com.sxjkwm.pm.common.BaseController;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ import java.sql.SQLException;
  * @date 2022/5/15 16:37
  */
 @RestController
-@RequestMapping("/projectNode")
+@RequestMapping(Constant.API_FEATURE + "/projectNode")
 public class ProjectNodeController extends BaseController {
 
     private final ProjectNodeService projectNodeService;

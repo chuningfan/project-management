@@ -2,6 +2,7 @@ package com.sxjkwm.pm.auth.controller;
 
 import com.sxjkwm.pm.auth.entity.User;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.wxwork.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping(Constant.API_FEATURE + "/user")
 public class UserController {
 
     private final UserService userService;

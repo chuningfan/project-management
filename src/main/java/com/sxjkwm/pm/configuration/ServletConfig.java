@@ -3,6 +3,7 @@ package com.sxjkwm.pm.configuration;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.auth.service.LoginService;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.ErrorPage;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
@@ -25,7 +26,7 @@ public class ServletConfig {
     @Bean
     public ServletRegistrationBean<WxLoginServlet> wxLoginServlet(@Autowired LoginService loginService, @Autowired FEConfig feConfig) {
         ServletRegistrationBean<WxLoginServlet> servletServletRegistrationBean = new ServletRegistrationBean<>();
-        servletServletRegistrationBean.setUrlMappings(Lists.newArrayList("/wxlogin.do"));
+        servletServletRegistrationBean.setUrlMappings(Lists.newArrayList(Constant.API_FEATURE + "/wxlogin.do"));
         servletServletRegistrationBean.setServlet(new WxLoginServlet(loginService, feConfig));
         servletServletRegistrationBean.setName("WxLoginServlet");
         servletServletRegistrationBean.setOrder(0);
@@ -68,7 +69,6 @@ public class ServletConfig {
             }
         }
     }
-
 
     @Bean
     public ServletRegistrationBean<PatternFileDownloadServlet> patternFileDownloadServlet() {

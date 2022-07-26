@@ -3,6 +3,7 @@ package com.sxjkwm.pm.auditing.controller;
 import com.sxjkwm.pm.auditing.dto.StartFlowDto;
 import com.sxjkwm.pm.auditing.service.AuditingActionService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2022/6/27 9:13
  */
 @RestController
-@RequestMapping("/auditingAction")
+@RequestMapping(Constant.API_FEATURE + "/auditingAction")
 public class AuditingActionController {
 
     private final AuditingActionService auditingActionService;

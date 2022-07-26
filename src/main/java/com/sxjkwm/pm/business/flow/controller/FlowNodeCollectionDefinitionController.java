@@ -4,6 +4,7 @@ import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionDefDto;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeCollectionDefinition;
 import com.sxjkwm.pm.business.flow.service.FlowNodeCollectionDefinitionService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * @date 2022/5/25 10:28
  */
 @RestController
-@RequestMapping("/collectionDefinition")
+@RequestMapping(Constant.API_FEATURE + "/collectionDefinition")
 public class FlowNodeCollectionDefinitionController {
 
 

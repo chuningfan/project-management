@@ -3,6 +3,7 @@ package com.sxjkwm.pm.auth.external;
 import com.alibaba.fastjson.JSONObject;
 import com.sxjkwm.pm.auth.service.OpenAPIAuthService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2022/7/15 14:39
  */
 @RestController
-@RequestMapping("/openApi")
+@RequestMapping(Constant.API_FEATURE + "/openApi")
 public class OpenApiSignController {
 
     private final OpenAPIAuthService openAPIAuthService;

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping(value = "/flowNodeDefinitions")
+@RequestMapping(Constant.API_FEATURE + "/flowNodeDefinitions")
 public class FlowNodeDefinitionController {
 
     private final FlowNodeDefinitionService flowNodeDefinitionService;

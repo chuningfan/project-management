@@ -18,10 +18,10 @@ import java.net.ConnectException;
 @Configuration
 @PropertySource("classpath:FilePreviewConfig.properties")
 public class FilePreviewConfig {
-    @Value("${openoffice.ip: localhost}")
+    @Value("${openoffice.ip: 127.0.0.1}")
     private String ip;
 
-    @Value("${openoffice.port: 8081}")
+    @Value("${openoffice.port: 8100}")
     private String port;
 
     @Bean

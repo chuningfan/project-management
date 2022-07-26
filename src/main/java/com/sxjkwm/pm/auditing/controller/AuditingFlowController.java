@@ -3,6 +3,7 @@ package com.sxjkwm.pm.auditing.controller;
 import com.sxjkwm.pm.auditing.dto.AuditingFlowDto;
 import com.sxjkwm.pm.auditing.service.AuditingFlowService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +16,7 @@ import java.util.List;
  * @date 2022/6/27 9:05
  */
 @RestController
-@RequestMapping("/auditingFlow")
+@RequestMapping(Constant.API_FEATURE + "/auditingFlow")
 public class AuditingFlowController {
 
     private final AuditingFlowService auditingFlowService;

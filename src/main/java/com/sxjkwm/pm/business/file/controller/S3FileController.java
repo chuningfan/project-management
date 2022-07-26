@@ -2,6 +2,7 @@ package com.sxjkwm.pm.business.file.controller;
 
 import com.sxjkwm.pm.business.file.service.S3FileService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 
 @RestController
-@RequestMapping("/s3")
+@RequestMapping(Constant.API_FEATURE + "/s3")
 public class S3FileController {
 
     private final S3FileService s3FileService;

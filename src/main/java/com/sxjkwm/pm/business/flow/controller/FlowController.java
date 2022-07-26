@@ -5,6 +5,7 @@ import com.sxjkwm.pm.business.flow.dto.FlowDto;
 import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.service.FlowService;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/flows")
+@RequestMapping(Constant.API_FEATURE + "/flows")
 public class FlowController {
 
     private final FlowService flowService;

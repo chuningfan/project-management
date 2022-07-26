@@ -5,6 +5,7 @@ import com.sxjkwm.pm.business.centralizedpurchase.service.BidInfoService;
 import com.sxjkwm.pm.business.centralizedpurchase.service.ProjectInfoService;
 import com.sxjkwm.pm.business.project.dto.ProjectDto;
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,7 +18,7 @@ import java.util.List;
  * @date 2022/7/4 16:59
  */
 @RestController
-@RequestMapping("/cp")
+@RequestMapping(Constant.API_FEATURE + "/cp")
 public class CentralizedPurchaseController {
 
     private final ProjectInfoService projectInfoService;
