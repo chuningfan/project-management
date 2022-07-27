@@ -20,13 +20,3 @@ spring:
     open-in-view: true
     hibernate:
       ddl-auto: update
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
-logging:
-  level:
-    org:
-      springframework:
-        web: INFO
-    hibernate: ERROR

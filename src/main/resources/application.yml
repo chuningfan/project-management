@@ -1,3 +1,5 @@
 spring:
   profiles:
-    active: test                 # dev-test-stage-prod
+    active: prod                 # dev-test-stage-prod
+logging:
+  config: classpath:logback.xml
