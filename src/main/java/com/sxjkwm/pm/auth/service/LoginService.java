@@ -12,6 +12,7 @@ import com.sxjkwm.pm.configuration.WxConfig;
 import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
+import com.sxjkwm.pm.util.IpAddressUtil;
 import com.sxjkwm.pm.util.WxWorkTokenUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,7 @@ public class LoginService {
     }
 
     private void fillContext(UserDataDto userDataDto, HttpServletRequest req) {
-        String remoteIpAddr = req.getRemoteAddr();
+        String remoteIpAddr = IpAddressUtil.getIpAddress(req);
         userDataDto.setIpAddr(remoteIpAddr);
         Context<UserDataDto> context = contextFactory.get();
         context.of(userDataDto);
