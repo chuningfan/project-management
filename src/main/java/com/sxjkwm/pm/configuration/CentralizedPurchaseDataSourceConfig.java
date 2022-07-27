@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * @date 2022/7/4 15:43
  */
 @Configuration
-@PropertySource("classpath:CentralizedPurchaseDataSourceConfig.properties")
+@PropertySource("classpath:config/cpConfig/cpConfig-${spring.profiles.active}.properties")
 public class CentralizedPurchaseDataSourceConfig {
 
     @Value("${cp.ds.address}")

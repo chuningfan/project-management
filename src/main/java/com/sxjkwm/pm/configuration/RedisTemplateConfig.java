@@ -22,18 +22,14 @@ import redis.clients.jedis.JedisPoolConfig;
  */
 @Configuration
 @EnableCaching
-@PropertySource("classpath:application.yml")
+@PropertySource("classpath:config/redisConfig/redisConfig-${spring.profiles.active}.properties")
 public class RedisTemplateConfig extends CachingConfigurerSupport {
 
-    @Value("${spring.redis.host}")
-    private String host;
+    @Value("${redis.address}")
+    private String address;
 
-    @Value("${spring.redis.port}")
-    private String port;
-
-    @Value("${spring.redis.password}")
+    @Value("${redis.password}")
     private String password;
-
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
@@ -61,8 +57,9 @@ public class RedisTemplateConfig extends CachingConfigurerSupport {
 
     private RedisConnectionFactory redisConnectionFactory(JedisPoolConfig jedisPoolConfig) {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
-        configuration.setHostName(host);
-        configuration.setPort(Integer.parseInt(port));
+        String[] array = address.split(":");
+        configuration.setHostName(array[1].replace("//", ""));
+        configuration.setPort(Integer.parseInt(array[2]));
         configuration.setDatabase(1);
         configuration.setPassword(RedisPassword.of(password));
         JedisClientConfiguration.JedisPoolingClientConfigurationBuilder jpcb = (JedisClientConfiguration.JedisPoolingClientConfigurationBuilder) JedisClientConfiguration.builder();

@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:ThirdPartyConfig.properties")
+@PropertySource("classpath:config/wxworkConfig/wxworkConfig-${spring.profiles.active}.properties")
 public class WxConfig {
 
     @Value("${wx.corpId}")

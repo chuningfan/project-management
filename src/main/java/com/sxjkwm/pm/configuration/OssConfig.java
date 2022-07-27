@@ -9,7 +9,7 @@ import org.springframework.context.annotation.PropertySource;
  * @date 2022/5/13 20:45
  */
 @Configuration
-@PropertySource("classpath:OSSConfig.properties")
+@PropertySource("classpath:config/ossConfig/ossConfig-${spring.profiles.active}.properties")
 public class OssConfig {
 
     @Value("${oss.address}")

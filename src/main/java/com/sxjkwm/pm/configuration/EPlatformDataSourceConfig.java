@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * @date 2022/7/4 15:43
  */
 @Configuration
-@PropertySource("classpath:EPlatformDataSourceConfig.properties")
+@PropertySource("classpath:config/epConfig/epConfig-${spring.profiles.active}.properties")
 public class EPlatformDataSourceConfig {
 
     @Value("${ep.ds.address}")

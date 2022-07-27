@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:FEConfig.properties")
+@PropertySource("classpath:config/feConfig/feConfig-${spring.profiles.active}.properties")
 public class FEConfig {
 
     @Value("${fe.domain}")

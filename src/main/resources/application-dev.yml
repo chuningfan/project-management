@@ -1,0 +1,32 @@
+server:
+  port: 9090
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://117.78.7.196:13306/project_management?serverTimezone=GMT%2B8&autoReconnect=true
+    username: admin
+    password: Sxjk123!
+    hikari:
+      connection-timeout: 600000
+      maximum-pool-size: 500
+      minimum-idle: 20
+      max-lifetime: 1800000
+      validation-timeout: 3000
+      idle-timeout: 60000
+      connection-init-sql: SET NAMES utf8mb4
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    show-sql: true
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+logging:
+  level:
+    org:
+      springframework:
+        web: INFO
+    hibernate: ERROR

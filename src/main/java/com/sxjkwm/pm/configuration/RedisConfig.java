@@ -9,7 +9,7 @@ import org.springframework.context.annotation.PropertySource;
  * @date 2022/5/13 20:52
  */
 @Configuration
-@PropertySource("classpath:Redis.properties")
+@PropertySource("classpath:config/redisConfig/redisConfig-${spring.profiles.active}.properties")
 public class RedisConfig {
 
     @Value("${redis.address}")

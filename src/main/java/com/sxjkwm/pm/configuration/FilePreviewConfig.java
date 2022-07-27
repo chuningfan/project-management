@@ -16,7 +16,7 @@ import java.net.ConnectException;
  * @date 2022/5/28 7:46
  */
 @Configuration
-@PropertySource("classpath:FilePreviewConfig.properties")
+@PropertySource("classpath:config/openOfficeConfig/openOfficeConfig-${spring.profiles.active}.properties")
 public class FilePreviewConfig {
     @Value("${openoffice.ip: 127.0.0.1}")
     private String ip;

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.PropertySource;
  */
 
 @Configuration
-@PropertySource("classpath:ReqTokenConfigUris.properties")
+@PropertySource("classpath:config/nonRepeatUriConfig/nonRepeatUriConfig-${spring.profiles.active}.properties")
 public class ReqTokenUrisConfig {
 
     @Value("${reqTokenUriList}")
