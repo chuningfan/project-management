@@ -23,6 +23,8 @@ import java.io.PrintWriter;
 @Configuration
 public class ServletConfig {
 
+    private static final String userIdKey = "userid";
+
     @Bean
     public ServletRegistrationBean<WxLoginServlet> wxLoginServlet(@Autowired LoginService loginService, @Autowired FEConfig feConfig) {
         ServletRegistrationBean<WxLoginServlet> servletServletRegistrationBean = new ServletRegistrationBean<>();
@@ -53,8 +55,8 @@ public class ServletConfig {
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
             try {
-                JSONObject res = loginService.doLogin(req);
-                String token = loginService.processToken(res);
+                String wxUserId = loginService.doLogin(req);
+                String token = loginService.processToken(wxUserId);
                 resp.sendRedirect(redirectURL + "?" + LoginService.tokenKey + "=" + token);
             } catch (PmException e) {
                 String code = e.getCode();

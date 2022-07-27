@@ -8,7 +8,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "pm_user", indexes = {@Index(name="pm_wx_user_id", columnList="wx_user_id")})
+@Table(name = "pm_user", indexes = {@Index(name="pm_wx_user_id", columnList="wx_user_id"), @Index(name = "pm_wx_user_mobile", columnList = "mobile")})
 public class User extends BaseEntity {
 
     @Column(name = "wx_user_id")
@@ -28,6 +28,9 @@ public class User extends BaseEntity {
 
     @Column(name = "mobile")
     private String mobile;
+
+    @Column(name = "login_pwd")
+    private String loginPwd;
 
     public String getWxUserId() {
         return wxUserId;
@@ -75,5 +78,13 @@ public class User extends BaseEntity {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public String getLoginPwd() {
+        return loginPwd;
+    }
+
+    public void setLoginPwd(String loginPwd) {
+        this.loginPwd = loginPwd;
     }
 }

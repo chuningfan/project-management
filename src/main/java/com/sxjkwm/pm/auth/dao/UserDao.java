@@ -9,4 +9,7 @@ public interface UserDao extends JpaRepository<User, Long> {
     @Query(value = "SELECT u FROM User u WHERE u.wxUserId=?1 AND u.isDeleted=0 ")
     User findUserByWxUserId(String wxUserId);
 
+    @Query(value = "SELECT u FROM User u WHERE u.mobile=?1 AND u.isDeleted=0 ")
+    User findUserByMobile(String mobile);
+
 }

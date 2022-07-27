@@ -1,5 +1,9 @@
 spring:
   profiles:
     active: prod                 # dev-test-stage-prod
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 logging:
   config: classpath:logback.xml

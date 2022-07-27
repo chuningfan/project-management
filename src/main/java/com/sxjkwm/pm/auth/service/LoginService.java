@@ -6,19 +6,24 @@ import com.google.common.collect.Maps;
 import com.sxjkwm.pm.auth.context.Context;
 import com.sxjkwm.pm.auth.context.ContextFactory;
 import com.sxjkwm.pm.auth.context.impl.ContextHelper;
+import com.sxjkwm.pm.auth.dao.UserDao;
 import com.sxjkwm.pm.auth.dto.UserDataDto;
+import com.sxjkwm.pm.auth.entity.User;
 import com.sxjkwm.pm.common.CacheService;
 import com.sxjkwm.pm.configuration.WxConfig;
 import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.IpAddressUtil;
+import com.sxjkwm.pm.util.PasswordUtil;
 import com.sxjkwm.pm.util.WxWorkTokenUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -44,12 +49,15 @@ public class LoginService {
 
     private final UserDataService userDataService;
 
+    private final UserDao userDao;
+
     @Autowired
-    public LoginService(WxConfig wxConfig, ContextFactory<UserDataDto> contextFactory, CacheService cacheService, UserDataService userDataService) {
+    public LoginService(WxConfig wxConfig, ContextFactory<UserDataDto> contextFactory, CacheService cacheService, UserDataService userDataService, UserDao userDao) {
         this.wxConfig = wxConfig;
         this.contextFactory = contextFactory;
         this.cacheService = cacheService;
         this.userDataService = userDataService;
+        this.userDao = userDao;
     }
 
     public Boolean logout() {
@@ -93,7 +101,7 @@ public class LoginService {
         context.of(userDataDto);
     }
 
-    public JSONObject doLogin(HttpServletRequest req) throws PmException {
+    public String doLogin(HttpServletRequest req) throws PmException {
         String code = req.getParameter(wxReturnCodeKey);
         String token = WxWorkTokenUtil.getToken();
         Map<String, Object> param = Maps.newHashMap();
@@ -110,15 +118,72 @@ public class LoginService {
             jsonObject = JSONObject.parseObject(res);
             errCode = jsonObject.getInteger(wxErrorKey);
             if (Objects.isNull(errCode) || errCode.intValue() == 0) {
-                return jsonObject;
+                return jsonObject.getString("userid");
             }
             throw new PmException(PmError.WXWORK_READ_USER_FAILED);
         }
         throw new PmException(PmError.WXWORK_LOGIN_FAILED);
     }
 
-    public String processToken(JSONObject jsonObject) {
-        String wxUserId = jsonObject.getString("userid");
+    public String doLogin(String mobile, String password, String captcha, HttpServletResponse response) throws PmException {
+        User user = userDao.findUserByMobile(mobile);
+        if (Objects.isNull(user)) {
+            throw new PmException(PmError.INVALID_USERNAME_OR_PASSWORD);
+        }
+        String wxUserId = user.getWxUserId();
+        String existingPwd = user.getLoginPwd();
+        if (StringUtils.isNotBlank(existingPwd)) {
+            String processedPwd = PasswordUtil.encryptPassword(password);
+            if (!processedPwd.equals(existingPwd)) {
+                throw new PmException(PmError.INVALID_USERNAME_OR_PASSWORD);
+            }
+        } else {
+            if (!mobile.equals(password)) { // first time
+                throw new PmException(PmError.INVALID_USERNAME_OR_PASSWORD);
+            }
+        }
+        String token = processToken(wxUserId);
+        Cookie cookie = new Cookie(tokenKey, token);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(5 * 3600);
+        response.addCookie(cookie);
+        return token;
+    }
+
+    public Boolean updatePassword(String mobile, String oldPwd, String newPwd, String captcha, HttpServletResponse response) throws PmException {
+        User user = userDao.findUserByMobile(mobile);
+        if (Objects.isNull(user)) {
+            throw new PmException(PmError.INVALID_USERNAME_OR_PASSWORD);
+        }
+        newPwd = PasswordUtil.encryptPassword(newPwd);
+        if (StringUtils.isBlank(oldPwd)) { // 管理员重置
+            user.setLoginPwd(newPwd);
+            userDao.save(user);
+            return Boolean.TRUE;
+        } else {
+            String existingOldPwd = user.getLoginPwd();
+            if (StringUtils.isNotBlank(existingOldPwd)) {
+                String wxUserId = ContextHelper.getUserData().getWxUserId();
+                if (!wxUserId.equals(user.getWxUserId())) {
+                    throw new PmException(PmError.NO_PRIVILEGES);
+                }
+                oldPwd = PasswordUtil.encryptPassword(oldPwd);
+                if (!oldPwd.equals(user.getLoginPwd())) {
+                    throw new PmException(PmError.OLD_PASSWORD_IS_INVALID);
+                }
+            } else {
+                if (!oldPwd.equals(mobile)) {
+                    throw new PmException(PmError.OLD_PASSWORD_IS_INVALID);
+                }
+            }
+            user.setLoginPwd(newPwd);
+            userDao.save(user);
+            return Boolean.TRUE;
+        }
+    }
+
+    public String processToken(String wxUserId) {
         Map<String, Object> dataMap = Maps.newHashMap();
         dataMap.put(keyArchKey, wxUserId);
         dataMap.put("time", System.currentTimeMillis());

@@ -31,6 +31,8 @@ public enum PmError implements Constant<String, String> {
     USER_NOT_LOGGED_IN("4003", "User not logged in"),
     INVALID_DATA_STATUS("4004", "Data status is invalid"),
     NO_PRIVILEGES("4005", "User has no privileges"),
+    INVALID_USERNAME_OR_PASSWORD("4006", "Invalid username or password"),
+    OLD_PASSWORD_IS_INVALID("4007", "Old password is invalid"),
 
     // open api error
     INVALID_KEY_OR_SECRET("5001", "Invalid appKey or appSecret"),

@@ -37,12 +37,12 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         return corsConfiguration;
     }
 
-    @Bean
-    public MultipartConfigElement multipartConfigElement() {
-        MultipartConfigFactory factory = new MultipartConfigFactory();
-        factory.setMaxFileSize("50MB"); //KB,MB
-        factory.setMaxRequestSize("50MB");
-        return factory.createMultipartConfig();
-    }
+//    @Bean
+//    public MultipartConfigElement multipartConfigElement() {
+//        MultipartConfigFactory factory = new MultipartConfigFactory();
+//        factory.setMaxFileSize("50MB"); //KB,MB
+//        factory.setMaxRequestSize("50MB");
+//        return factory.createMultipartConfig();
+//    }
 
 }

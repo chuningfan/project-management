@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.auth.dao.UserDao;
 import com.sxjkwm.pm.auth.entity.User;
 import com.sxjkwm.pm.constants.PmError;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -40,7 +43,6 @@ public class UserService {
     @Transactional
     @Async
     public Boolean syncUsers(List<Long> wxDeptIds) throws PmException {
-        userDao.deleteAll();
         if (CollectionUtils.isEmpty(wxDeptIds)) {
             wxDeptIds = Lists.newArrayList();
             JSONArray deptArray = departmentService.pullDeptFromWxWork();
@@ -83,7 +85,37 @@ public class UserService {
             }
         }
         if (CollectionUtils.isNotEmpty(users)) {
-            userDao.saveAll(users);
+            List<User> existingUsers = userDao.findAll();
+            if (CollectionUtils.isNotEmpty(existingUsers)) {
+                existingUsers = existingUsers.stream().filter(u -> Objects.isNull(u.getIsDeleted()) || u.getIsDeleted().intValue() == 0).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(existingUsers)) {
+                   for (User user: existingUsers) {
+                       String wxUserId = user.getWxUserId();
+                       User existingUser = users.stream().filter(u -> u.getWxUserId().equals(wxUserId)).findFirst().orElse(null);
+                       if (Objects.isNull(existingUser)) { // 人员信息已不存在
+                           user.setIsDeleted(1);
+                           continue;
+                       }
+                       user.setOpenUserId(existingUser.getOpenUserId());
+                       user.setMobile(existingUser.getMobile());
+                       user.setDeptIds(existingUser.getDeptIds());
+                       user.setAvatar(existingUser.getAvatar());
+                       user.setName(existingUser.getName());
+                       user.setModifiedAt(System.currentTimeMillis());
+                       user.setModifiedBy(ContextHelper.getUserData().getWxUserId());
+                   }
+                    userDao.saveAll(existingUsers);
+                    Set<String> newUserIds = users.stream().map(User::getWxUserId).collect(Collectors.toSet());
+                    Set<String> existingUserIds = existingUsers.stream().map(User::getWxUserId).collect(Collectors.toSet());
+                    List<String> userIdsNeedToBeAdded = newUserIds.stream().filter(i -> !existingUserIds.contains(i)).collect(Collectors.toList());
+                    if (CollectionUtils.isNotEmpty(userIdsNeedToBeAdded)) {
+                        List<User> usersNeedToBeAdded = users.stream().filter(u -> userIdsNeedToBeAdded.contains(u.getWxUserId())).collect(Collectors.toList());
+                        userDao.saveAll(usersNeedToBeAdded);
+                    }
+                }
+            } else {
+                userDao.saveAll(users);
+            }
         }
         return true;
     }
