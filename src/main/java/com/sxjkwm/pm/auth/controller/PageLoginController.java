@@ -32,7 +32,7 @@ public class PageLoginController {
 
     @PutMapping("/credentialsModification")
     public RestResponse<Boolean> updatePassword(@RequestBody PageLoginFormDto pageLoginFormDto, HttpServletResponse response) throws PmException {
-        return RestResponse.of(loginService.updatePassword(pageLoginFormDto.getUsername(), pageLoginFormDto.getOldPassword(), pageLoginFormDto.getPassword(), pageLoginFormDto.getOldPassword(), response));
+        return RestResponse.of(loginService.updatePassword(pageLoginFormDto.getUsername(), pageLoginFormDto.getPassword(), pageLoginFormDto.getPassword(), pageLoginFormDto.isAdmin(), response));
     }
 
 }

@@ -10,9 +10,9 @@ public class PageLoginFormDto implements Serializable {
 
     private String username;
 
-    private String oldPassword;
-
     private String password;
+
+    private boolean isAdmin;
 
     private String captcha;
 
@@ -22,14 +22,6 @@ public class PageLoginFormDto implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getOldPassword() {
-        return oldPassword;
-    }
-
-    public void setOldPassword(String oldPassword) {
-        this.oldPassword = oldPassword;
     }
 
     public String getPassword() {
@@ -46,5 +38,13 @@ public class PageLoginFormDto implements Serializable {
 
     public void setCaptcha(String captcha) {
         this.captcha = captcha;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
     }
 }

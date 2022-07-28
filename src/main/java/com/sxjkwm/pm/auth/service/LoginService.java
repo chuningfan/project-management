@@ -151,36 +151,21 @@ public class LoginService {
         return token;
     }
 
-    public Boolean updatePassword(String mobile, String oldPwd, String newPwd, String captcha, HttpServletResponse response) throws PmException {
+    public Boolean updatePassword(String mobile, String newPwd, String captcha, boolean isAdmin, HttpServletResponse response) throws PmException {
         User user = userDao.findUserByMobile(mobile);
         if (Objects.isNull(user)) {
             throw new PmException(PmError.INVALID_USERNAME_OR_PASSWORD);
         }
         newPwd = PasswordUtil.encryptPassword(newPwd);
-        if (StringUtils.isBlank(oldPwd)) { // 管理员重置
-            user.setLoginPwd(newPwd);
-            userDao.save(user);
-            return Boolean.TRUE;
-        } else {
-            String existingOldPwd = user.getLoginPwd();
-            if (StringUtils.isNotBlank(existingOldPwd)) {
-                String wxUserId = ContextHelper.getUserData().getWxUserId();
-                if (!wxUserId.equals(user.getWxUserId())) {
-                    throw new PmException(PmError.NO_PRIVILEGES);
-                }
-                oldPwd = PasswordUtil.encryptPassword(oldPwd);
-                if (!oldPwd.equals(user.getLoginPwd())) {
-                    throw new PmException(PmError.OLD_PASSWORD_IS_INVALID);
-                }
-            } else {
-                if (!oldPwd.equals(mobile)) {
-                    throw new PmException(PmError.OLD_PASSWORD_IS_INVALID);
-                }
+        if (!isAdmin) { // 管理员重置
+            String wxUserId = ContextHelper.getUserData().getWxUserId();
+            if (!wxUserId.equals(user.getWxUserId())) {
+                throw new PmException(PmError.NO_PRIVILEGES);
             }
-            user.setLoginPwd(newPwd);
-            userDao.save(user);
-            return Boolean.TRUE;
         }
+        user.setLoginPwd(newPwd);
+        userDao.save(user);
+        return Boolean.TRUE;
     }
 
     public String processToken(String wxUserId) {
