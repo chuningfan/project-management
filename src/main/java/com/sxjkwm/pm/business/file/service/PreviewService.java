@@ -50,15 +50,15 @@ public class PreviewService {
     }
 
     public void preview(Long fileId, HttpServletResponse response, boolean isProjectFile) throws PmException {
-        String fileName = null;
-        String bucketName = null;
-        String objectId = null;
+        String fileName;
+        String bucketName;
+        String objectId;
         if (isProjectFile) {
             ProjectFile projectFile = projectFileDao.getOne(fileId);
             if (Objects.isNull(projectFile)) {
                 throw new PmException(PmError.NO_DATA_FOUND);
             }
-            ProjectDto projectDto = projectService.getId(projectFile.getProjectId());
+            ProjectDto projectDto = projectService.getById(projectFile.getProjectId());
             if (Objects.isNull(projectDto)) {
                 throw new PmException(PmError.NO_DATA_FOUND);
             }

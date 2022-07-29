@@ -94,6 +94,9 @@ public enum ReplacementType {
     public abstract void convert(XWPFDocument document, BaseReplacement replacement);
 
     void handleStringValue(XWPFDocument document, String key, String value, String fontFamily, Integer fontSize) {
+        if (StringUtils.isBlank(value)) {
+            return;
+        }
         List<XWPFParagraph> paragraphs = document.getParagraphs();
         String rKey = "{{" + key + "}}";
         for (XWPFParagraph paragraph: paragraphs) {

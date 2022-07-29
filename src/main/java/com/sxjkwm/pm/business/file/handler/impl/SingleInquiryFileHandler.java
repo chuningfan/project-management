@@ -1,16 +1,21 @@
 package com.sxjkwm.pm.business.file.handler.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.sxjkwm.pm.business.file.handler.PatternFileHandler;
 import com.sxjkwm.pm.business.file.handler.replacement.BaseReplacement;
 import com.sxjkwm.pm.business.file.handler.replacement.ReplacementType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.FontFamily;
+import com.sxjkwm.pm.business.project.dto.ProjectDto;
+import com.sxjkwm.pm.business.project.service.ProjectService;
+import com.sxjkwm.pm.constants.PmError;
+import com.sxjkwm.pm.exception.PmException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Objects;
 
 /**
  * @author Vic.Chu
@@ -19,15 +24,36 @@ import java.util.TreeMap;
 @Component
 public class SingleInquiryFileHandler implements PatternFileHandler {
 
+    private final ProjectService projectService;
+
+    @Autowired
+    public SingleInquiryFileHandler(ProjectService projectService) {
+        this.projectService = projectService;
+    }
+
     @Override
-    public List<BaseReplacement> captureData(Long dataId, Long flowId, Long flowNodeId, Long propertyDefId) {
+    public List<BaseReplacement> captureData(Long dataId, Long flowId, Long flowNodeId, Long propertyDefId) throws PmException {
         List<BaseReplacement> replacements = Lists.newArrayList();
-//        replacements.add(BaseReplacement.of("projectName", "xxx测试项目", ReplacementType.STRING));
-//        replacements.add(BaseReplacement.of("projectCode", "CGRW-0010203023", ReplacementType.STRING));
-//        replacements.add(BaseReplacement.of("projectTime", "2022年1月1日", ReplacementType.STRING));
-//        replacements.add(BaseReplacement.of("projectDescription", "巴拉巴拉阿巴阿巴", ReplacementType.STRING, "黑体", 12));
-//        replacements.add(BaseReplacement.of("requirePart", "高速电子", ReplacementType.STRING));
-//        replacements.add(BaseReplacement.of("purchaseScope", "要购买黄瓜、茄子、豆角", ReplacementType.STRING));
+        ProjectDto projectDto = projectService.getById(dataId);
+        if (Objects.isNull(projectDto)) {
+            throw new PmException(PmError.NO_DATA_FOUND);
+        }
+        Long projectTime = projectDto.getProjectTime();
+        String projectTimeStr = "";
+        if (Objects.nonNull(projectTime)) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+            Date date = Date.from(Instant.ofEpochMilli(projectTime));
+            projectTimeStr = simpleDateFormat.format(date);
+        }
+        replacements.add(BaseReplacement.of("projectName", projectDto.getProjectName(), ReplacementType.STRING));
+        replacements.add(BaseReplacement.of("projectCode", projectDto.getProjectCode(), ReplacementType.STRING));
+        replacements.add(BaseReplacement.of("projectTime", projectTimeStr, ReplacementType.STRING));
+        replacements.add(BaseReplacement.of("projectDescription", projectDto.getDescription(), ReplacementType.STRING));
+        replacements.add(BaseReplacement.of("requirePart", projectDto.getRequirePart(), ReplacementType.STRING));
+        replacements.add(BaseReplacement.of("purchaseScope", projectDto.getPurchaseScope(), ReplacementType.STRING));
+
+
+
 //        List<List<TreeMap<String, String>>> tables = Lists.newArrayList();
 //        // table1
 //        List<TreeMap<String, String>> table1 = Lists.newArrayList();

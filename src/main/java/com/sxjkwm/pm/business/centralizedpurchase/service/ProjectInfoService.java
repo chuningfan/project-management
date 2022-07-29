@@ -28,7 +28,7 @@ public class ProjectInfoService {
     }
 
     public ProjectDto findProjectInfoByTaskCode(String taskCode) {
-        String sql = "SELECT tendercode as projectCode, tendername as projectName, projectnamae as requirePart, employeeorgname as deptName, budget, deadline, procstatename as inquiryStatus FROM gsrm7_sxjk_prod_sourcing.`proc_tender` WHERE tendercode = '" + taskCode + "'";
+        String sql = "SELECT tendercode as projectCode, tendername as projectName, projectname as requirePart, employeeorgname as deptName, budget, deadline, procstatename as inquiryStatus FROM gsrm7_sxjk_prod_sourcing.`proc_tender` WHERE tendercode = '" + taskCode + "'";
         Map<String, Object> dataMap = cpDao.findOne(sql);
         if (Objects.isNull(dataMap)) {
             return null;

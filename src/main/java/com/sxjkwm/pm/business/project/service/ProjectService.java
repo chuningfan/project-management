@@ -45,7 +45,7 @@ public class ProjectService {
         return projectDto;
     }
 
-    public ProjectDto getId(Long id) {
+    public ProjectDto getById(Long id) {
         Project project = projectDao.getOne(id);
         if (Objects.isNull(project)) {
             return null;

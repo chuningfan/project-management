@@ -36,7 +36,7 @@ public class ProjectFileService {
     }
 
     public Boolean generateInquiryFile(Long projectId, Long flowNodeId, Long propertyDefinitionId) throws PmException, ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        ProjectDto projectDto = projectService.getId(projectId);
+        ProjectDto projectDto = projectService.getById(projectId);
         if (Objects.isNull(projectDto)) {
             throw new PmException(PmError.NO_DATA_FOUND);
         }

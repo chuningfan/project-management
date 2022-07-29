@@ -39,9 +39,8 @@ public interface PatternFileHandler {
     @Transactional
     default Long doHandle0(InputStream targetPatternFileStream, Long dataId, Long flowNodeId, Long propertyDefId, String fileName) throws Throwable {
         try (InputStream inputStream = targetPatternFileStream; XWPFDocument document = new XWPFDocument(inputStream);) {
-            FlowNodeDefinitionDao flowNodeDefinitionDao = ContextUtil.getBean(FlowNodeDefinitionDao.class);
             ProjectService projectService = ContextUtil.getBean(ProjectService.class);
-            ProjectDto projectDto = projectService.getId(dataId);
+            ProjectDto projectDto = projectService.getById(dataId);
             S3FileUtil s3FileUtil = ContextUtil.getBean(S3FileUtil.class);
             List<BaseReplacement> dataList = captureData(dataId, projectDto.getFlowId(), flowNodeId, propertyDefId);
             processDataAsDefault(document, dataList);
@@ -103,7 +102,7 @@ public interface PatternFileHandler {
     }
 
     // Extension point
-    List<BaseReplacement> captureData(Long dataId, Long flowId, Long flowNodeId, Long propertyDefId);
+    List<BaseReplacement> captureData(Long dataId, Long flowId, Long flowNodeId, Long propertyDefId) throws PmException;
 
     default void processDataAsDefault(XWPFDocument document, List<BaseReplacement> dataList) {
         if (CollectionUtils.isEmpty(dataList)) {
