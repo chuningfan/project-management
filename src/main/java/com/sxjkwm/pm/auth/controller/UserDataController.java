@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(Constant.API_FEATURE + "/userData")
 public class UserDataController extends BaseController {
@@ -20,7 +22,7 @@ public class UserDataController extends BaseController {
         this.userDataService = userDataService;
     }
 
-    @GetMapping("/{wxUserId}")
+    @GetMapping("/person/{wxUserId}")
     public RestResponse<UserDataDto> findUserDataByWxUserId(@PathVariable("wxUserId") String wxUserId) {
         return RestResponse.of(userDataService.getUserDataByWxUserId(wxUserId));
     }
@@ -28,6 +30,11 @@ public class UserDataController extends BaseController {
     @GetMapping
     public RestResponse<UserDataDto> findUserDataByToken() {
         return RestResponse.of(getUserData());
+    }
+
+    @GetMapping("/list")
+    public RestResponse<List<UserDataDto>> findUserDataList() {
+        return RestResponse.of(userDataService.fetchAvailableUsers());
     }
 
 }

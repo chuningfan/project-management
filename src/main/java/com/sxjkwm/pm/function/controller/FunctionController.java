@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.function.controller;
 
 import com.sxjkwm.pm.common.RestResponse;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.function.entity.Function;
 import com.sxjkwm.pm.function.service.FunctionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/function")
+@RequestMapping(Constant.API_FEATURE + "/function")
 public class FunctionController {
 
     private final FunctionService functionService;
@@ -32,6 +33,12 @@ public class FunctionController {
     @PostMapping
     public RestResponse<Function> saveOrUpdate(@RequestBody Function function) {
         return RestResponse.of(functionService.saveOrUpdate(function));
+    }
+
+    @PutMapping
+    public RestResponse<Boolean> refresh() {
+        functionService.refreshFunctionMap();
+        return RestResponse.of(Boolean.TRUE);
     }
 
 }

@@ -64,7 +64,7 @@ public class LoginService {
         try {
             UserDataDto userDataDto = ContextHelper.getUserData();
             String userId = userDataDto.getWxUserId();
-            cacheService.remove(userId);
+            cacheService.remove(Constant.userCachePrefix + userId);
             return Boolean.TRUE;
         } catch (Exception e) {
             return Boolean.FALSE;
