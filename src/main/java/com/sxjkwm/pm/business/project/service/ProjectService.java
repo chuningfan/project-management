@@ -39,7 +39,7 @@ public class ProjectService {
         if (Objects.nonNull(id)) {
             project = projectDao.getOne(id);
         }
-        BeanUtils.copyProperties(projectDto, project);
+        BeanUtils.copyProperties(projectDto, project, "createdBy", "createdAt");
         projectDao.save(project);
         projectDto.setId(project.getId());
         return projectDto;
