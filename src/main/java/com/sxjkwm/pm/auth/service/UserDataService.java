@@ -1,15 +1,18 @@
 package com.sxjkwm.pm.auth.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.auth.dao.*;
 import com.sxjkwm.pm.auth.dto.UserDataDto;
-import com.sxjkwm.pm.auth.entity.*;
+import com.sxjkwm.pm.auth.entity.Department;
+import com.sxjkwm.pm.auth.entity.RoleAndFunctionRelation;
+import com.sxjkwm.pm.auth.entity.User;
+import com.sxjkwm.pm.auth.entity.UserAndRoleRelation;
 import com.sxjkwm.pm.common.CacheService;
 import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.function.dao.FunctionDao;
+import com.sxjkwm.pm.function.dto.FunctionDto;
 import com.sxjkwm.pm.function.entity.Function;
 import com.sxjkwm.pm.function.service.FunctionService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -77,21 +80,22 @@ public class UserDataService {
                     result.setDeptNames(deptNames);
                 }
             }
-            List<Long> roleIds = userAndRoleRelationDao.findRoleIdsByWxUserId(wxUserId);
-            if (CollectionUtils.isNotEmpty(roleIds)) {
-                List<Role> roles = roleDao.findRolesByIds(roleIds);
-                if (CollectionUtils.isNotEmpty(roles)) {
-                    result.setRoleNames(roles.stream().map(Role::getName).collect(Collectors.toList()));
-                }
-                List<RoleAndFunctionRelation> roleAndFunctionRelations = roleAndFunctionRelationDao.findRoleAndFunctionRelationsByRoleIds(roleIds);
-                if (CollectionUtils.isNotEmpty(roleAndFunctionRelations)) {
-                    List<Long> functionIds = roleAndFunctionRelations.stream().map(RoleAndFunctionRelation::getFunctionId).collect(Collectors.toList());
-                    List<Function> accessibleFunctions = Lists.newArrayList();
-                    functionIds.forEach(i -> {
-                        accessibleFunctions.add(FunctionService.functionMap.get(i));
-                    });
-                    result.setAccessibleFunctions(accessibleFunctions);
-                }
+            List<String> roleNames = userAndRoleRelationDao.findRoleNamesByWxUserId(wxUserId);
+            if (CollectionUtils.isEmpty(roleNames)) {
+                roleNames = Lists.newArrayList(Constant.UserRole.BUSINESS_STAFF.getValue());
+            }
+            result.setRoleNames(roleNames);
+            List<RoleAndFunctionRelation> roleAndFunctionRelations = roleAndFunctionRelationDao.findRoleAndFunctionRelationsByRoleNames(roleNames);
+            if (CollectionUtils.isNotEmpty(roleAndFunctionRelations)) {
+                List<Long> functionIds = roleAndFunctionRelations.stream().map(RoleAndFunctionRelation::getFunctionId).collect(Collectors.toList());
+                List<FunctionDto> accessibleFunctions = Lists.newArrayList();
+                functionIds.forEach(i -> {
+                    Function function = FunctionService.functionMap.get(i);
+                    if (Objects.nonNull(function)) {
+                        accessibleFunctions.add(new FunctionDto(function));
+                    }
+                });
+                result.setAccessibleFunctions(accessibleFunctions);
             }
             return result;
         }
@@ -111,20 +115,15 @@ public class UserDataService {
         }
         List<String> wxUserIds = users.stream().map(User::getWxUserId).collect(Collectors.toList());
         List<UserAndRoleRelation> relations = userAndRoleRelationDao.findByWxUserIds(wxUserIds);
-        Map<Long, String> roleNameMap = null;
-        Map<String, List<Long>> userRoleMap = null;
-        Map<Long, List<Long>> roleAndFuncMap = null;
+        Map<String, List<String>> userRoleMap = null;
+        Map<String, List<Long>> roleAndFuncMap = null;
         Map<Long, Function> functionMap = FunctionService.functionMap;
         if (CollectionUtils.isNotEmpty(relations)) {
-            userRoleMap = relations.stream().collect(Collectors.groupingBy(UserAndRoleRelation::getWxUserId, Collectors.mapping(UserAndRoleRelation::getRoleId, Collectors.toList())));
-            List<Long> relatedRoleIds = relations.stream().map(UserAndRoleRelation::getRoleId).collect(Collectors.toList());
-            List<Role> roles = roleDao.findRolesByIds(relatedRoleIds);
-            if (CollectionUtils.isNotEmpty(roles)) {
-                roleNameMap = roles.stream().collect(Collectors.toMap(Role::getId, Role::getName, (k1, k2) -> k1));
-            }
-            List<RoleAndFunctionRelation> roleAndFunctionRelations = roleAndFunctionRelationDao.findRoleAndFunctionRelationsByRoleIds(relatedRoleIds);
+            userRoleMap = relations.stream().collect(Collectors.groupingBy(UserAndRoleRelation::getWxUserId, Collectors.mapping(UserAndRoleRelation::getRoleName, Collectors.toList())));
+            List<String> relatedRoleNames = relations.stream().map(UserAndRoleRelation::getRoleName).collect(Collectors.toList());
+            List<RoleAndFunctionRelation> roleAndFunctionRelations = roleAndFunctionRelationDao.findRoleAndFunctionRelationsByRoleNames(relatedRoleNames);
             if (CollectionUtils.isNotEmpty(roleAndFunctionRelations)) {
-                roleAndFuncMap = roleAndFunctionRelations.stream().collect(Collectors.groupingBy(RoleAndFunctionRelation::getRoleId, Collectors.mapping(RoleAndFunctionRelation::getFunctionId, Collectors.toList())));
+                roleAndFuncMap = roleAndFunctionRelations.stream().collect(Collectors.groupingBy(RoleAndFunctionRelation::getRoleName, Collectors.mapping(RoleAndFunctionRelation::getFunctionId, Collectors.toList())));
             }
         }
         UserDataDto dataDto;
@@ -136,23 +135,24 @@ public class UserDataService {
             dataDto.setMobile(user.getMobile());
             dataDto.setAvatar(user.getAvatar());
             dataDto.setUsername(user.getName());
-            List<String> roleNames = Lists.newArrayList();
-            List<Function> functions = Lists.newArrayList();
+            List<String> roleNames = userRoleMap.get(wxUserId);
+            if (CollectionUtils.isEmpty(roleNames)) {
+
+            }
+            List<FunctionDto> functions = Lists.newArrayList();
             dataDto.setRoleNames(roleNames);
             dataDto.setAccessibleFunctions(functions);
             if (Objects.nonNull(userRoleMap)) {
-                List<Long> roleIds = userRoleMap.get(wxUserId);
-                if (CollectionUtils.isNotEmpty(roleIds) && Objects.nonNull(roleNameMap)) {
-                    for (Long roleId: roleIds) {
-                        String roleName = roleNameMap.get(roleId);
+                if (CollectionUtils.isNotEmpty(roleNames)) {
+                    for (String roleName: roleNames) {
                         roleNames.add(roleName);
                         if (Objects.nonNull(roleAndFuncMap)) {
-                            List<Long> roleFunIds = roleAndFuncMap.get(roleId);
+                            List<Long> roleFunIds = roleAndFuncMap.get(roleName);
                             if (CollectionUtils.isNotEmpty(roleFunIds) && !functionMap.isEmpty()) {
                                 for (Long funcId: roleFunIds) {
                                     Function function = functionMap.get(funcId);
                                     if (Objects.nonNull(function)) {
-                                        functions.add(function);
+                                        functions.add(new FunctionDto(function));
                                     }
                                 }
                             }

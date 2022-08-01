@@ -22,7 +22,7 @@ public class UserAndRoleRelationService {
     }
 
     @Transactional
-    public Boolean populateRelations(String wxUserId, List<Long> roleIds) {
+    public Boolean populateRelations(String wxUserId, List<String> roleNames) {
         UserAndRoleRelation condition = new UserAndRoleRelation();
         condition.setWxUserId(wxUserId);
         Example<UserAndRoleRelation> example = Example.of(condition);
@@ -30,13 +30,13 @@ public class UserAndRoleRelationService {
         if (CollectionUtils.isNotEmpty(existingRelations)) {
             userAndRoleRelationDao.deleteInBatch(existingRelations);
         }
-        if (CollectionUtils.isNotEmpty(roleIds)) {
+        if (CollectionUtils.isNotEmpty(roleNames)) {
             List<UserAndRoleRelation> relations = Lists.newArrayList();
             UserAndRoleRelation relation;
-            for (Long roleId : roleIds) {
+            for (String roleName : roleNames) {
                 relation = new UserAndRoleRelation();
                 relation.setWxUserId(wxUserId);
-                relation.setRoleId(roleId);
+                relation.setRoleName(roleName);
                 relations.add(relation);
             }
             userAndRoleRelationDao.saveAll(relations);

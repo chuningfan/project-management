@@ -1,6 +1,6 @@
 package com.sxjkwm.pm.auth.dto;
 
-import com.sxjkwm.pm.function.entity.Function;
+import com.sxjkwm.pm.function.dto.FunctionDto;
 
 import java.io.Serializable;
 import java.util.List;
@@ -17,7 +17,7 @@ public class UserDataDto implements Serializable {
 
     private List<String> roleNames;
 
-    private List<Function> accessibleFunctions;
+    private List<FunctionDto> accessibleFunctions;
 
     private String avatar;
 
@@ -65,11 +65,11 @@ public class UserDataDto implements Serializable {
         this.roleNames = roleNames;
     }
 
-    public List<Function> getAccessibleFunctions() {
+    public List<FunctionDto> getAccessibleFunctions() {
         return accessibleFunctions;
     }
 
-    public void setAccessibleFunctions(List<Function> accessibleFunctions) {
+    public void setAccessibleFunctions(List<FunctionDto> accessibleFunctions) {
         this.accessibleFunctions = accessibleFunctions;
     }
 

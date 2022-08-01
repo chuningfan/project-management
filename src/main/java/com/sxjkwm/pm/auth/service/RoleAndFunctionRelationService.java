@@ -3,7 +3,6 @@ package com.sxjkwm.pm.auth.service;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.auth.dao.RoleAndFunctionRelationDao;
 import com.sxjkwm.pm.auth.entity.RoleAndFunctionRelation;
-import com.sxjkwm.pm.auth.entity.UserAndRoleRelation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -23,9 +22,9 @@ public class RoleAndFunctionRelationService {
     }
 
     @Transactional
-    public Boolean populateRelations(Long roleId, List<Long> functionIds) {
+    public Boolean populateRelations(String roleName, List<Long> functionIds) {
         RoleAndFunctionRelation condition = new RoleAndFunctionRelation();
-        condition.setRoleId(roleId);
+        condition.setRoleName(roleName);
         Example<RoleAndFunctionRelation> example = Example.of(condition);
         List<RoleAndFunctionRelation> existingRelations = roleAndFunctionRelationDao.findAll(example);
         if (CollectionUtils.isNotEmpty(existingRelations)) {
@@ -36,7 +35,7 @@ public class RoleAndFunctionRelationService {
             RoleAndFunctionRelation relation;
             for (Long functionId : functionIds) {
                 relation = new RoleAndFunctionRelation();
-                relation.setRoleId(roleId);
+                relation.setRoleName(roleName);
                 relation.setFunctionId(functionId);
                 relations.add(relation);
             }

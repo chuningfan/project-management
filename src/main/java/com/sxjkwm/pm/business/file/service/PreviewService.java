@@ -8,6 +8,7 @@ import com.sxjkwm.pm.business.file.entity.PatternFile;
 import com.sxjkwm.pm.business.file.entity.ProjectFile;
 import com.sxjkwm.pm.business.project.dto.ProjectDto;
 import com.sxjkwm.pm.business.project.service.ProjectService;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.FileUtil;
@@ -65,7 +66,7 @@ public class PreviewService {
             String ownerUserId = projectDto.getOwnerUserId();
             UserDataDto currentUser = ContextHelper.getUserData();
             List<String> roleNames = currentUser.getRoleNames();
-            if (CollectionUtils.isNotEmpty(roleNames) && roleNames.contains("业务人员")) {
+            if (CollectionUtils.isNotEmpty(roleNames) && roleNames.contains(Constant.UserRole.BUSINESS_STAFF.getValue())) {
                 String currentUserId = currentUser.getWxUserId();
                 if (!ownerUserId.equals(currentUserId)) {
                     throw new PmException(PmError.NO_PRIVILEGES);

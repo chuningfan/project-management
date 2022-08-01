@@ -43,7 +43,7 @@ public class ProjectDto implements Serializable {
 
     private String purchaseScope;
 
-    private Integer isDeleted;
+    private Integer isDeleted = 0;
 
     private Long deadLine;
 

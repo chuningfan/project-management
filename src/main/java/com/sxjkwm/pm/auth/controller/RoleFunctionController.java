@@ -19,9 +19,9 @@ public class RoleFunctionController {
         this.roleAndFunctionRelationService = roleAndFunctionRelationService;
     }
 
-    @PostMapping("/{roleId}")
-    public RestResponse<Boolean> populateRelations(@PathVariable("roleId") Long roleId, @RequestBody List<Long> functionIds) {
-        return RestResponse.of(roleAndFunctionRelationService.populateRelations(roleId, functionIds));
+    @PostMapping("/{roleName}")
+    public RestResponse<Boolean> populateRelations(@PathVariable("roleName") String roleName, @RequestBody List<Long> functionIds) {
+        return RestResponse.of(roleAndFunctionRelationService.populateRelations(roleName, functionIds));
     }
 
 }

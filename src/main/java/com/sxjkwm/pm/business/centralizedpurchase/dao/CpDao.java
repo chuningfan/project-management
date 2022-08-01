@@ -1,5 +1,7 @@
 package com.sxjkwm.pm.business.centralizedpurchase.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +17,8 @@ import java.util.Map;
 @Repository
 public class CpDao {
 
+    private static final Logger logger = LoggerFactory.getLogger(CpDao.class);
+
     @Autowired
     @Qualifier("cpJdbcTemplate")
     private JdbcTemplate cpJdbcTemplate;
@@ -24,7 +28,12 @@ public class CpDao {
     }
 
     public Map<String, Object> findOne(String querySql) {
-        return cpJdbcTemplate.queryForMap(querySql);
+        try {
+            return cpJdbcTemplate.queryForMap(querySql);
+        } catch (Exception e) {
+            logger.error("Query by SQL error: {}", e);
+            return null;
+        }
     }
 
     public void execute(String sql) {

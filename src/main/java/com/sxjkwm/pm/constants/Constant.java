@@ -366,4 +366,32 @@ public interface Constant<K, V> {
         public abstract AuditingDataHandler dataHandler();
     }
 
+    enum UserRole implements Constant<String, String> {
+        BUSINESS_STAFF("business", "业务人员"),
+        FINANCE_STAFF("finance", "财务人员"),
+        PROCESS_DEF_ADMIN("processAdmin", "流程定义人员"),
+        SUPER_ADMIN("processAdmin", "超级管理员"),
+        LEADER("leader", "领导班子"),
+        ;
+
+        private String value;
+
+        private String label;
+
+        UserRole(String value, String label) {
+            this.value = value;
+            this.label = label;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public String getLabel() {
+            return label;
+        }
+    }
+
 }

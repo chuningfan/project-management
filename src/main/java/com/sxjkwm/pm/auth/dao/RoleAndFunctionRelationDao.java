@@ -11,4 +11,7 @@ public interface RoleAndFunctionRelationDao extends JpaRepository<RoleAndFunctio
     @Query(value = "SELECT t.* FROM pm_role_function_relation t WHERE t.role_id IN (?1)", nativeQuery = true)
     List<RoleAndFunctionRelation> findRoleAndFunctionRelationsByRoleIds(List<Long> roleIds);
 
+    @Query(value = "SELECT t.* FROM pm_role_function_relation t WHERE t.role_name IN (?1)", nativeQuery = true)
+    List<RoleAndFunctionRelation> findRoleAndFunctionRelationsByRoleNames(List<String> roleNames);
+
 }
