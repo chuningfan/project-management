@@ -1,6 +1,8 @@
 package com.sxjkwm.pm.business.file.handler.impl;
 
 import com.google.common.collect.Lists;
+import com.sxjkwm.pm.auth.context.impl.ContextHelper;
+import com.sxjkwm.pm.auth.entity.User;
 import com.sxjkwm.pm.business.file.handler.PatternFileHandler;
 import com.sxjkwm.pm.business.file.handler.replacement.BaseReplacement;
 import com.sxjkwm.pm.business.file.handler.replacement.ReplacementType;
@@ -8,6 +10,7 @@ import com.sxjkwm.pm.business.project.dto.ProjectDto;
 import com.sxjkwm.pm.business.project.service.ProjectService;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
+import com.sxjkwm.pm.wxwork.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +29,12 @@ public class SingleInquiryFileHandler implements PatternFileHandler {
 
     private final ProjectService projectService;
 
+    private final UserService userService;
+
     @Autowired
-    public SingleInquiryFileHandler(ProjectService projectService) {
+    public SingleInquiryFileHandler(ProjectService projectService, UserService userService) {
         this.projectService = projectService;
+        this.userService = userService;
     }
 
     @Override
@@ -39,9 +45,9 @@ public class SingleInquiryFileHandler implements PatternFileHandler {
             throw new PmException(PmError.NO_DATA_FOUND);
         }
         Long projectTime = projectDto.getProjectTime();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 hh时mm分");
         String projectTimeStr = "";
         if (Objects.nonNull(projectTime)) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
             Date date = Date.from(Instant.ofEpochMilli(projectTime));
             projectTimeStr = simpleDateFormat.format(date);
         }
@@ -51,9 +57,29 @@ public class SingleInquiryFileHandler implements PatternFileHandler {
         replacements.add(BaseReplacement.of("projectDescription", projectDto.getDescription(), ReplacementType.STRING));
         replacements.add(BaseReplacement.of("requirePart", projectDto.getRequirePart(), ReplacementType.STRING));
         replacements.add(BaseReplacement.of("purchaseScope", projectDto.getPurchaseScope(), ReplacementType.STRING));
-
-
-
+        replacements.add(BaseReplacement.of("goodsReceiveAddress", projectDto.getGoodsReceiveAddress(), ReplacementType.STRING));
+        String goodsReceiveTimeStr = "";
+        Long goodsReceiveTime = projectDto.getGoodsReceiveTime();
+        if (Objects.nonNull(goodsReceiveTime)) {
+            Date date = Date.from(Instant.ofEpochMilli(goodsReceiveTime));
+            goodsReceiveTimeStr = simpleDateFormat.format(date);
+        }
+        replacements.add(BaseReplacement.of("supplyPeriod", goodsReceiveTimeStr.split(" ")[0], ReplacementType.STRING));
+        String deadlineStr = "";
+        Long deadline = projectDto.getDeadLine();
+        if (Objects.nonNull(deadline)) {
+            Date date = Date.from(Instant.ofEpochMilli(deadline));
+            deadlineStr = simpleDateFormat.format(date);
+        }
+        replacements.add(BaseReplacement.of("deadline", deadlineStr, ReplacementType.STRING));
+        String ownerUserId = projectDto.getOwnerUserId();
+        User owner = userService.findByUserId(ownerUserId);
+        String ownerName = ContextHelper.getUserData().getUsername();
+        if (Objects.isNull(owner)) {
+            ownerName = owner.getName();
+        }
+        replacements.add(BaseReplacement.of("ownerName", ownerName, ReplacementType.STRING));
+        replacements.add(BaseReplacement.of("paymentType", projectDto.getPaymentType(), ReplacementType.STRING));
 //        List<List<TreeMap<String, String>>> tables = Lists.newArrayList();
 //        // table1
 //        List<TreeMap<String, String>> table1 = Lists.newArrayList();

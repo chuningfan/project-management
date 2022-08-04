@@ -49,6 +49,8 @@ public class ProjectDto implements Serializable {
 
     private Integer projectType;
 
+    private String paymentType;
+
     public Long getId() {
         return id;
     }
@@ -223,5 +225,13 @@ public class ProjectDto implements Serializable {
 
     public void setProjectType(Integer projectType) {
         this.projectType = projectType;
+    }
+
+    public String getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(String paymentType) {
+        this.paymentType = paymentType;
     }
 }

@@ -12,7 +12,10 @@ import com.sxjkwm.pm.util.ContextUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public interface Constant<K, V> {
@@ -337,22 +340,6 @@ public interface Constant<K, V> {
             this.lable = lable;
         }
 
-        public Integer getType() {
-            return type;
-        }
-
-        public void setType(Integer type) {
-            this.type = type;
-        }
-
-        public String getLable() {
-            return lable;
-        }
-
-        public void setLable(String lable) {
-            this.lable = lable;
-        }
-
         @Override
         public Integer getValue() {
             return type;
@@ -381,6 +368,59 @@ public interface Constant<K, V> {
         UserRole(String value, String label) {
             this.value = value;
             this.label = label;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public String getLabel() {
+            return label;
+        }
+    }
+
+    enum Relation implements Constant<String, String> {
+        OR("或", "||"),
+        AND("且", "&&"),
+        ;
+
+        private String label;
+
+        private String value;
+
+        Relation(String label, String value) {
+            this.label = label;
+            this.value = value;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public String getLabel() {
+            return label;
+        }
+    }
+
+    enum Comparation implements Constant<String, String> {
+        EQUAL("等于", "="),
+        GREATER_AND_EQUAL("大于等于", ">="),
+        LESS_AND_EQUAL("小于等于", "<="),
+        GREATER_THAN("大于", ">"),
+        LESS_THAN("小于", "<"),
+        ;
+
+        private String label;
+
+        private String value;
+
+        Comparation(String label, String value) {
+            this.label = label;
+            this.value = value;
         }
 
         @Override

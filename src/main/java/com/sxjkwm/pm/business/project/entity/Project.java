@@ -80,6 +80,9 @@ public class Project extends BaseEntity {
     @Column(name = "projectType")
     private Integer projectType;
 
+    @Column(name = "payment_type", length = 4000)
+    private String paymentType;
+
     public String getProjectName() {
         return projectName;
     }
@@ -246,5 +249,13 @@ public class Project extends BaseEntity {
 
     public void setProjectType(Integer projectType) {
         this.projectType = projectType;
+    }
+
+    public String getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(String paymentType) {
+        this.paymentType = paymentType;
     }
 }

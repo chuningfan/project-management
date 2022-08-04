@@ -31,26 +31,38 @@ public enum ReplacementType {
     STRING() {
         @Override
         public void convert(XWPFDocument document, BaseReplacement replacement) {
-            handleStringValue(document, replacement.getKey(), replacement.getData().toString(), replacement.getFontFamily(), replacement.getFontSize());
+            Object data = replacement.getData();
+            handleStringValue(document, replacement.getKey(), Objects.isNull(data) ? null : data.toString(), replacement.getFontFamily(), replacement.getFontSize());
         }
     },
     TABLE() {
         @Override
         public void convert(XWPFDocument document, BaseReplacement replacement) {
-            List<List<TreeMap<String, String>>> tables = (List<List<TreeMap<String, String>>>) replacement.data;
+            Object data = replacement.getData();
+            if (Objects.isNull(data)) {
+                return;
+            }
+            List<List<TreeMap<String, String>>> tables = (List<List<TreeMap<String, String>>>) data;
             handleTableValue(document, replacement.getKey(), tables, null, replacement.getFontFamily(), replacement.getFontSize());
         }
     },
     TABLE_WITH_MERGED_FIRST_COLUMN() {
         @Override
         public void convert(XWPFDocument document, BaseReplacement replacement) {
-            TreeMap<String, List<TreeMap<String, String>>> tables = (TreeMap<String, List<TreeMap<String, String>>>) replacement.data;
+            Object data = replacement.getData();
+            if (Objects.isNull(data)) {
+                return;
+            }
+            TreeMap<String, List<TreeMap<String, String>>> tables = (TreeMap<String, List<TreeMap<String, String>>>) data;
             handleTableWithMergedFirstColumn(document, replacement.getKey(), tables, replacement.getFontFamily(), replacement.getFontSize());
         }
     }, PRICE() {
         @Override
         public void convert(XWPFDocument document, BaseReplacement replacement) {
             Object data = replacement.getData();
+            if (Objects.isNull(data)) {
+                return;
+            }
             String value = null;
             if (data instanceof Number) {
                 value = data.toString();
@@ -63,8 +75,11 @@ public enum ReplacementType {
         @Override
         public void convert(XWPFDocument document, BaseReplacement replacement) {
             Object data = replacement.getData();
+            if (Objects.isNull(data)) {
+                return;
+            }
             String value = null;
-            Date date = null;
+            Date date;
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年M月d日HH时mm分ss秒");
             if ((data instanceof Date)) {
                 date = (Date) data;
@@ -82,11 +97,20 @@ public enum ReplacementType {
     }, SIGN() {
         @Override
         public void convert(XWPFDocument document, BaseReplacement replacement) {
-            InputStream inputStream = (InputStream) replacement.data;
+            Object data = replacement.getData();
+            if (Objects.isNull(data)) {
+                return;
+            }
+            InputStream inputStream = (InputStream) data;
             try {
                 handleImgValue(document, replacement.getKey(), inputStream);
             } catch (IOException | InvalidFormatException e) {
                 logger.error("Insert image into document failed: {}", e);
+            } finally {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                }
             }
         }
     };
