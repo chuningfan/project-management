@@ -11,6 +11,7 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <elasticsearch>7.5.1</elasticsearch>
     </properties>
 
     <parent>
@@ -62,42 +63,57 @@
             <artifactId>xlsx-streamer</artifactId>
             <version>2.1.0</version>
         </dependency>
-        <!-- lucene start ***************************************** -->
         <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-queryparser</artifactId>
-            <version>8.3.0</version>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>${elasticsearch}</version>
         </dependency>
-        <!--高亮 -->
         <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-highlighter</artifactId>
-            <version>8.3.0</version>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-client</artifactId>
+            <version>${elasticsearch}</version>
         </dependency>
-        <!--smartcn 中文分词器 SmartChineseAnalyzer  smartcn分词器 需要lucene依赖 且和lucene版本同步-->
         <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analyzers-smartcn</artifactId>
-            <version>8.3.0</version>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>${elasticsearch}</version>
         </dependency>
-        <!--ik-analyzer 中文分词器-->
-        <dependency>
-            <groupId>cn.bestwu</groupId>
-            <artifactId>ik-analyzers</artifactId>
-            <version>5.1.0</version>
-        </dependency>
-        <!--MMSeg4j 分词器-->
-        <dependency>
-            <groupId>com.chenlb.mmseg4j</groupId>
-            <artifactId>mmseg4j-solr</artifactId>
-            <version>2.4.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.solr</groupId>
-                    <artifactId>solr-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+<!--        &lt;!&ndash; lucene start ***************************************** &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.lucene</groupId>-->
+<!--            <artifactId>lucene-queryparser</artifactId>-->
+<!--            <version>8.3.0</version>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash;高亮 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.lucene</groupId>-->
+<!--            <artifactId>lucene-highlighter</artifactId>-->
+<!--            <version>8.3.0</version>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash;smartcn 中文分词器 SmartChineseAnalyzer  smartcn分词器 需要lucene依赖 且和lucene版本同步&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.lucene</groupId>-->
+<!--            <artifactId>lucene-analyzers-smartcn</artifactId>-->
+<!--            <version>8.3.0</version>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash;ik-analyzer 中文分词器&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>cn.bestwu</groupId>-->
+<!--            <artifactId>ik-analyzers</artifactId>-->
+<!--            <version>5.1.0</version>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash;MMSeg4j 分词器&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.chenlb.mmseg4j</groupId>-->
+<!--            <artifactId>mmseg4j-solr</artifactId>-->
+<!--            <version>2.4.0</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.apache.solr</groupId>-->
+<!--                    <artifactId>solr-core</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>

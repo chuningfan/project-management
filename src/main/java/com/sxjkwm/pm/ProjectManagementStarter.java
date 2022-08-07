@@ -17,9 +17,11 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableJpaRepositories
+@EnableScheduling
 public class ProjectManagementStarter {
 
     private static final Logger logger = LoggerFactory.getLogger(ProjectManagementStarter.class);

@@ -26,6 +26,7 @@ public class EpSql {
             " LEFT JOIN service_user.organization org ON org.id = si.organize_id AND org.yn = 1 " +
             " LEFT JOIN service_user.`user_account` ua ON ua.id = oi.buyer_id AND ua.yn = 1 " +
             " WHERE oi.order_status = 40 AND roi.id IS NOT NULL AND oi.`yn`=1 " +
+            " AND NOT EXISTS (SELECT 1 FROM service_order.order_info ooi WHERE ooi.parent_no = oi.order_no AND ooi.parent_no > 0) " +
             ") o " +
             " LEFT JOIN (" +
             " SELECT otr.order_no, bi.`bill_code`, bi.`status` AS bb_status, bi.`bill_price` AS b_bill_price  " +
@@ -59,5 +60,43 @@ public class EpSql {
             " {{buyInvoicePrintingStatus}} {{buyInvoiceErrorMsg}} {{orderTimePeriod}} {{buyerOrgId}} {{saleOrderNo}} {{saleBillNo}} {{saleBillStatus}} " +
             " {{saleInvoiceApplyNo}} {{saleInvoiceType}} {{saleInvoiceApplyStatus}} {{saleInvoicePrintingStatus}} {{saleInvoiceErrorMsg}} " +
             " ORDER BY bb.bill_code LIMIT 20000 ";
+
+    static String invoicePrintingSql = "SELECT o.supplier_org_id, o.supplier_name, o.buyer_name, o.order_time, o.buyer_org_name, o.buyer_org_full_name, " +
+            " o.sale_order_no,  o.final_price, sb.bill_code, sb.s_bill_price, si.si_invoice_apply_number, (CASE WHEN si.si_invoice_type = 1 THEN '普通纸质票' WHEN si.si_invoice_type = 2 THEN '专票' WHEN si.si_invoice_type = 3 THEN '普通电子票' END) sale_invoice_category, " +
+            " si.si_amount, si.invoice_title, si.remark, si.finish_time FROM " +
+            "(" +
+            " SELECT org.id AS supplier_org_id, oi.order_no AS buy_order_no, oi.order_no + 1 AS sale_order_no, oi.final_price, org.name AS supplier_name, oi.order_time, ua.user_name AS buyer_name, ua.legal_entity_organization_id AS buyer_org_id, ua.legal_entity_organization_name AS buyer_org_name, buyer_org.full_name AS buyer_org_full_name " +
+            " FROM service_order.order_info oi " +
+            " LEFT JOIN service_order.`reseller_order_info` roi ON oi.`order_no` = roi.`order_no` AND roi.`yn`=1 " +
+            " LEFT JOIN service_user.`shop_info` si ON si.shop_id = oi.shop_id AND si.yn = 1 " +
+            " LEFT JOIN service_user.organization org ON org.id = si.organize_id AND org.yn = 1 " +
+            " LEFT JOIN service_user.`user_account` ua ON ua.id = oi.buyer_id AND ua.yn = 1 " +
+            " LEFT JOIN service_user.`organization` buyer_org ON buyer_org.id = ua.legal_entity_organization_id " +
+            " WHERE oi.order_status = 40  " +
+            " AND roi.id IS NOT NULL AND oi.`yn`=1 AND order_split_type = 1 " +
+            " AND NOT EXISTS (SELECT 1 FROM service_order.order_info ooi WHERE ooi.parent_no = oi.order_no AND ooi.parent_no > 0) " +
+            ") o " +
+            " LEFT JOIN (" +
+            " SELECT t.order_id, t.bill_code, bbi.status AS sb_status, bbi.`bill_price` AS s_bill_price FROM " +
+            "(" +
+            " SELECT bo.order_id, MAX(bi.`bill_code`) AS bill_code " +
+            " FROM service_order.`bill_order` bo " +
+            " INNER JOIN service_order.`bill_infos` bi ON bi.id = bo.`bill_id` AND bi.has_reseller_create = 1 AND bi.`yn` = 1 " +
+            " GROUP BY bo.order_id " +
+            ") t " +
+            " INNER JOIN service_order.`bill_infos` bbi ON bbi.bill_code = t.bill_code " +
+            ") sb ON sb.order_id = o.sale_order_no " +
+            "LEFT JOIN (" +
+            " SELECT t.si_order_no, ia.`apply_number` AS si_invoice_apply_number, ia.`apply_status` AS si_invoice_apply_status, ia.`tatal_amount` AS si_amount, ia.`billing` AS si_billing, ia.`cancel_status` AS si_invoice_cancel_status, ia.invoice_type AS si_invoice_type, iat.`invoice_title`, iat.`remark`, ia.finish_time  " +
+            " FROM service_order.`invoice_apply` ia  " +
+            " INNER JOIN ( " +
+            " SELECT iaor.`order_no` AS si_order_no, MAX(ia.`apply_number`) AS si_invoice_apply_number " +
+            " FROM service_order.`invoice_apply_order_relation` iaor " +
+            " INNER JOIN service_order.`invoice_apply` ia ON ia.id = iaor.`invoice_apply_id` AND ia.`sql_type` = 1 AND ia.`yn` = 1 " +
+            " GROUP BY iaor.`order_no` " +
+            " ) t ON t.si_invoice_apply_number = ia.apply_number " +
+            " INNER JOIN service_order.invoice_apply_title iat ON iat.`apply_number` = ia.apply_number " +
+            ") si ON si.si_order_no = o.sale_order_no " +
+            " WHERE si.si_billing = 1 ";
 
 }

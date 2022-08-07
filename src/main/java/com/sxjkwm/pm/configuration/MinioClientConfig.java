@@ -22,7 +22,7 @@ public class MinioClientConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(MinioClientConfig.class);
 
-    private static final String[] bucketNames = {"oddbucket", "evenbucket", "pattern", "finance"};
+    private static final String[] bucketNames = {"oddbucket", "evenbucket", "pattern", "finance", "temp"};
 
     @Bean
     public MinioClient minioClient(@Autowired OssConfig ossConfig) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
