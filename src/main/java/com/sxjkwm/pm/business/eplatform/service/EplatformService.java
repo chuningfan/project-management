@@ -459,6 +459,8 @@ public class EplatformService {
         }
         int totalRowNum = sheet.getPhysicalNumberOfRows();
         XSSFRow lastRow = sheet.createRow(totalRowNum);
+        XSSFCell totalPriceCell = null;
+        XSSFCell totalInvoiceAmountCell = null;
         for (int i = 0; i < invoiceBillWorkbookHeaders.length; i ++) {
             ConditionPair conditionPair = invoiceBillWorkbookHeaders[i];
             XSSFCell cell = lastRow.createCell(i);
@@ -466,15 +468,18 @@ public class EplatformService {
                 cell.setCellValue("合计：");
             } else {
                 if ("finalPrice".equals(conditionPair.key)) {
+                    totalPriceCell = cell;
                     cell.setCellValue(totalPrice.toString());
                 }
                 if ("saleInvoiceAmount".equals(conditionPair.key)) {
+                    totalInvoiceAmountCell= cell;
                     cell.setCellValue(totalInvoiceAmount.toString());
                 }
             }
             if (i == invoiceBillWorkbookHeaders.length - 1) {
-                if (totalInvoiceAmount.equals(totalPrice)) {
-                    resultStyle.getFont().setColor(Font.COLOR_RED);
+                if (!totalInvoiceAmount.equals(totalPrice)) {
+                    totalPriceCell.getCellStyle().getFont().setColor(Font.COLOR_RED);
+                    totalInvoiceAmountCell.getCellStyle().getFont().setColor(Font.COLOR_RED);
                 }
             }
             cell.setCellStyle(resultStyle);
