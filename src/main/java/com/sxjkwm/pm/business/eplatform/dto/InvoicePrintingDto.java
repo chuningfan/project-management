@@ -56,10 +56,10 @@ public class InvoicePrintingDto implements Serializable {
         dto.setSaleOrderNo(MapUtils.getLong(dataRow, "sale_order_no"));
         dto.setFinalPrice((BigDecimal) MapUtils.getNumber(dataRow, "final_price"));
         dto.setSaleBillCode(MapUtils.getString(dataRow, "bill_code"));
-        dto.setSaleBillPrice((BigDecimal) MapUtils.getNumber(dataRow, "s_bill_price"));
-        dto.setSaleInvoiceApplyNumber(MapUtils.getString(dataRow, "si_invoice_apply_number"));
+        dto.setSaleBillPrice((BigDecimal) MapUtils.getNumber(dataRow, "bill_price"));
+        dto.setSaleInvoiceApplyNumber(MapUtils.getString(dataRow, "apply_number"));
         dto.setSaleInvoiceCategory(MapUtils.getString(dataRow, "sale_invoice_category"));
-        dto.setSaleInvoiceAmount((BigDecimal) MapUtils.getNumber(dataRow, "si_amount"));
+        dto.setSaleInvoiceAmount((BigDecimal) MapUtils.getNumber(dataRow, "tatal_amount"));
         dto.setSaleInvoiceTitle(MapUtils.getString(dataRow, "invoice_title"));
         dto.setSaleInvoiceRemark(MapUtils.getString(dataRow, "remark"));
         dto.setSaleInvoiceFinishTime(((Date) MapUtils.getObject(dataRow, "finish_time")).getTime());

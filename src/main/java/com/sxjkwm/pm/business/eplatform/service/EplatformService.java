@@ -16,7 +16,6 @@ import io.minio.GetObjectResponse;
 import io.minio.errors.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -44,7 +43,6 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -219,7 +217,7 @@ public class EplatformService {
         return esDao.updateDataByIdNoRealTime(item, checkBillESIndexName, id);
     }
 
-    public PageDataDto<Map<String, Object>> queryPrintedInvoiceInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime) throws IOException {
+    public PageDataDto<Map<String, Object>> queryPrintedInvoiceInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime, String buyerOrg, String invoiceTitle, String invoiceApplyNum) throws IOException {
         BoolQueryBuilder queryCondition = QueryBuilders.boolQuery();
         if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
             queryCondition.must(QueryBuilders.rangeQuery("saleInvoiceFinishTime").from(startTime, true).to(endTime, true));
@@ -228,7 +226,15 @@ public class EplatformService {
         } else if (Objects.nonNull(endTime)) {
             queryCondition.must(QueryBuilders.rangeQuery("saleInvoiceFinishTime").to(endTime, true));
         }
-//        queryCondition.must(QueryBuilders.matchQuery("saleInvoiceTitle.keyword", "陕西高速机械化工程有限公司")); // .keyword is for searching exactly
+        if (StringUtils.isNotBlank(buyerOrg)) {
+            queryCondition.must(QueryBuilders.matchQuery("buyerOrgName.keyword", buyerOrg)); // .keyword is for searching exactly
+        }
+        if (StringUtils.isNotBlank(invoiceTitle)) {
+            queryCondition.must(QueryBuilders.matchQuery("saleInvoiceTitle.keyword", invoiceTitle)); // .keyword is for searching exactly
+        }
+        if (StringUtils.isNotBlank(invoiceApplyNum)) {
+            queryCondition.must(QueryBuilders.matchQuery("saleInvoiceApplyNumber.keyword", invoiceApplyNum)); // .keyword is for searching exactly
+        }
         return esDao.searchListData(printedInvoiceIndexName, queryCondition, pageSize, pageNo, null, null, null);
     }
 
@@ -299,10 +305,25 @@ public class EplatformService {
         resultStyle.setAlignment(HorizontalAlignment.CENTER);
         resultStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
+        XSSFFont errResultFont = workbook.createFont();
+        errResultFont.setFontHeight(11);
+        errResultFont.setFontName("等线");
+        errResultFont.setBold(true);
+        XSSFCellStyle errResultStyle = workbook.createCellStyle();
+        errResultStyle.setFont(errResultFont);
+        errResultStyle.setFillForegroundColor((short) 18);
+        errResultStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        errResultStyle.setBorderBottom(BorderStyle.THIN);
+        errResultStyle.setBorderLeft(BorderStyle.THIN);
+        errResultStyle.setBorderRight(BorderStyle.THIN);
+        errResultStyle.setBorderTop(BorderStyle.THIN);
+        errResultStyle.setAlignment(HorizontalAlignment.CENTER);
+        errResultStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
         while (iterator.hasNext()) {
             Map.Entry<String, List<InvoicePrintingDto>> entry = iterator.next();
             String sheetName = entry.getKey();
-            processSheetByInvoiceTitle(workbook, sheetName, entry.getValue(), titleStyle, dataStyle, resultStyle);
+            processSheetByInvoiceTitle(workbook, sheetName, entry.getValue(), titleStyle, dataStyle, resultStyle, errResultStyle);
         }
         String fileName = "销项发票订单明细表.xlsx";
         String objName = ContextHelper.getUserData().getWxUserId() + "/" + UUID.fastUUID().toString().replace("-", "");
@@ -354,7 +375,8 @@ public class EplatformService {
                                             List<InvoicePrintingDto> dataList,
                                             XSSFCellStyle titleStyle,
                                             XSSFCellStyle dataStyle,
-                                            XSSFCellStyle resultStyle) throws NoSuchFieldException, IllegalAccessException {
+                                            XSSFCellStyle resultStyle,
+                                            XSSFCellStyle errResultStyle) throws NoSuchFieldException, IllegalAccessException {
         XSSFSheet sheet = workbook.createSheet(sheetName);
         XSSFRow titleRow = sheet.createRow(0);
         for (int i = 0; i < invoiceBillWorkbookHeaders.length; i++) {
@@ -368,16 +390,16 @@ public class EplatformService {
         sheet.addMergedRegion(titleRegion);
         createRowHeader(sheet, dataStyle); // create header
         // fill data
-        Map<String, List<InvoicePrintingDto>> dataMapBySupplier = dataList.stream().collect(Collectors.groupingBy(InvoicePrintingDto::getSupplierName));
-        Set<Map.Entry<String, List<InvoicePrintingDto>>> entrySet = dataMapBySupplier.entrySet();
-        Iterator<Map.Entry<String, List<InvoicePrintingDto>>> iterator = entrySet.iterator();
+//        Map<String, List<InvoicePrintingDto>> dataMapBySupplier = dataList.stream().collect(Collectors.groupingBy(InvoicePrintingDto::getSupplierName));
+//        Set<Map.Entry<String, List<InvoicePrintingDto>>> entrySet = dataMapBySupplier.entrySet();
+//        Iterator<Map.Entry<String, List<InvoicePrintingDto>>> iterator = entrySet.iterator();
         BigDecimal totalPrice = new BigDecimal("0");
         BigDecimal totalInvoiceAmount = new BigDecimal("0");
         Set<String> addedInvoiceApplyNum = Sets.newHashSet();
         int rowNum = 2;
-        while (iterator.hasNext()) {
-            Map.Entry<String, List<InvoicePrintingDto>> entry = iterator.next();
-            List<InvoicePrintingDto> bookDataList = entry.getValue();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, List<InvoicePrintingDto>> entry = iterator.next();
+            List<InvoicePrintingDto> bookDataList = dataList;
             Map<String, List<InvoicePrintingDto>> dataMapByOrg = bookDataList.stream().collect(Collectors.groupingBy(InvoicePrintingDto::getBuyerOrgName));
             Set<Map.Entry<String, List<InvoicePrintingDto>>> orgEntrySet = dataMapByOrg.entrySet();
             Iterator<Map.Entry<String, List<InvoicePrintingDto>>> orgIterator = orgEntrySet.iterator();
@@ -456,7 +478,7 @@ public class EplatformService {
                     sheet.addMergedRegion(orgRegion);
                 }
             }
-        }
+//        }
         int totalRowNum = sheet.getPhysicalNumberOfRows();
         XSSFRow lastRow = sheet.createRow(totalRowNum);
         XSSFCell totalPriceCell = null;
@@ -476,15 +498,12 @@ public class EplatformService {
                     cell.setCellValue(totalInvoiceAmount.toString());
                 }
             }
-            if (i == invoiceBillWorkbookHeaders.length - 1) {
-                if (!totalInvoiceAmount.equals(totalPrice)) {
-                    totalPriceCell.getCellStyle().getFont().setColor(Font.COLOR_RED);
-                    totalInvoiceAmountCell.getCellStyle().getFont().setColor(Font.COLOR_RED);
-                }
-            }
             cell.setCellStyle(resultStyle);
         }
-        resultStyle.getFont().setColor(Font.COLOR_NORMAL);
+        if (!totalInvoiceAmount.equals(totalPrice)) {
+            totalPriceCell.setCellStyle(errResultStyle);
+            totalInvoiceAmountCell.setCellStyle(errResultStyle);
+        }
     }
 
     private void createRowHeader(XSSFSheet sheet, XSSFCellStyle dataStyle) {

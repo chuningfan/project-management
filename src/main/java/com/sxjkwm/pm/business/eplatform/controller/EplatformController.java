@@ -80,8 +80,11 @@ public class EplatformController {
             @RequestParam("pageSize") Integer pageSize,
             @RequestParam("pageNo") Integer pageNo,
             @RequestParam("startTime") Long startTime,
-            @RequestParam("endTime") Long endTime) throws IOException {
-        return RestResponse.of(eplatformService.queryPrintedInvoiceInEs(pageSize, pageNo, startTime, endTime));
+            @RequestParam("endTime") Long endTime,
+            @RequestParam(value = "buyerOrg", required = false) String buyerOrg,
+            @RequestParam(value = "invoiceTitle", required = false) String invoiceTitle,
+            @RequestParam(value = "invoiceApplyNum", required = false) String invoiceApplyNum) throws IOException {
+        return RestResponse.of(eplatformService.queryPrintedInvoiceInEs(pageSize, pageNo, startTime, endTime, buyerOrg, invoiceTitle, invoiceApplyNum));
     }
 
     @GetMapping("/es/syncInvoicePrinted")
