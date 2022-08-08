@@ -51,7 +51,7 @@ public class InvoicePrintingDto implements Serializable {
         dto.setSupplierName(MapUtils.getString(dataRow, "supplier_name"));
         dto.setBuyerName(MapUtils.getString(dataRow, "buyer_name"));
         dto.setOrderTime(((Date) MapUtils.getObject(dataRow, "order_time")).getTime());
-        dto.setBuyerOrgName(MapUtils.getString(dataRow, "buyer_org_name"));
+        dto.setBuyerOrgName(MapUtils.getString(dataRow, "buyer_org_name").trim());
         dto.setBuyerOrgFullName(MapUtils.getString(dataRow, "buyer_org_full_name"));
         dto.setSaleOrderNo(MapUtils.getLong(dataRow, "sale_order_no"));
         dto.setFinalPrice((BigDecimal) MapUtils.getNumber(dataRow, "final_price"));
@@ -60,7 +60,7 @@ public class InvoicePrintingDto implements Serializable {
         dto.setSaleInvoiceApplyNumber(MapUtils.getString(dataRow, "apply_number"));
         dto.setSaleInvoiceCategory(MapUtils.getString(dataRow, "sale_invoice_category"));
         dto.setSaleInvoiceAmount((BigDecimal) MapUtils.getNumber(dataRow, "tatal_amount"));
-        dto.setSaleInvoiceTitle(MapUtils.getString(dataRow, "invoice_title"));
+        dto.setSaleInvoiceTitle(MapUtils.getString(dataRow, "invoice_title").trim());
         dto.setSaleInvoiceRemark(MapUtils.getString(dataRow, "remark"));
         dto.setSaleInvoiceFinishTime(((Date) MapUtils.getObject(dataRow, "finish_time")).getTime());
         return dto;

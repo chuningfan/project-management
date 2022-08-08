@@ -227,10 +227,10 @@ public class EplatformService {
             queryCondition.must(QueryBuilders.rangeQuery("saleInvoiceFinishTime").to(endTime, true));
         }
         if (StringUtils.isNotBlank(buyerOrg)) {
-            queryCondition.must(QueryBuilders.matchQuery("buyerOrgName.keyword", buyerOrg)); // .keyword is for searching exactly
+            queryCondition.must(QueryBuilders.matchQuery("buyerOrgName.keyword", buyerOrg.trim())); // .keyword is for searching exactly
         }
         if (StringUtils.isNotBlank(invoiceTitle)) {
-            queryCondition.must(QueryBuilders.matchQuery("saleInvoiceTitle.keyword", invoiceTitle)); // .keyword is for searching exactly
+            queryCondition.must(QueryBuilders.matchQuery("saleInvoiceTitle.keyword", invoiceTitle.trim())); // .keyword is for searching exactly
         }
         if (StringUtils.isNotBlank(invoiceApplyNum)) {
             queryCondition.must(QueryBuilders.matchQuery("saleInvoiceApplyNumber.keyword", invoiceApplyNum)); // .keyword is for searching exactly
