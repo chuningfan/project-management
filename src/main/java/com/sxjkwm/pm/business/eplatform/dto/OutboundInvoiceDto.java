@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Vic.Chu
  * @date 2022/8/7 12:06
  */
-public class InvoicePrintingDto implements Serializable {
+public class OutboundInvoiceDto implements Serializable {
 
     private Long supplierOrgId; // 供应商ID
 
@@ -45,10 +45,10 @@ public class InvoicePrintingDto implements Serializable {
 
     private Long saleInvoiceFinishTime; // 发票打印时间
 
-    public static InvoicePrintingDto fillData(Map<String, Object> dataRow) {
-        InvoicePrintingDto dto = new InvoicePrintingDto();
+    public static OutboundInvoiceDto fillData(Map<String, Object> dataRow) {
+        OutboundInvoiceDto dto = new OutboundInvoiceDto();
         dto.setSupplierOrgId(MapUtils.getLong(dataRow, "supplier_org_id"));
-        dto.setSupplierName(MapUtils.getString(dataRow, "supplier_name"));
+        dto.setSupplierName(MapUtils.getString(dataRow, "supplier_name").trim());
         dto.setBuyerName(MapUtils.getString(dataRow, "buyer_name"));
         dto.setOrderTime(((Date) MapUtils.getObject(dataRow, "order_time")).getTime());
         dto.setBuyerOrgName(MapUtils.getString(dataRow, "buyer_org_name").trim());

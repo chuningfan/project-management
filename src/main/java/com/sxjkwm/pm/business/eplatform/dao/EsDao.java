@@ -26,12 +26,11 @@ import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -42,6 +41,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -184,7 +184,7 @@ public class EsDao {
     }
 
     public PageDataDto<Map<String, Object>> searchListData(String index,
-                                                    BoolQueryBuilder boolQueryBuilder,
+                                                    AbstractQueryBuilder queryBuilder,
                                                     Integer pageSize,
                                                     Integer pageNo,
                                                     String fields,
@@ -202,7 +202,9 @@ public class EsDao {
         if (StringUtils.isNotEmpty(sortField)){
             searchSourceBuilder.sort(sortField+".keyword", SortOrder.ASC);
         }
-        searchSourceBuilder.query(boolQueryBuilder);
+        if (Objects.nonNull(queryBuilder)) {
+            searchSourceBuilder.query(queryBuilder);
+        }
 //        HighlightBuilder highlight = new HighlightBuilder();
 //        highlight.field(highlightField);
 //        highlight.requireFieldMatch(false);
