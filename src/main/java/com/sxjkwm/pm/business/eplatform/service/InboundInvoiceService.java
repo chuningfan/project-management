@@ -179,7 +179,7 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
         for (int i = 0; i < invoiceBillWorkbookHeaders.length; i++) {
             XSSFCell titleCell = titleRow.createCell(i);
             if (i == 0) {
-                titleCell.setCellValue("销项发票订单明细表");
+                titleCell.setCellValue("进项发票订单明细表");
                 titleCell.setCellStyle(titleStyle);
             }
         }
