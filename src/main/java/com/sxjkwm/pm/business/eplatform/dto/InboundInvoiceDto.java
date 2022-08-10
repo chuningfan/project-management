@@ -37,6 +37,10 @@ public class InboundInvoiceDto implements Serializable {
 
     private Long operateTime; // 发票打印时间
 
+    private Boolean hasOutbound;
+
+    private Long saleOrderNo;
+
     public static InboundInvoiceDto fillData(Map<String, Object> dataRow) {
         InboundInvoiceDto dto = new InboundInvoiceDto();
         dto.setSupplierOrgId(MapUtils.getLong(dataRow, "supplier_org_id"));
@@ -51,6 +55,7 @@ public class InboundInvoiceDto implements Serializable {
         dto.setBuyInvoiceAmount((BigDecimal) MapUtils.getNumber(dataRow, "tatal_amount"));
         dto.setInvoicecCount(MapUtils.getInteger(dataRow, "invoice_num"));
         dto.setOperateTime(((Date) MapUtils.getObject(dataRow, "modified")).getTime());
+        dto.setSaleOrderNo(MapUtils.getLong(dataRow, "sale_order_no"));
         return dto;
     }
 
@@ -148,5 +153,21 @@ public class InboundInvoiceDto implements Serializable {
 
     public void setOperateTime(Long operateTime) {
         this.operateTime = operateTime;
+    }
+
+    public Boolean getHasOutbound() {
+        return hasOutbound;
+    }
+
+    public void setHasOutbound(Boolean hasOutbound) {
+        this.hasOutbound = hasOutbound;
+    }
+
+    public Long getSaleOrderNo() {
+        return saleOrderNo;
+    }
+
+    public void setSaleOrderNo(Long saleOrderNo) {
+        this.saleOrderNo = saleOrderNo;
     }
 }

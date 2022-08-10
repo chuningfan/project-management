@@ -47,7 +47,7 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
 
     private static final Logger logger = LoggerFactory.getLogger(OutboundInvoiceService.class);
 
-    private static final String outboundInvoiceIndex = "pepdi";
+    static final String outboundInvoiceIndex = "pepdi";
 
     private final S3FileUtil s3FileUtil;
 
@@ -294,6 +294,12 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
                                     }
                                 }
                                 cell.setCellValue(amount.doubleValue());
+                            } else if (clazz == Boolean.class) {
+                                if ((Boolean) value) {
+                                    cell.setCellValue("是");
+                                } else {
+                                    cell.setCellValue("否");
+                                }
                             } else {
                                 cell.setCellValue(value.toString());
                             }

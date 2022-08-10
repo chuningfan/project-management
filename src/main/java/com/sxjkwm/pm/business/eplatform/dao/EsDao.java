@@ -149,6 +149,9 @@ public class EsDao {
         }
         GetResponse response = restHighLevelClient.get(request, RequestOptions.DEFAULT);
         Map<String, Object> map = response.getSource();
+        if (Objects.isNull(map)) {
+            return null;
+        }
         map.put("id",response.getId());
         return map;
     }

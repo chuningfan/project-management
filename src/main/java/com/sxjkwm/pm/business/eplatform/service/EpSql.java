@@ -79,7 +79,7 @@ public class EpSql {
             " WHERE ia.billing = 1 AND ia.cancel_status IS NULL ";
 
     static String inboundInvoiceSql = " SELECT DISTINCT o.supplier_org_id, o.org_name supplier_name, o.buyer_org_name, o.buyer_org_full_name, o.buy_order_no, o.final_price, " +
-            " bb.bill_code, bb.b_bill_price bill_price, bi.bi_invoice_apply_number apply_number, bi.bi_amount tatal_amount, bi.invoice_num, bi.modified FROM (" +
+            " bb.bill_code, bb.b_bill_price bill_price, bi.bi_invoice_apply_number apply_number, bi.bi_amount tatal_amount, bi.invoice_num, bi.modified, o.sale_order_no FROM (" +
             " SELECT org.id AS supplier_org_id, oi.order_no AS buy_order_no, oi.order_no + 1 AS sale_order_no, oi.final_price, org.name AS org_name, " +
             " oi.order_time, ua.user_name AS buyer_name, ua.legal_entity_organization_id AS buyer_org_id, ua.legal_entity_organization_name AS buyer_org_name, " +
             " buyer_org.full_name AS buyer_org_full_name FROM service_order.order_info oi " +

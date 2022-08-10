@@ -47,7 +47,7 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
 
     private static final Logger logger = LoggerFactory.getLogger(InboundInvoiceService.class);
 
-    private static final String inboundInvoiceIndex = "pepii";
+    static final String inboundInvoiceIndex = "pepii";
 
     private static final ConditionPair[] invoiceBillWorkbookHeaders = {
             ConditionPair.of("supplierName", "供应商名称", String.class),
@@ -56,6 +56,7 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
             ConditionPair.of("buyInvoiceAmount", "发票金额", BigDecimal.class),
             ConditionPair.of("buyerOrgName", "采购单位", String.class),
             ConditionPair.of("ownerName", "对接人", String.class),
+            ConditionPair.of("hasOutbound", "是否已开销项", Boolean.class),
     };
 
     private final EpDao epDao;
@@ -101,6 +102,26 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
     }
 
     public String generateWorkbook(List<InboundInvoiceDto> dataList) throws NoSuchFieldException, IllegalAccessException {
+        // relate to outbound invoice data
+        for (InboundInvoiceDto inbound: dataList) {
+            Long outboundId = inbound.getSaleOrderNo();
+            Boolean hasOutbound = false;
+            try {
+                Map<String,Object> resp = esDao.searchDataById(OutboundInvoiceService.outboundInvoiceIndex, outboundId.toString(), "saleInvoiceApplyNumber");
+                if (Objects.nonNull(resp)) {
+                    Object resObj = resp.get("saleInvoiceApplyNumber");
+                    if (Objects.nonNull(resObj)) {
+                        String num = resObj.toString();
+                        if (StringUtils.isNotBlank(num)) {
+                            hasOutbound = true;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                logger.error("Search outbound data failed: {}", e);
+            }
+            inbound.setHasOutbound(hasOutbound);
+        }
         XSSFWorkbook workbook = new XSSFWorkbook();
         Map<String, List<InboundInvoiceDto>> dataMapBySupplier = dataList.stream().collect(Collectors.groupingBy(InboundInvoiceDto::getSupplierName));
         Set<Map.Entry<String, List<InboundInvoiceDto>>> entrySet = dataMapBySupplier.entrySet();
@@ -239,6 +260,12 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
                                 }
                             }
                             cell.setCellValue(amount.doubleValue());
+                        } else if (clazz == Boolean.class) {
+                            if ((Boolean) value) {
+                                cell.setCellValue("是");
+                            } else {
+                                cell.setCellValue("否");
+                            }
                         } else {
                             cell.setCellValue(value.toString());
                         }
