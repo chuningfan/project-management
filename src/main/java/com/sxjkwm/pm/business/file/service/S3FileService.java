@@ -16,6 +16,7 @@ import com.sxjkwm.pm.util.OSSUtil;
 import com.sxjkwm.pm.util.S3FileUtil;
 import io.minio.GetObjectResponse;
 import io.minio.errors.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -88,9 +90,11 @@ public class S3FileService {
             condition.setFlowNodeId(flowNodeId);
             condition.setProjectId(projectId);
             condition.setPropertyDefId(propertyDefId);
-            ProjectFile existingFile = projectFileDao.findOne(Example.of(condition)).orElse(null);
-            if (Objects.nonNull(existingFile)) {
-                removeFileById(existingFile.getId());
+            List<ProjectFile> existingFiles = projectFileDao.findAll(Example.of(condition));
+            if (CollectionUtils.isNotEmpty(existingFiles)) {
+                for (ProjectFile existingFile: existingFiles) {
+                    removeFileById(existingFile.getId());
+                }
             }
             s3FileUtil.upload(bucketName, objectName, file);
             ProjectFile projectFile = new ProjectFile();

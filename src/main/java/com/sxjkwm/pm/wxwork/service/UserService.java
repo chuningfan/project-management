@@ -8,15 +8,18 @@ import com.google.common.collect.Lists;
 import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.auth.dao.UserDao;
 import com.sxjkwm.pm.auth.entity.User;
+import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.WxWorkTokenUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Constants;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -40,6 +43,11 @@ public class UserService {
         this.departmentService = departmentService;
     }
 
+    @Scheduled(cron = "0 15 10 ? * MON")
+    public void autoSyncUsers() throws PmException {
+        syncUsers(null);
+    }
+
     @Transactional
     @Async
     public Boolean syncUsers(List<Long> wxDeptIds) throws PmException {
@@ -47,7 +55,6 @@ public class UserService {
             wxDeptIds = Lists.newArrayList();
             JSONArray deptArray = departmentService.pullDeptFromWxWork();
             if (Objects.nonNull(deptArray) && !deptArray.isEmpty()) {
-                Object obj;
                 JSONObject deptJson;
                 for (int i = 0; i < deptArray.size(); i ++) {
                     deptJson = deptArray.getJSONObject(i);
@@ -102,7 +109,7 @@ public class UserService {
                        user.setAvatar(existingUser.getAvatar());
                        user.setName(existingUser.getName());
                        user.setModifiedAt(System.currentTimeMillis());
-                       user.setModifiedBy(ContextHelper.getUserData().getWxUserId());
+                       user.setModifiedBy(Constant.SYS);
                    }
                     userDao.saveAll(existingUsers);
                     Set<String> newUserIds = users.stream().map(User::getWxUserId).collect(Collectors.toSet());

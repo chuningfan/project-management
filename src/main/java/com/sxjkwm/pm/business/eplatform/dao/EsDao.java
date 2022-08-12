@@ -31,6 +31,7 @@ import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -208,16 +209,18 @@ public class EsDao {
         if (Objects.nonNull(queryBuilder)) {
             searchSourceBuilder.query(queryBuilder);
         }
-//        HighlightBuilder highlight = new HighlightBuilder();
-//        highlight.field(highlightField);
-//        highlight.requireFieldMatch(false);
-//        highlight.preTags("<span style='color:red'>");
-//        highlight.postTags("</span>");
-//        builder.highlighter(highlight);
+        if (Objects.nonNull(highlightField)) {
+            HighlightBuilder highlight = new HighlightBuilder();
+            highlight.field(highlightField);
+            highlight.requireFieldMatch(false);
+            highlight.preTags("<span style='color:red'>");
+            highlight.postTags("</span>");
+            searchSourceBuilder.highlighter(highlight);
+        }
         request.source(searchSourceBuilder);
         SearchResponse response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
         long totalHits = response.getHits().getTotalHits().value;
-        logger.error("=="+response.getHits().getTotalHits());
+        logger.warn("=="+response.getHits().getTotalHits());
         if (response.status().getStatus() == 200) {
             List<Map<String, Object>> dataList = setSearchResponse(response, highlightField);
             PageDataDto<Map<String, Object>> pageDataDto = new PageDataDto<>();

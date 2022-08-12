@@ -74,7 +74,7 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
             ConditionPair.of("ownerName", "对接人", String.class),
     };
 
-    public PageDataDto<Map<String, Object>> queryPrintedInvoiceInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime, String buyerOrg, String invoiceTitle, String invoiceApplyNum) throws IOException {
+    public PageDataDto<Map<String, Object>> queryPrintedInvoiceInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime, String buyerOrg, String invoiceTitle, String invoiceApplyNum, String supplierName) throws IOException {
         BoolQueryBuilder queryCondition = QueryBuilders.boolQuery();
         if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
             queryCondition.must(QueryBuilders.rangeQuery("saleInvoiceFinishTime").from(startTime, true).to(endTime, true));
@@ -91,6 +91,9 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
         }
         if (StringUtils.isNotBlank(invoiceApplyNum)) {
             queryCondition.must(QueryBuilders.matchQuery("saleInvoiceApplyNumber.keyword", invoiceApplyNum)); // .keyword is for searching exactly
+        }
+        if (StringUtils.isNotBlank(supplierName)) {
+            queryCondition.must(QueryBuilders.matchQuery("supplierName.keyword", supplierName));
         }
         return super.queryFromES(outboundInvoiceIndex, queryCondition, pageSize, pageNo);
     }

@@ -46,8 +46,9 @@ public class EplatformController {
             @RequestParam("endTime") Long endTime,
             @RequestParam(value = "buyerOrg", required = false) String buyerOrg,
             @RequestParam(value = "invoiceTitle", required = false) String invoiceTitle,
-            @RequestParam(value = "invoiceApplyNum", required = false) String invoiceApplyNum) throws IOException {
-        return RestResponse.of(outboundInvoiceService.queryPrintedInvoiceInEs(pageSize, pageNo, startTime, endTime, buyerOrg, invoiceTitle, invoiceApplyNum));
+            @RequestParam(value = "invoiceApplyNum", required = false) String invoiceApplyNum,
+            @RequestParam(value = "supplierName", required = false) String supplierName) throws IOException {
+        return RestResponse.of(outboundInvoiceService.queryPrintedInvoiceInEs(pageSize, pageNo, startTime, endTime, buyerOrg, invoiceTitle, invoiceApplyNum, supplierName));
     }
 
     @GetMapping("/es/syncInvoicePrinted")

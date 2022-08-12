@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 public interface Constant<K, V> {
 
+    String SYS = "system";
+
     String openAPISignCachePrefix = "opas:";
 
     String userCachePrefix = "user:";
