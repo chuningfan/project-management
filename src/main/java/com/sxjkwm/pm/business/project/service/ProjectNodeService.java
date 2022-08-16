@@ -3,8 +3,6 @@ package com.sxjkwm.pm.business.project.service;
 import cn.hutool.core.map.MapUtil;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.sxjkwm.pm.auditing.dao.AuditingRecordDao;
-import com.sxjkwm.pm.auditing.entity.AuditingRecord;
 import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
 import com.sxjkwm.pm.business.file.entity.ProjectFile;
@@ -14,7 +12,10 @@ import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionDefDto;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeSelectionDefinitionDto;
-import com.sxjkwm.pm.business.flow.entity.*;
+import com.sxjkwm.pm.business.flow.entity.FlowNode;
+import com.sxjkwm.pm.business.flow.entity.FlowNodeCollectionDefinition;
+import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
+import com.sxjkwm.pm.business.flow.entity.FlowNodeSelectionDefinition;
 import com.sxjkwm.pm.business.flow.service.FlowNodeSelectionDefinitionService;
 import com.sxjkwm.pm.business.project.dao.ProjectDao;
 import com.sxjkwm.pm.business.project.dao.ProjectNodeDao;
@@ -68,14 +69,12 @@ public class ProjectNodeService {
 
     private final FlowNodeSelectionDefinitionService flowNodeSelectionDefinitionService;
 
-    private final AuditingRecordDao auditingRecordDao;
-
     private final FlowNodeDao flowNodeDao;
 
     private final FlowDao flowDao;
 
     @Autowired
-    public ProjectNodeService(ProjectNodeDao projectNodeDao, ProjectNodePropertyDao projectNodePropertyDao, FlowNodeDefinitionDao flowNodeDefinitionDao, ProjectDao projectDao, ProjectFileDao projectFileDao, FlowNodeCollectionDefinitionDao flowNodeCollectionDefinitionDao, FlowNodeSelectionDefinitionService flowNodeSelectionDefinitionService, AuditingRecordDao auditingRecordDao, FlowNodeDao flowNodeDao, FlowDao flowDao) {
+    public ProjectNodeService(ProjectNodeDao projectNodeDao, ProjectNodePropertyDao projectNodePropertyDao, FlowNodeDefinitionDao flowNodeDefinitionDao, ProjectDao projectDao, ProjectFileDao projectFileDao, FlowNodeCollectionDefinitionDao flowNodeCollectionDefinitionDao, FlowNodeSelectionDefinitionService flowNodeSelectionDefinitionService, FlowNodeDao flowNodeDao, FlowDao flowDao) {
         this.projectNodeDao = projectNodeDao;
         this.projectNodePropertyDao = projectNodePropertyDao;
         this.flowNodeDefinitionDao = flowNodeDefinitionDao;
@@ -83,7 +82,6 @@ public class ProjectNodeService {
         this.projectFileDao = projectFileDao;
         this.flowNodeCollectionDefinitionDao = flowNodeCollectionDefinitionDao;
         this.flowNodeSelectionDefinitionService = flowNodeSelectionDefinitionService;
-        this.auditingRecordDao = auditingRecordDao;
         this.flowNodeDao = flowNodeDao;
         this.flowDao = flowDao;
         handlerMap = ContextUtil.getBeansOfType(PropertyHandler.class);
@@ -338,28 +336,28 @@ public class ProjectNodeService {
             }
             propertyDtos.add(propertyDto);
         }
-        FlowNode flowNode = flowNodeDao.getOne(flowNodeId);
-        if (Objects.nonNull(flowNode)) {
-            Long auditingFlowId = flowNode.getAuditingFlowId();
-            if (Objects.nonNull(auditingFlowId)) {
-                Flow flow = flowDao.getOne(flowId);
-                Long dataId = projectId;
-                Integer auditingDataType = flow.getDataType();
-                if (Objects.isNull(auditingDataType)) {
-                    auditingDataType = 1;
-                }
-                AuditingRecord AuditingRecordCondition = new AuditingRecord();
-                AuditingRecordCondition.setAuditingFlowId(auditingFlowId);
-                AuditingRecordCondition.setIsDeleted(0);
-                AuditingRecordCondition.setBusinessFlowNodeId(flowNodeId);
-                AuditingRecordCondition.setDataType(auditingDataType);
-                AuditingRecordCondition.setDataId(dataId);
-                AuditingRecord auditingRecord = auditingRecordDao.findOne(Example.of(AuditingRecordCondition)).orElse(null);
-                if (Objects.nonNull(auditingRecord)) {
-                    dto.setAuditingStatus(auditingRecord.getAuditingStatus());
-                }
-            }
-        }
+//        FlowNode flowNode = flowNodeDao.getOne(flowNodeId);
+//        if (Objects.nonNull(flowNode)) {
+//            Long auditingFlowId = flowNode.getAuditingFlowId();
+//            if (Objects.nonNull(auditingFlowId)) {
+//                Flow flow = flowDao.getOne(flowId);
+//                Long dataId = projectId;
+//                Integer auditingDataType = flow.getDataType();
+//                if (Objects.isNull(auditingDataType)) {
+//                    auditingDataType = 1;
+//                }
+//                AuditingRecord AuditingRecordCondition = new AuditingRecord();
+//                AuditingRecordCondition.setAuditingFlowId(auditingFlowId);
+//                AuditingRecordCondition.setIsDeleted(0);
+//                AuditingRecordCondition.setBusinessFlowNodeId(flowNodeId);
+//                AuditingRecordCondition.setDataType(auditingDataType);
+//                AuditingRecordCondition.setDataId(dataId);
+//                AuditingRecord auditingRecord = auditingRecordDao.findOne(Example.of(AuditingRecordCondition)).orElse(null);
+//                if (Objects.nonNull(auditingRecord)) {
+//                    dto.setAuditingStatus(auditingRecord.getAuditingStatus());
+//                }
+//            }
+//        }
         return dto;
     }
 

@@ -3,12 +3,9 @@ package com.sxjkwm.pm.constants;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sxjkwm.pm.auditing.handler.AuditingDataHandler;
-import com.sxjkwm.pm.auditing.handler.impl.ProjectAuditingDataHandler;
 import com.sxjkwm.pm.business.file.handler.PatternFileHandler;
 import com.sxjkwm.pm.business.file.handler.impl.SingleInquiryFileHandler;
 import com.sxjkwm.pm.business.project.dto.ProjectDto;
-import com.sxjkwm.pm.util.ContextUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -316,43 +313,6 @@ public interface Constant<K, V> {
         public String getLabel() {
             return status;
         }
-    }
-
-    enum DataType implements Constant<String, Integer> {
-        TRADITIONAL(1, "集采项目") {
-            @Override
-            public AuditingDataHandler dataHandler() {
-                return ContextUtil.getBean(ProjectAuditingDataHandler.class);
-            }
-        },
-        E_PLATFORM(2, "电商项目") {
-            @Override
-            public AuditingDataHandler dataHandler() {
-                return null;
-            }
-        },
-        ;
-
-        private Integer type;
-
-        private String lable;
-
-        DataType(Integer type, String lable) {
-            this.type = type;
-            this.lable = lable;
-        }
-
-        @Override
-        public Integer getValue() {
-            return type;
-        }
-
-        @Override
-        public String getLabel() {
-            return lable;
-        }
-
-        public abstract AuditingDataHandler dataHandler();
     }
 
     enum UserRole implements Constant<String, String> {

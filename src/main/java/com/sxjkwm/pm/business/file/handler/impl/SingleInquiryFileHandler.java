@@ -1,8 +1,10 @@
 package com.sxjkwm.pm.business.file.handler.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.auth.entity.User;
+import com.sxjkwm.pm.business.centralizedpurchase.dao.CpDao;
 import com.sxjkwm.pm.business.file.handler.PatternFileHandler;
 import com.sxjkwm.pm.business.file.handler.replacement.BaseReplacement;
 import com.sxjkwm.pm.business.file.handler.replacement.ReplacementType;
@@ -11,30 +13,42 @@ import com.sxjkwm.pm.business.project.service.ProjectService;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.wxwork.service.UserService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
+ * 单一来源询价文件
  * @author Vic.Chu
  * @date 2022/7/8 17:44
  */
 @Component
 public class SingleInquiryFileHandler implements PatternFileHandler {
 
+    private static final String itemListSql = "SELECT DISTINCT it.itemname, pm.materialname, pm.specification, pm.unit, pm.planquantity, pm.remark, pm.brand " +
+            " FROM gsrm7_sxjk_prod_sourcing.`proc_tender` pt " +
+            " INNER JOIN gsrm7_sxjk_prod_sourcing.`proc_item` it ON pt.tenderid = it.tenderid " +
+            " INNER JOIN gsrm7_sxjk_prod_sourcing.`proc_material` pm ON pm.tenderid = it.tenderid  AND it.itemcode = pm.type " +
+            " WHERE pt.tendercode = '%s' ";
+
     private final ProjectService projectService;
 
     private final UserService userService;
 
+    private final CpDao cpDao;
+
     @Autowired
-    public SingleInquiryFileHandler(ProjectService projectService, UserService userService) {
+    public SingleInquiryFileHandler(ProjectService projectService, UserService userService, CpDao cpDao) {
         this.projectService = projectService;
         this.userService = userService;
+        this.cpDao = cpDao;
     }
 
     @Override
@@ -80,52 +94,139 @@ public class SingleInquiryFileHandler implements PatternFileHandler {
         }
         replacements.add(BaseReplacement.of("ownerName", ownerName, ReplacementType.STRING));
         replacements.add(BaseReplacement.of("paymentType", projectDto.getPaymentType(), ReplacementType.STRING));
-//        List<List<TreeMap<String, String>>> tables = Lists.newArrayList();
-//        // table1
-//        List<TreeMap<String, String>> table1 = Lists.newArrayList();
-//        TreeMap<String, String> row1_1 = Maps.newTreeMap();
-//        table1.add(row1_1);
-//        row1_1.put("表1第一列", "第一行第一列数据");
-//        row1_1.put("表1第二列", "第一行第二列数据");
-//        TreeMap<String, String> row2_1 = Maps.newTreeMap();
-//        table1.add(row2_1);
-//        row2_1.put("表1第一列", "第二行第一列数据");
-//        row2_1.put("表1第二列", "第二行第二列数据");
-//        tables.add(table1);
-//        // table2
-//        List<TreeMap<String, String>> table2 = Lists.newArrayList();
-//        TreeMap<String, String> row1_2 = Maps.newTreeMap();
-//        table2.add(row1_2);
-//        row1_2.put("表2第一列", "第一行第一列数据");
-//        row1_2.put("表2第二列", "第一行第二列数据");
-//        row1_2.put("表2第三列", "第一行第三列数据");
-//        TreeMap<String, String> row2_2 = Maps.newTreeMap();
-//        table2.add(row2_2);
-//        row2_2.put("表2第一列", "第二行第一列数据");
-//        row2_2.put("表2第二列", "第二行第二列数据");
-//        row2_2.put("表2第三列", "第二行第三列数据");
-//        tables.add(table2);
-//        replacements.add(BaseReplacement.of("goodsList", tables, ReplacementType.TABLE));
-        // ----------------------------------------------------------
-//        TreeMap<String, List<TreeMap<String, String>>> tables = Maps.newTreeMap();
-//        List<TreeMap<String, String>> rowDataList = Lists.newArrayList();
-//        TreeMap<String, String> row1_1 = Maps.newTreeMap();
-//        row1_1.put("表1第一列", "第一行第一列数据");
-//        row1_1.put("表1第二列", "第一行第二列数据");
-//        row1_1.put("表1第三列", "第一行第三列数据");
-//        rowDataList.add(row1_1);
-//        TreeMap<String, String> row1_2 = Maps.newTreeMap();
-//        row1_2.put("表1第一列", "第二行第一列数据");
-//        row1_2.put("表1第二列", "第二行第二列数据");
-//        row1_2.put("表1第三列", "第二行第三列数据");
-//        rowDataList.add(row1_2);
-//        tables.put("标包1", rowDataList);
-//        replacements.add(BaseReplacement.of("goodsList", tables, ReplacementType.TABLE_WITH_MERGED_FIRST_COLUMN, "黑体", 12));
-//        replacements.add(BaseReplacement.of("supplyPeriod", "2022年2月1日", ReplacementType.STRING));
-//        replacements.add(BaseReplacement.of("goodsReceiveAddress", "xxx收费站", ReplacementType.STRING));
-//        replacements.add(BaseReplacement.of("ownerName", "张三", ReplacementType.STRING));
-//        replacements.add(BaseReplacement.of("deadline", "2022年1月15日 10点00分00秒", ReplacementType.STRING, "黑体", 12));
+        // query goods list
+        String projectCode = projectDto.getProjectCode();
+        String sql = String.format(itemListSql, projectCode);
+        List<Map<String, Object>> dataList = cpDao.queryList(sql);
+        if (CollectionUtils.isNotEmpty(dataList)) {
+            List<Item> items = Lists.newArrayList();
+            for (Map<String, Object> dataMap: dataList) {
+                items.add(new Item(dataMap));
+            }
+            Map<String, List<Item>> itemMap = items.stream().collect(Collectors.groupingBy(Item::getItemName));
+            Set<Map.Entry<String, List<Item>>> itemMapEntrySet = itemMap.entrySet();
+            Iterator<Map.Entry<String, List<Item>>> iterator = itemMapEntrySet.iterator();
+            if (itemMap.size() > 1) { // 多标包
+                LinkedHashMap<String, List<LinkedHashMap<String, String>>> tables = Maps.newLinkedHashMap();
+                int count = 1;
+                while (iterator.hasNext()) {
+                    Map.Entry<String, List<Item>> entry = iterator.next();
+                    String itemName = entry.getKey();
+                    List<Item> materialList = entry.getValue();
+                    List<LinkedHashMap<String, String>> rowDataList = Lists.newArrayList();
+                    for (Item item: materialList) {
+                        LinkedHashMap<String, String> row = Maps.newLinkedHashMap();
+                        row.put("货物名称", item.getMaterialName());
+                        row.put("型号", item.getSpecification());
+                        row.put("品牌/产地", item.getBrand());
+                        row.put("单位", item.getUnit());
+                        row.put("数量", item.getQuantity());
+                        rowDataList.add(row);
+                    }
+                    tables.put("标包" + (count ++) + " " + itemName, rowDataList);
+                }
+                replacements.add(BaseReplacement.of("goodsList", tables, ReplacementType.TABLE_WITH_MERGED_FIRST_COLUMN, "黑体", 12));
+            } else {  // 单标包
+                List<List<LinkedHashMap<String, String>>> tables = Lists.newArrayList();
+                Map.Entry<String, List<Item>> entry = iterator.next();
+                List<Item> materialList = entry.getValue();
+                List<LinkedHashMap<String, String>> rowDataList = Lists.newArrayList();
+                for (Item item: materialList) {
+                    LinkedHashMap<String, String> row = Maps.newLinkedHashMap();
+                    row.put("货物名称", item.getMaterialName());
+                    row.put("型号", item.getSpecification());
+                    row.put("品牌/产地", item.getBrand());
+                    row.put("单位", item.getUnit());
+                    row.put("数量", item.getQuantity());
+                    rowDataList.add(row);
+                }
+                tables.add(rowDataList);
+                replacements.add(BaseReplacement.of("goodsList", tables, ReplacementType.TABLE, "黑体", 12));
+            }
+        }
         return replacements;
+    }
+
+    private static class Item implements Serializable {
+        private String itemName;
+
+        private String materialName;
+
+        private String specification;
+
+        private String unit;
+
+        private String quantity;
+
+        private String brand;
+
+        private String remark;
+
+        public Item(Map<String, Object> dataMap) {
+            this.itemName = MapUtils.getString(dataMap, "itemname");
+            this.materialName = MapUtils.getString(dataMap, "materialname");
+            this.specification = MapUtils.getString(dataMap, "specification");
+            this.unit = MapUtils.getString(dataMap, "unit");
+            this.quantity = MapUtils.getNumber(dataMap, "planquantity").toString();
+            this.brand = MapUtils.getString(dataMap, "brand");
+            this.remark = MapUtils.getString(dataMap, "remark");
+        }
+
+        public String getItemName() {
+            return itemName;
+        }
+
+        public void setItemName(String itemName) {
+            this.itemName = itemName;
+        }
+
+        public String getMaterialName() {
+            return materialName;
+        }
+
+        public void setMaterialName(String materialName) {
+            this.materialName = materialName;
+        }
+
+        public String getSpecification() {
+            return specification;
+        }
+
+        public void setSpecification(String specification) {
+            this.specification = specification;
+        }
+
+        public String getUnit() {
+            return unit;
+        }
+
+        public void setUnit(String unit) {
+            this.unit = unit;
+        }
+
+        public String getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(String quantity) {
+            this.quantity = quantity;
+        }
+
+        public String getBrand() {
+            return brand;
+        }
+
+        public void setBrand(String brand) {
+            this.brand = brand;
+        }
+
+        public String getRemark() {
+            return remark;
+        }
+
+        public void setRemark(String remark) {
+            this.remark = remark;
+        }
     }
 
 }

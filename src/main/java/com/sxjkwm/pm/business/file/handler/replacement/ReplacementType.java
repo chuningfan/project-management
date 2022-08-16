@@ -42,7 +42,7 @@ public enum ReplacementType {
             if (Objects.isNull(data)) {
                 return;
             }
-            List<List<TreeMap<String, String>>> tables = (List<List<TreeMap<String, String>>>) data;
+            List<List<LinkedHashMap<String, String>>> tables = (List<List<LinkedHashMap<String, String>>>) data;
             handleTableValue(document, replacement.getKey(), tables, null, replacement.getFontFamily(), replacement.getFontSize());
         }
     },
@@ -53,7 +53,7 @@ public enum ReplacementType {
             if (Objects.isNull(data)) {
                 return;
             }
-            TreeMap<String, List<TreeMap<String, String>>> tables = (TreeMap<String, List<TreeMap<String, String>>>) data;
+            LinkedHashMap<String, List<LinkedHashMap<String, String>>> tables = (LinkedHashMap<String, List<LinkedHashMap<String, String>>>) data;
             handleTableWithMergedFirstColumn(document, replacement.getKey(), tables, replacement.getFontFamily(), replacement.getFontSize());
         }
     }, PRICE() {
@@ -169,18 +169,18 @@ public enum ReplacementType {
         }
     }
 
-    void handleTableWithMergedFirstColumn(XWPFDocument document, String key, TreeMap<String, List<TreeMap<String, String>>> tables, String fontFamily, Integer fontSize) {
-        Set<Map.Entry<String, List<TreeMap<String, String>>>> tableEntries = tables.entrySet();
-        Iterator<Map.Entry<String, List<TreeMap<String, String>>>> tableIterator = tableEntries.iterator();
-        List<List<TreeMap<String, String>>> tableList = Lists.newArrayList();
+    void handleTableWithMergedFirstColumn(XWPFDocument document, String key, LinkedHashMap<String, List<LinkedHashMap<String, String>>> tables, String fontFamily, Integer fontSize) {
+        Set<Map.Entry<String, List<LinkedHashMap<String, String>>>> tableEntries = tables.entrySet();
+        Iterator<Map.Entry<String, List<LinkedHashMap<String, String>>>> tableIterator = tableEntries.iterator();
+        List<List<LinkedHashMap<String, String>>> tableList = Lists.newArrayList();
         while (tableIterator.hasNext()) {
-            Map.Entry<String, List<TreeMap<String, String>>> tableEntry = tableIterator.next();
+            Map.Entry<String, List<LinkedHashMap<String, String>>> tableEntry = tableIterator.next();
             String tableKey = tableEntry.getKey();
-            List<TreeMap<String, String>> rows = tableEntry.getValue();
-            List<TreeMap<String, String>> newRows = Lists.newArrayList();
+            List<LinkedHashMap<String, String>> rows = tableEntry.getValue();
+            List<LinkedHashMap<String, String>> newRows = Lists.newArrayList();
             for (int i = 0; i < rows.size(); i ++) {
-                TreeMap<String, String> rowData = rows.get(i);
-                TreeMap<String, String> newRowData = Maps.newTreeMap();
+                LinkedHashMap<String, String> rowData = rows.get(i);
+                LinkedHashMap<String, String> newRowData = Maps.newLinkedHashMap();
                 newRowData.put(tableKey, tableKey);
                 newRowData.putAll(rowData);
                 newRows.add(newRowData);
@@ -190,7 +190,7 @@ public enum ReplacementType {
         handleTableValue(document, key, tableList, true, fontFamily, fontSize);
     }
 
-    void handleTableValue(XWPFDocument document, String key, List<List<TreeMap<String, String>>> tables, Boolean mergeFirstColumn, String fontFamily, Integer fontSize) {
+    void handleTableValue(XWPFDocument document, String key, List<List<LinkedHashMap<String, String>>> tables, Boolean mergeFirstColumn, String fontFamily, Integer fontSize) {
         if (Objects.isNull(mergeFirstColumn)) {
             mergeFirstColumn = false;
         }
@@ -204,9 +204,9 @@ public enum ReplacementType {
                 String text = run.getText(0);
                 if (StringUtils.isNotBlank(text) && text.indexOf(rKey) != -1) {
                     List<String> headers;
-                    for (List<TreeMap<String, String>> table: tables) {
-                        TreeMap<String, String> firstRow = table.get(0);
-                        headers = Lists.newArrayList(firstRow.navigableKeySet());
+                    for (List<LinkedHashMap<String, String>> table: tables) {
+                        LinkedHashMap<String, String> firstRow = table.get(0);
+                        headers = Lists.newArrayList(firstRow.keySet());
                         List<List<String>> rowValues = Lists.newArrayList();
                         for (Map<String, String> rowData: table) {
                             List<String> values = Lists.newArrayList();
