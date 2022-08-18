@@ -5,6 +5,8 @@ import com.google.common.collect.Maps;
 import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.auth.entity.User;
 import com.sxjkwm.pm.business.centralizedpurchase.dao.CpDao;
+import com.sxjkwm.pm.business.centralizedpurchase.dto.Item;
+import com.sxjkwm.pm.business.centralizedpurchase.service.ProjectInfoService;
 import com.sxjkwm.pm.business.file.handler.PatternFileHandler;
 import com.sxjkwm.pm.business.file.handler.replacement.BaseReplacement;
 import com.sxjkwm.pm.business.file.handler.replacement.ReplacementType;
@@ -14,11 +16,9 @@ import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.wxwork.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
@@ -30,25 +30,19 @@ import java.util.stream.Collectors;
  * @date 2022/7/8 17:44
  */
 @Component
-public class SingleInquiryFileHandler implements PatternFileHandler {
-
-    private static final String itemListSql = "SELECT DISTINCT it.itemname, pm.materialname, pm.specification, pm.unit, pm.planquantity, pm.remark, pm.brand " +
-            " FROM gsrm7_sxjk_prod_sourcing.`proc_tender` pt " +
-            " INNER JOIN gsrm7_sxjk_prod_sourcing.`proc_item` it ON pt.tenderid = it.tenderid " +
-            " INNER JOIN gsrm7_sxjk_prod_sourcing.`proc_material` pm ON pm.tenderid = it.tenderid  AND it.itemcode = pm.type " +
-            " WHERE pt.tendercode = '%s' ";
+public class InquiryFileHandler implements PatternFileHandler {
 
     private final ProjectService projectService;
 
     private final UserService userService;
 
-    private final CpDao cpDao;
+    private final ProjectInfoService projectInfoService;
 
     @Autowired
-    public SingleInquiryFileHandler(ProjectService projectService, UserService userService, CpDao cpDao) {
+    public InquiryFileHandler(ProjectService projectService, UserService userService, ProjectInfoService projectInfoService) {
         this.projectService = projectService;
         this.userService = userService;
-        this.cpDao = cpDao;
+        this.projectInfoService = projectInfoService;
     }
 
     @Override
@@ -95,9 +89,7 @@ public class SingleInquiryFileHandler implements PatternFileHandler {
         replacements.add(BaseReplacement.of("ownerName", ownerName, ReplacementType.STRING));
         replacements.add(BaseReplacement.of("paymentType", projectDto.getPaymentType(), ReplacementType.STRING));
         // query goods list
-        String projectCode = projectDto.getProjectCode();
-        String sql = String.format(itemListSql, projectCode);
-        List<Map<String, Object>> dataList = cpDao.queryList(sql);
+        List<Map<String, Object>> dataList = projectInfoService.findMaterialOfTask(projectDto.getProjectCode());
         if (CollectionUtils.isNotEmpty(dataList)) {
             List<Item> items = Lists.newArrayList();
             for (Map<String, Object> dataMap: dataList) {
@@ -145,88 +137,6 @@ public class SingleInquiryFileHandler implements PatternFileHandler {
             }
         }
         return replacements;
-    }
-
-    private static class Item implements Serializable {
-        private String itemName;
-
-        private String materialName;
-
-        private String specification;
-
-        private String unit;
-
-        private String quantity;
-
-        private String brand;
-
-        private String remark;
-
-        public Item(Map<String, Object> dataMap) {
-            this.itemName = MapUtils.getString(dataMap, "itemname");
-            this.materialName = MapUtils.getString(dataMap, "materialname");
-            this.specification = MapUtils.getString(dataMap, "specification");
-            this.unit = MapUtils.getString(dataMap, "unit");
-            this.quantity = MapUtils.getNumber(dataMap, "planquantity").toString();
-            this.brand = MapUtils.getString(dataMap, "brand");
-            this.remark = MapUtils.getString(dataMap, "remark");
-        }
-
-        public String getItemName() {
-            return itemName;
-        }
-
-        public void setItemName(String itemName) {
-            this.itemName = itemName;
-        }
-
-        public String getMaterialName() {
-            return materialName;
-        }
-
-        public void setMaterialName(String materialName) {
-            this.materialName = materialName;
-        }
-
-        public String getSpecification() {
-            return specification;
-        }
-
-        public void setSpecification(String specification) {
-            this.specification = specification;
-        }
-
-        public String getUnit() {
-            return unit;
-        }
-
-        public void setUnit(String unit) {
-            this.unit = unit;
-        }
-
-        public String getQuantity() {
-            return quantity;
-        }
-
-        public void setQuantity(String quantity) {
-            this.quantity = quantity;
-        }
-
-        public String getBrand() {
-            return brand;
-        }
-
-        public void setBrand(String brand) {
-            this.brand = brand;
-        }
-
-        public String getRemark() {
-            return remark;
-        }
-
-        public void setRemark(String remark) {
-            this.remark = remark;
-        }
     }
 
 }

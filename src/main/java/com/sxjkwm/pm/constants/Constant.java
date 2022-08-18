@@ -4,7 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sxjkwm.pm.business.file.handler.PatternFileHandler;
-import com.sxjkwm.pm.business.file.handler.impl.SingleInquiryFileHandler;
+import com.sxjkwm.pm.business.file.handler.impl.InquiryFileHandler;
 import com.sxjkwm.pm.business.project.dto.ProjectDto;
 import org.apache.commons.lang3.StringUtils;
 
@@ -121,31 +121,31 @@ public interface Constant<K, V> {
         SINGLE_INQUIRY(1, "询价文件", "单一来源询价文件", 1) {
             @Override
             public Class<? extends PatternFileHandler> fileHandlerClass() {
-                return SingleInquiryFileHandler.class;
+                return InquiryFileHandler.class;
             }
         },
         NORMAL_INQUIRY(1, "询价文件", "全网询价文件", 2) {
             @Override
             public Class<? extends PatternFileHandler> fileHandlerClass() {
-                return SingleInquiryFileHandler.class;
+                return InquiryFileHandler.class;
             }
         },
         SPECIF_INQUIRY(1, "询价文件", "指定供应商询价文件", 3) {
             @Override
             public Class<? extends PatternFileHandler> fileHandlerClass() {
-                return SingleInquiryFileHandler.class;
+                return InquiryFileHandler.class;
             }
         },
         NORMAL_BUY_CONTRACT(2, "合同", "通用采购合同", 1) {
             @Override
             public Class<? extends PatternFileHandler> fileHandlerClass() {
-                return SingleInquiryFileHandler.class;
+                return InquiryFileHandler.class;
             }
         },
         NORMAL_SALE_CONTRACT(2, "合同", "通用销售合同", 2) {
             @Override
             public Class<? extends PatternFileHandler> fileHandlerClass() {
-                return SingleInquiryFileHandler.class;
+                return InquiryFileHandler.class;
             }
         },
         ;
