@@ -37,9 +37,9 @@ public class InboundInvoiceDto implements Serializable {
 
     private Long operateTime; // 发票打印时间
 
-    private Boolean hasOutbound;
+    private Boolean hasOutbound; // 是否已有销项
 
-    private Long saleOrderNo;
+    private Long saleOrderNo;  // 销售订单编号
 
     public static InboundInvoiceDto fillData(Map<String, Object> dataRow) {
         InboundInvoiceDto dto = new InboundInvoiceDto();

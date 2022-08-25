@@ -21,6 +21,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -94,6 +95,7 @@ public class PatternFileService {
     }
 
 
+    @Transactional
     public Long generateFile(Long patternFileId, Long dataId, Long flowNodeId, Long propertyDefId) throws Throwable {
         PatternFile patternFile = patternFileDao.getOne(patternFileId);
         if (Objects.isNull(patternFile)) {
@@ -105,7 +107,11 @@ public class PatternFileService {
             }
             Constant.FileType fileType = Constant.FileType.getFromVal(patternFile.getFileCategory(), patternFile.getFileType());
             PatternFileHandler patternFileHandler = ContextUtil.getBean(fileType.fileHandlerClass());
-            return patternFileHandler.doHandle0(fileResponse, dataId, flowNodeId, propertyDefId, patternFile.getFileName());
+            if (patternFileHandler.isSingleFile()) {
+                return patternFileHandler.doHandle0(fileResponse, dataId, flowNodeId, propertyDefId, patternFile.getFileName(), null);
+            } else {
+                return patternFileHandler.doHandle1(patternFile, dataId, flowNodeId, propertyDefId, patternFile.getFileName());
+            }
         }
     }
 

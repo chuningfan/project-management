@@ -3,6 +3,7 @@ package com.sxjkwm.pm.business.file.handler;
 import cn.hutool.core.lang.UUID;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
+import com.sxjkwm.pm.business.file.entity.PatternFile;
 import com.sxjkwm.pm.business.file.entity.ProjectFile;
 import com.sxjkwm.pm.business.file.handler.replacement.BaseReplacement;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
@@ -18,6 +19,7 @@ import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.ContextUtil;
 import com.sxjkwm.pm.util.OSSUtil;
 import com.sxjkwm.pm.util.S3FileUtil;
+import io.minio.GetObjectResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.data.domain.Example;
@@ -26,9 +28,14 @@ import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author Vic.Chu
@@ -36,13 +43,137 @@ import java.util.Objects;
  */
 public interface PatternFileHandler {
 
+    /**
+     * process multiple files if necessary
+     * @param targetPatternFileStream
+     * @param dataId
+     * @param flowNodeId
+     * @param propertyDefId
+     * @param fileName
+     * @return
+     */
     @Transactional
-    default Long doHandle0(InputStream targetPatternFileStream, Long dataId, Long flowNodeId, Long propertyDefId, String fileName) throws Throwable {
+    default Long doHandle1(PatternFile patternFile, Long dataId, Long flowNodeId, Long propertyDefId, String fileName) throws Throwable {
+        ProjectService projectService = ContextUtil.getBean(ProjectService.class);
+        ProjectDto projectDto = projectService.getById(dataId);
+        List<List<BaseReplacement>> replacementsList = captureDataCollection(dataId, projectDto.getFlowId(), flowNodeId, propertyDefId);
+        if (CollectionUtils.isEmpty(replacementsList)) {
+            throw new PmException("No implementation for captureDataCollection or replacement list is empty");
+        }
+        S3FileUtil s3FileUtil = ContextUtil.getBean(S3FileUtil.class);
+        // if there is only one collection of replacement, invoke doHandle0 directly
+        if (replacementsList.size() == 1) {
+            GetObjectResponse fileResponse = s3FileUtil.getFile(patternFile.getBucketName(), patternFile.getObjName());
+            return doHandle0(fileResponse, dataId, flowNodeId, propertyDefId, fileName, replacementsList.get(0));
+        }
+        // process existing files
+        ProjectFileDao projectFileDao = ContextUtil.getBean(ProjectFileDao.class);
+        ProjectFile condition = new ProjectFile();
+        condition.setFlowNodeId(flowNodeId);
+        condition.setProjectId(dataId);
+        condition.setFlowId(projectDto.getFlowId());
+        condition.setPropertyDefId(propertyDefId);
+        ProjectFile oldFile = projectFileDao.findOne(Example.of(condition)).orElse(null);
+        if (Objects.nonNull(oldFile)) {
+            String bucketName = oldFile.getBucketName();
+            String objectName = oldFile.getObjectName();
+            s3FileUtil.remove(bucketName, objectName);
+            projectFileDao.delete(oldFile);
+        }
+        // generate files
+        int index = fileName.lastIndexOf('.');
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); ZipOutputStream zop = new ZipOutputStream(baos)) {
+            for (List<BaseReplacement> replacementList : replacementsList) {
+                try (InputStream inputStream = s3FileUtil.getFile(patternFile.getBucketName(), patternFile.getObjName())) {
+                    try (XWPFDocument document = new XWPFDocument(inputStream)) {
+                        processDataAsDefault(document, replacementList);
+                        try (ByteArrayOutputStream docBaos = new ByteArrayOutputStream()) {
+                            document.write(docBaos);
+                            byte[] data = docBaos.toByteArray();
+                            ZipEntry entry = new ZipEntry(fileName.substring(0, index) + "-" + dateRandom18() + fileName.substring(index));
+                            zop.putNextEntry(entry);
+                            zop.write(data);
+                            zop.flush();
+                            zop.closeEntry();
+                        }
+                    }
+                }
+            }
+            zop.flush();
+            zop.finish();
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray())) {
+                String bucketName = OSSUtil.getBucketName(dataId);
+                String objectName = dataId + "/" + flowNodeId + "/" + (UUID.fastUUID().toString().replace("-", "").toLowerCase());
+                s3FileUtil.upload(bucketName, objectName, fileName, bais);
+                ProjectFile newFile = new ProjectFile();
+                newFile.setFileName(fileName + ".zip");
+                newFile.setFlowNodeId(flowNodeId);
+                newFile.setPropertyDefId(propertyDefId);
+                newFile.setBucketName(bucketName);
+                newFile.setObjectName(objectName);
+                newFile.setFlowId(projectDto.getFlowId());
+                newFile.setProjectId(projectDto.getId());
+                newFile.setIsDeleted(0);
+                projectFileDao.save(newFile);
+                // cover property value
+                ProjectNodePropertyDao projectNodePropertyDao = ContextUtil.getBean(ProjectNodePropertyDao.class);
+                List<ProjectNodeProperty> projectNodePropertyList = projectNodePropertyDao.findByPropDefIdsAndProjectId(Lists.newArrayList(propertyDefId), dataId);
+                ProjectNodeProperty projectNodeProperty;
+                if (CollectionUtils.isEmpty(projectNodePropertyList)) {
+                    projectNodeProperty = new ProjectNodeProperty();
+                    projectNodeProperty.setFlowNodePropertyDefId(propertyDefId);
+                    projectNodeProperty.setProjectId(dataId);
+                    projectNodeProperty.setIsDeleted(0);
+                    ProjectNodeDao projectNodeDao = ContextUtil.getBean(ProjectNodeDao.class);
+                    ProjectNode projectNodeCondition = new ProjectNode();
+                    projectNodeCondition.setIsDeleted(0);
+                    projectNodeCondition.setProjectId(dataId);
+                    projectNodeCondition.setFlowNodeId(flowNodeId);
+                    ProjectNode projectNode = projectNodeDao.findOne(Example.of(projectNodeCondition)).orElse(null);
+                    if (Objects.isNull(projectNode)) {
+                        throw new PmException(PmError.NO_DATA_FOUND);
+                    }
+                    projectNodeProperty.setProjectNodeId(projectNode.getId());
+                } else {
+                    projectNodeProperty = projectNodePropertyList.get(0);
+                }
+                projectNodeProperty.setPropertyValue(newFile.getId().toString());
+                projectNodePropertyDao.save(projectNodeProperty);
+                return newFile.getId();
+            }
+        }
+    }
+
+    static String dateRandom18() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        String date = simpleDateFormat.format(new Date());
+        String timeMillis = String.valueOf(System.currentTimeMillis());
+        String fiveNumber = timeMillis.substring(timeMillis.length() - 6);
+        String tempRandom = String.valueOf(Math.random());
+        String number = tempRandom.substring(tempRandom.length() - 4);
+        return date + fiveNumber + number;
+    }
+
+    /**
+     * generate one file and return ID of the file
+     * @param targetPatternFileStream
+     * @param dataId
+     * @param flowNodeId
+     * @param propertyDefId
+     * @param fileName
+     * @return
+     * @throws Throwable
+     */
+    @Transactional
+    default Long doHandle0(InputStream targetPatternFileStream, Long dataId, Long flowNodeId, Long propertyDefId, String fileName, List<BaseReplacement> specificReplacements) throws Throwable {
         try (InputStream inputStream = targetPatternFileStream; XWPFDocument document = new XWPFDocument(inputStream);) {
             ProjectService projectService = ContextUtil.getBean(ProjectService.class);
             ProjectDto projectDto = projectService.getById(dataId);
             S3FileUtil s3FileUtil = ContextUtil.getBean(S3FileUtil.class);
-            List<BaseReplacement> dataList = captureData(dataId, projectDto.getFlowId(), flowNodeId, propertyDefId);
+            List<BaseReplacement> dataList = specificReplacements;
+            if (CollectionUtils.isEmpty(dataList)) {
+                dataList = captureData(dataId, projectDto.getFlowId(), flowNodeId, propertyDefId);
+            }
             processDataAsDefault(document, dataList);
             ProjectFileDao projectFileDao = ContextUtil.getBean(ProjectFileDao.class);
             ProjectFile condition = new ProjectFile();
@@ -59,50 +190,54 @@ public interface PatternFileHandler {
             }
             String bucketName = OSSUtil.getBucketName(dataId);
             String objectName = dataId + "/" + flowNodeId + "/" + (UUID.fastUUID().toString().replace("-", "").toLowerCase());
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            document.write(baos);
-            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-            s3FileUtil.upload(bucketName, objectName, fileName, bais);
-            ProjectFile newFile = new ProjectFile();
-            newFile.setFileName(fileName);
-            newFile.setFlowNodeId(flowNodeId);
-            newFile.setPropertyDefId(propertyDefId);
-            newFile.setBucketName(bucketName);
-            newFile.setObjectName(objectName);
-            newFile.setFlowId(projectDto.getFlowId());
-            newFile.setProjectId(projectDto.getId());
-            newFile.setIsDeleted(0);
-            projectFileDao.save(newFile);
-            // cover property value
-            ProjectNodePropertyDao projectNodePropertyDao = ContextUtil.getBean(ProjectNodePropertyDao.class);
-            List<ProjectNodeProperty> projectNodePropertyList = projectNodePropertyDao.findByPropDefIdsAndProjectId(Lists.newArrayList(propertyDefId), dataId);
-            ProjectNodeProperty projectNodeProperty;
-            if (CollectionUtils.isEmpty(projectNodePropertyList)) {
-                projectNodeProperty = new ProjectNodeProperty();
-                projectNodeProperty.setFlowNodePropertyDefId(propertyDefId);
-                projectNodeProperty.setProjectId(dataId);
-                projectNodeProperty.setIsDeleted(0);
-                ProjectNodeDao projectNodeDao = ContextUtil.getBean(ProjectNodeDao.class);
-                ProjectNode projectNodeCondition = new ProjectNode();
-                projectNodeCondition.setIsDeleted(0);
-                projectNodeCondition.setProjectId(dataId);
-                projectNodeCondition.setFlowNodeId(flowNodeId);
-                ProjectNode projectNode = projectNodeDao.findOne(Example.of(projectNodeCondition)).orElse(null);
-                if (Objects.isNull(projectNode)) {
-                    throw new PmException(PmError.NO_DATA_FOUND);
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                document.write(baos);
+                try (ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray())) {
+                    s3FileUtil.upload(bucketName, objectName, fileName, bais);
+                    ProjectFile newFile = new ProjectFile();
+                    newFile.setFileName(fileName);
+                    newFile.setFlowNodeId(flowNodeId);
+                    newFile.setPropertyDefId(propertyDefId);
+                    newFile.setBucketName(bucketName);
+                    newFile.setObjectName(objectName);
+                    newFile.setFlowId(projectDto.getFlowId());
+                    newFile.setProjectId(projectDto.getId());
+                    newFile.setIsDeleted(0);
+                    projectFileDao.save(newFile);
+                    // cover property value
+                    ProjectNodePropertyDao projectNodePropertyDao = ContextUtil.getBean(ProjectNodePropertyDao.class);
+                    List<ProjectNodeProperty> projectNodePropertyList = projectNodePropertyDao.findByPropDefIdsAndProjectId(Lists.newArrayList(propertyDefId), dataId);
+                    ProjectNodeProperty projectNodeProperty;
+                    if (CollectionUtils.isEmpty(projectNodePropertyList)) {
+                        projectNodeProperty = new ProjectNodeProperty();
+                        projectNodeProperty.setFlowNodePropertyDefId(propertyDefId);
+                        projectNodeProperty.setProjectId(dataId);
+                        projectNodeProperty.setIsDeleted(0);
+                        ProjectNodeDao projectNodeDao = ContextUtil.getBean(ProjectNodeDao.class);
+                        ProjectNode projectNodeCondition = new ProjectNode();
+                        projectNodeCondition.setIsDeleted(0);
+                        projectNodeCondition.setProjectId(dataId);
+                        projectNodeCondition.setFlowNodeId(flowNodeId);
+                        ProjectNode projectNode = projectNodeDao.findOne(Example.of(projectNodeCondition)).orElse(null);
+                        if (Objects.isNull(projectNode)) {
+                            throw new PmException(PmError.NO_DATA_FOUND);
+                        }
+                        projectNodeProperty.setProjectNodeId(projectNode.getId());
+                    } else {
+                        projectNodeProperty = projectNodePropertyList.get(0);
+                    }
+                    projectNodeProperty.setPropertyValue(newFile.getId().toString());
+                    projectNodePropertyDao.save(projectNodeProperty);
+                    return newFile.getId();
                 }
-                projectNodeProperty.setProjectNodeId(projectNode.getId());
-            } else {
-                projectNodeProperty = projectNodePropertyList.get(0);
             }
-            projectNodeProperty.setPropertyValue(newFile.getId().toString());
-            projectNodePropertyDao.save(projectNodeProperty);
-            return newFile.getId();
         }
     }
 
     // Extension point
     List<BaseReplacement> captureData(Long dataId, Long flowId, Long flowNodeId, Long propertyDefId) throws PmException;
+
+    default List<List<BaseReplacement>> captureDataCollection(Long dataId, Long flowId, Long flowNodeId, Long propertyDefId) throws PmException {return null;}
 
     default void processDataAsDefault(XWPFDocument document, List<BaseReplacement> dataList) {
         if (CollectionUtils.isEmpty(dataList)) {
@@ -112,5 +247,7 @@ public interface PatternFileHandler {
             replacement.getReplacementType().convert(document, replacement);
         }
     }
+
+    boolean isSingleFile();
 
 }

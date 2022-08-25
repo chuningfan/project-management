@@ -66,6 +66,7 @@ public class Item {
         this.winningDate = Objects.isNull(winningDateObj) ? null : ((Date) winningDateObj).getTime();
         this.supplierContactPerson = MapUtils.getString(dataMap, "suppliercontactperson");
         this.supplierMobile = MapUtils.getString(dataMap, "suppliermobile");
+
     }
 
     public String getItemName() {

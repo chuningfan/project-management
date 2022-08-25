@@ -51,6 +51,8 @@ public class ProjectDto implements Serializable {
 
     private String paymentType;
 
+    private BigDecimal salePriceAdditionalRate;
+
     public Long getId() {
         return id;
     }
@@ -233,5 +235,13 @@ public class ProjectDto implements Serializable {
 
     public void setPaymentType(String paymentType) {
         this.paymentType = paymentType;
+    }
+
+    public BigDecimal getSalePriceAdditionalRate() {
+        return salePriceAdditionalRate;
+    }
+
+    public void setSalePriceAdditionalRate(BigDecimal salePriceAdditionalRate) {
+        this.salePriceAdditionalRate = salePriceAdditionalRate;
     }
 }

@@ -139,4 +139,9 @@ public class InquiryFileHandler implements PatternFileHandler {
         return replacements;
     }
 
+    @Override
+    public boolean isSingleFile() {
+        return true;
+    }
+
 }

@@ -83,6 +83,9 @@ public class Project extends BaseEntity {
     @Column(name = "payment_type", length = 4000)
     private String paymentType;
 
+    @Column(name = "sale_price_additional_rate")
+    private BigDecimal salePriceAdditionalRate;
+
     public String getProjectName() {
         return projectName;
     }
@@ -257,5 +260,13 @@ public class Project extends BaseEntity {
 
     public void setPaymentType(String paymentType) {
         this.paymentType = paymentType;
+    }
+
+    public BigDecimal getSalePriceAdditionalRate() {
+        return salePriceAdditionalRate;
+    }
+
+    public void setSalePriceAdditionalRate(BigDecimal salePriceAdditionalRate) {
+        this.salePriceAdditionalRate = salePriceAdditionalRate;
     }
 }

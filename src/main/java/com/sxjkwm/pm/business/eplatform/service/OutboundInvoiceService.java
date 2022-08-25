@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.business.eplatform.dao.EpDao;
 import com.sxjkwm.pm.business.eplatform.dao.EsDao;
+import com.sxjkwm.pm.business.eplatform.dto.InboundInvoiceDto;
 import com.sxjkwm.pm.business.eplatform.dto.OutboundInvoiceDto;
 import com.sxjkwm.pm.common.PageDataDto;
 import com.sxjkwm.pm.util.S3FileUtil;
@@ -14,7 +15,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
+import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +38,8 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,9 +77,12 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
             ConditionPair.of("saleInvoiceTitle", "发票抬头", String.class),
             ConditionPair.of("saleInvoiceRemark", "发票备注", String.class),
             ConditionPair.of("ownerName", "对接人", String.class),
+            ConditionPair.of("thirdPartyOrderNo", "三方订单号", String.class),
+            ConditionPair.of("hasInbound", "进项是否已开", Boolean.class),
+            ConditionPair.of("saleInvoiceFinishTime", "销项发票开票时间", Date.class),
     };
 
-    public PageDataDto<Map<String, Object>> queryPrintedInvoiceInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime, String buyerOrg, String invoiceTitle, String invoiceApplyNum, String supplierName) throws IOException {
+    public PageDataDto<Map<String, Object>> queryPrintedInvoiceInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime, String[] buyerOrgs, String invoiceTitle, String invoiceApplyNum, String[] supplierNames) throws IOException {
         BoolQueryBuilder queryCondition = QueryBuilders.boolQuery();
         if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
             queryCondition.must(QueryBuilders.rangeQuery("saleInvoiceFinishTime").from(startTime, true).to(endTime, true));
@@ -83,8 +91,12 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
         } else if (Objects.nonNull(endTime)) {
             queryCondition.must(QueryBuilders.rangeQuery("saleInvoiceFinishTime").to(endTime, true));
         }
-        if (StringUtils.isNotBlank(buyerOrg)) {
-            queryCondition.must(QueryBuilders.matchQuery("buyerOrgName.keyword", buyerOrg.trim())); // .keyword is for searching exactly
+        if (Objects.nonNull(buyerOrgs) && buyerOrgs.length > 0) {
+            for (int i = 0; i < buyerOrgs.length; i ++) {
+                String org = buyerOrgs[i].trim();
+                buyerOrgs[i] = org;
+            }
+            queryCondition.must(QueryBuilders.termsQuery("buyerOrgName.keyword", buyerOrgs));
         }
         if (StringUtils.isNotBlank(invoiceTitle)) {
             queryCondition.must(QueryBuilders.matchQuery("saleInvoiceTitle.keyword", invoiceTitle.trim())); // .keyword is for searching exactly
@@ -92,8 +104,8 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
         if (StringUtils.isNotBlank(invoiceApplyNum)) {
             queryCondition.must(QueryBuilders.matchQuery("saleInvoiceApplyNumber.keyword", invoiceApplyNum)); // .keyword is for searching exactly
         }
-        if (StringUtils.isNotBlank(supplierName)) {
-            queryCondition.must(QueryBuilders.matchQuery("supplierName.keyword", supplierName));
+        if (Objects.nonNull(supplierNames) && supplierNames.length > 0) {
+            queryCondition.must(QueryBuilders.termsQuery("supplierName.keyword", supplierNames));
         }
         return super.queryFromES(outboundInvoiceIndex, queryCondition, pageSize, pageNo);
     }
@@ -110,11 +122,29 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
         }
     }
 
-    public String exportInvoiceBill(List<OutboundInvoiceDto> dataList) throws NoSuchFieldException, IllegalAccessException {
+    public String exportInvoiceBill(List<OutboundInvoiceDto> dataList, boolean mergeData) throws NoSuchFieldException, IllegalAccessException {
+        // process property[hasInbound]
+        for (OutboundInvoiceDto outbound: dataList) {
+            Long inboundId = outbound.getSaleOrderNo() - 1;
+            Boolean hasInbound = false;
+            try {
+                Map<String,Object> resp = esDao.searchDataById(InboundInvoiceService.inboundInvoiceIndex, inboundId.toString(), "buyInvoiceApplyNumber");
+                if (Objects.nonNull(resp)) {
+                    Object resObj = resp.get("buyInvoiceApplyNumber");
+                    if (Objects.nonNull(resObj)) {
+                        String num = resObj.toString();
+                        if (StringUtils.isNotBlank(num)) {
+                            hasInbound = true;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                logger.error("Search outbound data failed: {}", e);
+            }
+            outbound.setHasInbound(hasInbound);
+        }
         XSSFWorkbook workbook = new XSSFWorkbook();
-        Map<String, List<OutboundInvoiceDto>> dataMapByBuyerTitle = dataList.stream().collect(Collectors.groupingBy(OutboundInvoiceDto::getSaleInvoiceTitle));
-        Set<Map.Entry<String, List<OutboundInvoiceDto>>> entrySet = dataMapByBuyerTitle.entrySet();
-        Iterator<Map.Entry<String, List<OutboundInvoiceDto>>> iterator = entrySet.iterator();
+
         XSSFFont titleFont = workbook.createFont();
         titleFont.setFontHeight(18);
         titleFont.setFontName("等线");
@@ -163,10 +193,19 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
         errResultStyle.setAlignment(HorizontalAlignment.CENTER);
         errResultStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
-        while (iterator.hasNext()) {
-            Map.Entry<String, List<OutboundInvoiceDto>> entry = iterator.next();
-            String sheetName = entry.getKey();
-            processSheetByInvoiceTitle(workbook, sheetName, entry.getValue(), titleStyle, dataStyle, resultStyle, errResultStyle);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+        if (mergeData) {
+            processAllData(workbook, "merged_data", dataList, titleStyle, dataStyle, simpleDateFormat);
+        } else {
+            Map<String, List<OutboundInvoiceDto>> dataMapByBuyerTitle = dataList.stream().collect(Collectors.groupingBy(OutboundInvoiceDto::getSaleInvoiceTitle));
+            Set<Map.Entry<String, List<OutboundInvoiceDto>>> entrySet = dataMapByBuyerTitle.entrySet();
+            Iterator<Map.Entry<String, List<OutboundInvoiceDto>>> iterator = entrySet.iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, List<OutboundInvoiceDto>> entry = iterator.next();
+                String sheetName = entry.getKey();
+                processSheetByInvoiceTitle(workbook, sheetName, entry.getValue(), titleStyle, dataStyle, resultStyle, errResultStyle, simpleDateFormat);
+            }
         }
         String fileName = "销项发票订单明细表.xlsx";
         String objName = ContextHelper.getUserData().getWxUserId() + "/" + UUID.fastUUID().toString().replace("-", "");
@@ -213,13 +252,76 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
         }
     }
 
+    private void processAllData(XSSFWorkbook workbook,
+                                String sheetName,
+                                List<OutboundInvoiceDto> dataList,
+                                XSSFCellStyle titleStyle,
+                                XSSFCellStyle dataStyle,
+                                SimpleDateFormat simpleDateFormat) throws NoSuchFieldException, IllegalAccessException {
+        XSSFSheet sheet = workbook.createSheet(sheetName);
+        XSSFRow titleRow = sheet.createRow(0);
+        for (int i = 0; i < invoiceBillWorkbookHeaders.length; i++) {
+            XSSFCell titleCell = titleRow.createCell(i);
+            if (i == 0) {
+                titleCell.setCellValue("销项发票订单明细表");
+                titleCell.setCellStyle(titleStyle);
+            }
+        }
+        CellRangeAddress titleRegion = new CellRangeAddress(0, 0, 0, invoiceBillWorkbookHeaders.length - 1);
+        sheet.addMergedRegion(titleRegion);
+        createRowHeader(sheet, dataStyle); // create header
+        int rowNum = 2;
+        List<OutboundInvoiceDto> bookDataList = dataList;
+        for (OutboundInvoiceDto outbound: bookDataList) {
+            XSSFRow row = sheet.createRow(rowNum ++);
+            for (int i = 0; i < invoiceBillWorkbookHeaders.length; i++) {
+                ConditionPair conditionPair = invoiceBillWorkbookHeaders[i];
+                XSSFCell cell = row.createCell(i);
+                if (conditionPair.key.equals("ownerName")) {
+                    String ownerName = ContextHelper.getUserData().getUsername();
+                    cell.setCellValue(ownerName);
+                    cell.setCellStyle(dataStyle);
+                    continue;
+                }
+                Class<?> clazz = conditionPair.clazz;
+                Field field = OutboundInvoiceDto.class.getDeclaredField(conditionPair.key);
+                boolean originalAccess = field.isAccessible();
+                field.setAccessible(true);
+                Object value = field.get(outbound);
+                field.setAccessible(originalAccess);
+                if (Objects.nonNull(value)) {
+                    if (clazz == BigDecimal.class) {
+                        BigDecimal amount = new BigDecimal(value.toString());
+                        cell.setCellValue(amount.doubleValue());
+                    } else if (clazz == Boolean.class) {
+                        if ((Boolean) value) {
+                            cell.setCellValue("是");
+                        } else {
+                            cell.setCellValue("否");
+                        }
+                    } else if (clazz == Date.class) {
+                        Long date = (Long) value;
+                        if (Objects.nonNull(date)) {
+                            cell.setCellValue(simpleDateFormat.format(Date.from(Instant.ofEpochMilli(date))));
+                        }
+                    } else {
+                        cell.setCellValue(value.toString());
+                    }
+                }
+                cell.setCellStyle(dataStyle);
+                sheet.autoSizeColumn(i);
+            }
+        }
+    }
+
     private void processSheetByInvoiceTitle(XSSFWorkbook workbook,
                                             String sheetName,
                                             List<OutboundInvoiceDto> dataList,
                                             XSSFCellStyle titleStyle,
                                             XSSFCellStyle dataStyle,
                                             XSSFCellStyle resultStyle,
-                                            XSSFCellStyle errResultStyle) throws NoSuchFieldException, IllegalAccessException {
+                                            XSSFCellStyle errResultStyle,
+                                            SimpleDateFormat simpleDateFormat) throws NoSuchFieldException, IllegalAccessException {
         XSSFSheet sheet = workbook.createSheet(sheetName);
         XSSFRow titleRow = sheet.createRow(0);
         for (int i = 0; i < invoiceBillWorkbookHeaders.length; i++) {
@@ -302,6 +404,11 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
                                     cell.setCellValue("是");
                                 } else {
                                     cell.setCellValue("否");
+                                }
+                            } else if (clazz == Date.class) {
+                                Long date = (Long) value;
+                                if (Objects.nonNull(date)) {
+                                    cell.setCellValue(simpleDateFormat.format(Date.from(Instant.ofEpochMilli(date))));
                                 }
                             } else {
                                 cell.setCellValue(value.toString());

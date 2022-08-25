@@ -59,7 +59,7 @@ public class EpSql {
 
     static String outboundInvoiceSql = "SELECT DISTINCT o.supplier_org_id, o.supplier_name, o.buyer_name, o.order_time, o.buyer_org_name, o.buyer_org_full_name, o.sale_order_no, o.final_price, bi.bill_code, bi.bill_price, ia.apply_number, " +
             " (CASE WHEN ia.invoice_type = 1 THEN '普通纸质票' WHEN ia.invoice_type = 2 THEN '专票' WHEN ia.invoice_type = 3 THEN '普通电子票' END) sale_invoice_category, " +
-            " ia.tatal_amount, iat.invoice_title, ia.remark, ia.finish_time FROM (" +
+            " ia.tatal_amount, iat.invoice_title, ia.remark, ia.finish_time, iaor.`order_id` AS third_party_order_no FROM (" +
             " SELECT org.id AS supplier_org_id, oi.order_no AS buy_order_no, oi.order_no + 1 AS sale_order_no, oi.final_price, org.name AS supplier_name, oi.order_time, ua.user_name AS buyer_name, ua.legal_entity_organization_id AS buyer_org_id, ua.legal_entity_organization_name AS buyer_org_name, buyer_org.full_name AS buyer_org_full_name " +
             " FROM service_order.order_info oi " +
             " LEFT JOIN service_order.`reseller_order_info` roi ON oi.`order_no` = roi.`order_no` AND roi.`yn`=1  " +
@@ -76,7 +76,8 @@ public class EpSql {
             " LEFT JOIN service_order.`invoice_apply_order_relation` iaor ON iaor.order_no = o.sale_order_no " +
             " LEFT JOIN service_order.`invoice_apply` ia ON ia.id = iaor.invoice_apply_id AND ia.`sql_type` = 1 AND ia.`yn` = 1 " +
             " INNER JOIN service_order.invoice_apply_title iat ON iat.`apply_number` = ia.apply_number " +
-            " WHERE ia.billing = 1 AND ia.cancel_status IS NULL ";
+            " WHERE ia.billing = 1 AND ia.apply_type = 0 " +
+            " AND NOT EXISTS (SELECT 1 FROM service_order.`invoice_apply` WHERE billing = 1 AND apply_type IN (1, 2) AND cancel_status IN (1, 2, 3, 4, 5) AND parent_apply_id = ia.id) ";
 
     static String inboundInvoiceSql = " SELECT DISTINCT o.supplier_org_id, o.org_name supplier_name, o.buyer_org_name, o.buyer_org_full_name, o.buy_order_no, o.final_price, " +
             " bb.bill_code, bb.b_bill_price bill_price, bi.bi_invoice_apply_number apply_number, bi.bi_amount tatal_amount, bi.invoice_num, bi.modified, o.sale_order_no FROM (" +

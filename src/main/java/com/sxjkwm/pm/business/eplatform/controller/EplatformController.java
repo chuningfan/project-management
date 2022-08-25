@@ -2,12 +2,14 @@ package com.sxjkwm.pm.business.eplatform.controller;
 
 import com.sxjkwm.pm.business.eplatform.dto.InboundInvoiceDto;
 import com.sxjkwm.pm.business.eplatform.dto.OutboundInvoiceDto;
+import com.sxjkwm.pm.business.eplatform.dto.OutboundQueryParam;
 import com.sxjkwm.pm.business.eplatform.service.InboundInvoiceService;
 import com.sxjkwm.pm.business.eplatform.service.OutboundInvoiceService;
 import com.sxjkwm.pm.common.PageDataDto;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
 import io.minio.errors.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +18,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Vic.Chu
@@ -38,27 +41,35 @@ public class EplatformController {
      * 查询已打印发票的数据
      * @return
      */
-    @GetMapping("/invoiceList")
-    public RestResponse<PageDataDto<Map<String, Object>>> queryInvoicePrintedList(
-            @RequestParam("pageSize") Integer pageSize,
-            @RequestParam("pageNo") Integer pageNo,
-            @RequestParam("startTime") Long startTime,
-            @RequestParam("endTime") Long endTime,
-            @RequestParam(value = "buyerOrg", required = false) String buyerOrg,
-            @RequestParam(value = "invoiceTitle", required = false) String invoiceTitle,
-            @RequestParam(value = "invoiceApplyNum", required = false) String invoiceApplyNum,
-            @RequestParam(value = "supplierName", required = false) String supplierName) throws IOException {
-        return RestResponse.of(outboundInvoiceService.queryPrintedInvoiceInEs(pageSize, pageNo, startTime, endTime, buyerOrg, invoiceTitle, invoiceApplyNum, supplierName));
+    @PostMapping("/invoiceList")
+    public RestResponse<PageDataDto<Map<String, Object>>> queryInvoicePrintedList(@RequestBody OutboundQueryParam outboundQueryParam) throws IOException {
+        String supplierNames = outboundQueryParam.getSupplierNames();
+        String[] sNames = null;
+        if (StringUtils.isNotBlank(supplierNames)) {
+            sNames = supplierNames.split(",");
+        }
+
+        String buyerOrgs = outboundQueryParam.getBuyerOrgs();
+        String[] oNames = null;
+        if (StringUtils.isNotBlank(buyerOrgs)) {
+            oNames = buyerOrgs.split(",");
+        }
+        return RestResponse.of(outboundInvoiceService.queryPrintedInvoiceInEs(outboundQueryParam.getPageSize(), outboundQueryParam.getPageNo(),
+                outboundQueryParam.getStartTime(), outboundQueryParam.getEndTime(), oNames, outboundQueryParam.getInvoiceTitle(),
+                outboundQueryParam.getInvoiceApplyNum(), sNames));
     }
 
-    @GetMapping("/es/syncInvoicePrinted")
+    @GetMapping("/es/outboundSyncInvoicePrinted")
     public RestResponse<Boolean> syncInvoicePrintedData() {
         return RestResponse.of(outboundInvoiceService.syncInvoicePrintedListInEs());
     }
 
     @PostMapping("/invoiceBill")
-    public RestResponse<String> generateInvoiceBill(@RequestBody List<OutboundInvoiceDto> dataList) throws NoSuchFieldException, IllegalAccessException {
-        return RestResponse.of(outboundInvoiceService.exportInvoiceBill(dataList));
+    public RestResponse<String> generateInvoiceBill(@RequestBody List<OutboundInvoiceDto> dataList, @RequestParam(value = "mergeData", required = false) Boolean mergeData) throws NoSuchFieldException, IllegalAccessException {
+        if (Objects.isNull(mergeData)) {
+            mergeData = false;
+        }
+        return RestResponse.of(outboundInvoiceService.exportInvoiceBill(dataList, mergeData));
     }
 
     @GetMapping("/invoiceBill")
@@ -77,10 +88,14 @@ public class EplatformController {
             @RequestParam(value = "pageNo") Integer pageNo,
             @RequestParam(value = "startTime", required = false) Long startTime,
             @RequestParam(value = "endTime", required = false) Long endTime,
-            @RequestParam(value = "supplierName", required = false) String supplierName,
+            @RequestParam(value = "supplierNames", required = false) String supplierNames,
             @RequestParam(value = "buyInvoiceApplyNumber", required = false) String buyInvoiceApplyNumber
             ) throws IOException {
-        return RestResponse.of(inboundInvoiceService.queryDataInEs(pageSize, pageNo, startTime, endTime, supplierName, buyInvoiceApplyNumber));
+        String[] sNames = null;
+        if (StringUtils.isNotBlank(supplierNames)) {
+            sNames = supplierNames.split(",");
+        }
+        return RestResponse.of(inboundInvoiceService.queryDataInEs(pageSize, pageNo, startTime, endTime, sNames, buyInvoiceApplyNumber));
     }
 
     @GetMapping("/es/inboundSyncInvoicePrinted")

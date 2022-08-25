@@ -83,7 +83,7 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
         }
     }
 
-    public PageDataDto<Map<String, Object>> queryDataInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime, String supplierName, String buyInvoiceApplyNumber) throws IOException {
+    public PageDataDto<Map<String, Object>> queryDataInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime, String[] supplierNames, String buyInvoiceApplyNumber) throws IOException {
         BoolQueryBuilder queryCondition = QueryBuilders.boolQuery();
         if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
             queryCondition.must(QueryBuilders.rangeQuery("operateTime").from(startTime, true).to(endTime, true));
@@ -92,11 +92,14 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
         } else if (Objects.nonNull(endTime)) {
             queryCondition.must(QueryBuilders.rangeQuery("operateTime").to(endTime, true));
         }
-        if (StringUtils.isNotBlank(supplierName)) {
-            queryCondition.must(QueryBuilders.matchQuery("supplierName.keyword", supplierName.trim()));
-        }
+//        if (StringUtils.isNotBlank(supplierName)) {
+//            queryCondition.must(QueryBuilders.matchQuery("supplierName.keyword", supplierName.trim()));
+//        }
         if (StringUtils.isNotBlank(buyInvoiceApplyNumber)) {
             queryCondition.must(QueryBuilders.matchQuery("buyInvoiceApplyNumber.keyword", buyInvoiceApplyNumber.trim()));
+        }
+        if (Objects.nonNull(supplierNames) && supplierNames.length > 0) {
+            queryCondition.must(QueryBuilders.termsQuery("supplierName.keyword", supplierNames));
         }
         return super.queryFromES(inboundInvoiceIndex, queryCondition, pageSize, pageNo);
     }

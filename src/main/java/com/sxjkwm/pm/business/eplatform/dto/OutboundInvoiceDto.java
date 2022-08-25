@@ -45,6 +45,10 @@ public class OutboundInvoiceDto implements Serializable {
 
     private Long saleInvoiceFinishTime; // 发票打印时间
 
+    private String thirdPartyOrderNo; // 三方订单编号
+
+    private Boolean hasInbound; // 是否已有进项
+
     public static OutboundInvoiceDto fillData(Map<String, Object> dataRow) {
         OutboundInvoiceDto dto = new OutboundInvoiceDto();
         dto.setSupplierOrgId(MapUtils.getLong(dataRow, "supplier_org_id"));
@@ -63,6 +67,7 @@ public class OutboundInvoiceDto implements Serializable {
         dto.setSaleInvoiceTitle(MapUtils.getString(dataRow, "invoice_title").trim());
         dto.setSaleInvoiceRemark(MapUtils.getString(dataRow, "remark"));
         dto.setSaleInvoiceFinishTime(((Date) MapUtils.getObject(dataRow, "finish_time")).getTime());
+        dto.setThirdPartyOrderNo(MapUtils.getString(dataRow, "third_party_order_no"));
         return dto;
     }
 
@@ -192,5 +197,21 @@ public class OutboundInvoiceDto implements Serializable {
 
     public void setSaleInvoiceFinishTime(Long saleInvoiceFinishTime) {
         this.saleInvoiceFinishTime = saleInvoiceFinishTime;
+    }
+
+    public String getThirdPartyOrderNo() {
+        return thirdPartyOrderNo;
+    }
+
+    public void setThirdPartyOrderNo(String thirdPartyOrderNo) {
+        this.thirdPartyOrderNo = thirdPartyOrderNo;
+    }
+
+    public Boolean getHasInbound() {
+        return hasInbound;
+    }
+
+    public void setHasInbound(Boolean hasInbound) {
+        this.hasInbound = hasInbound;
     }
 }

@@ -4,7 +4,9 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sxjkwm.pm.business.file.handler.PatternFileHandler;
+import com.sxjkwm.pm.business.file.handler.impl.BUYContractHandler;
 import com.sxjkwm.pm.business.file.handler.impl.InquiryFileHandler;
+import com.sxjkwm.pm.business.file.handler.impl.SALEContractHandler;
 import com.sxjkwm.pm.business.project.dto.ProjectDto;
 import org.apache.commons.lang3.StringUtils;
 
@@ -139,13 +141,13 @@ public interface Constant<K, V> {
         NORMAL_BUY_CONTRACT(2, "合同", "通用采购合同", 1) {
             @Override
             public Class<? extends PatternFileHandler> fileHandlerClass() {
-                return InquiryFileHandler.class;
+                return BUYContractHandler.class;
             }
         },
         NORMAL_SALE_CONTRACT(2, "合同", "通用销售合同", 2) {
             @Override
             public Class<? extends PatternFileHandler> fileHandlerClass() {
-                return InquiryFileHandler.class;
+                return SALEContractHandler.class;
             }
         },
         ;
