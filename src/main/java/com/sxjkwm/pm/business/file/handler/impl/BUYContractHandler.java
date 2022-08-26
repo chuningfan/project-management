@@ -16,6 +16,7 @@ import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.RMBChange;
 import com.sxjkwm.pm.wxwork.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -104,7 +105,13 @@ public class BUYContractHandler implements PatternFileHandler {
                 row.put("型号", item.getSpecification());
                 row.put("品牌/产地", item.getBrand());
                 row.put("单位", item.getUnit());
-                row.put("数量", item.getQuantity());
+                String qty = item.getQuantity();
+                if (StringUtils.isNotBlank(qty)) {
+                    qty = new BigDecimal(qty).setScale(2, BigDecimal.ROUND_CEILING).toString();
+                    row.put("数量", qty);
+                } else {
+                    row.put("数量", "");
+                }
                 row.put("单价（元）", item.getUnitPrice().setScale(2, BigDecimal.ROUND_CEILING).toString());
                 row.put("金额（元）", item.getTotalPrice().setScale(2, BigDecimal.ROUND_CEILING).toString());
                 rowDataList.add(row);

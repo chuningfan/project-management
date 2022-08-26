@@ -16,6 +16,7 @@ import com.sxjkwm.pm.exception.PmException;
 import com.sxjkwm.pm.util.RMBChange;
 import com.sxjkwm.pm.wxwork.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -95,7 +96,13 @@ public class SALEContractHandler implements PatternFileHandler {
                 map.put("型号", item.getSpecification());
                 map.put("品牌/产地", item.getBrand());
                 map.put("单位", item.getUnit());
-                map.put("数量", item.getQuantity());
+                String qty = item.getQuantity();
+                if (StringUtils.isNotBlank(qty)) {
+                    qty = new BigDecimal(qty).setScale(2, BigDecimal.ROUND_CEILING).toString();
+                    map.put("数量", qty);
+                } else {
+                    map.put("数量", "");
+                }
                 map.put("单价（元）", unitPriceWithTax.toString());
                 map.put("金额（元）", unitPriceWithTax.multiply(new BigDecimal(item.getQuantity())).setScale(2, BigDecimal.ROUND_CEILING).toString());
                 totalPriceWithTax = totalPriceWithTax.add(item.getTotalPrice());
