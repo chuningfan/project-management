@@ -132,12 +132,6 @@ public interface Constant<K, V> {
                 return InquiryFileHandler.class;
             }
         },
-        SPECIF_INQUIRY(1, "询价文件", "指定供应商询价文件", 3) {
-            @Override
-            public Class<? extends PatternFileHandler> fileHandlerClass() {
-                return InquiryFileHandler.class;
-            }
-        },
         NORMAL_BUY_CONTRACT(2, "合同", "通用采购合同", 1) {
             @Override
             public Class<? extends PatternFileHandler> fileHandlerClass() {
@@ -145,6 +139,30 @@ public interface Constant<K, V> {
             }
         },
         NORMAL_SALE_CONTRACT(2, "合同", "通用销售合同", 2) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return SALEContractHandler.class;
+            }
+        },
+        TRAFFIC_SAFETY_BUY_CONTRACT(2, "合同", "交安采购合同", 3) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return BUYContractHandler.class;
+            }
+        },
+        TRAFFIC_SAFETY_SALE_CONTRACT(2, "合同", "交安销售合同", 4) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return SALEContractHandler.class;
+            }
+        },
+        ELECTROMECHANICAL_BUY_CONTRACT(2, "合同", "机电采购合同", 5) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return BUYContractHandler.class;
+            }
+        },
+        ELECTROMECHANICAL_SALE_CONTRACT(2, "合同", "机电销售合同", 6) {
             @Override
             public Class<? extends PatternFileHandler> fileHandlerClass() {
                 return SALEContractHandler.class;
