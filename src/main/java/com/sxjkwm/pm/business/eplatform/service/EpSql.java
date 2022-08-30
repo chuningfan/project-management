@@ -107,4 +107,32 @@ public class EpSql {
             ") bi ON bi.bi_order_no = o.buy_order_no " +
             " WHERE bb.b_bill_price IS NOT NULL AND bi.bi_amount IS NOT NULL ";
 
+
+
+    static String invoiceSql = "SELECT\n" +
+            "\ta1.invoice_apply_id AS invoiceApplyId,\n" +
+            "\ta1.invoice_no AS invoiceNo,\n" +
+            "\ta1.invoice_amount AS invoiceAmount,\n" +
+            "\ta1.third_order_id AS thirdOrderId,\n" +
+            "\ta1.application_no AS applicationNo,\n" +
+            "\ta2.apply_number AS applyNumber,\n" +
+            "\ta2.tatal_amount AS totalAmount,\n" +
+            "\ta2.order_num AS orderNum,\n" +
+            "\ta3.order_no AS orderNo,\n" +
+            "\ta3.order_id AS orderId,\n" +
+            "\ta4.payment_price AS paymentPrice,\n" +
+            "\ta4.total_price AS totalPrice,\n" +
+            "\ta4.shop_id AS shopId,\n" +
+            "\ta5.shop_name AS shopName \n" +
+            "FROM\n" +
+            "\tservice_order.invoice_apply_invoice a1\n" +
+            "\tLEFT JOIN service_order.invoice_apply a2 ON a1.invoice_apply_id = a2.id\n" +
+            "\tLEFT JOIN service_order.invoice_apply_invoice_detail a3 ON a1.id = a3.invoice_id\n" +
+            "\tLEFT JOIN service_order.order_info a4 ON a3.order_no = a4.order_no\n" +
+            "\tLEFT JOIN service_user.shop_info a5 ON a5.shop_id = a4.shop_id \n" +
+            "WHERE\n" +
+            "\ta2.apply_status = 1 \n" +
+            "\tAND a2.billing = 1 \n" +
+            "\tAND ISNULL( cancel_status ) ";
+
 }
