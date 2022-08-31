@@ -135,4 +135,26 @@ public class EpSql {
             "\tAND a2.billing = 1 \n" +
             "\tAND ISNULL( cancel_status ) ";
 
+
+    static String inboundInvoiceSql2 = " SELECT o.supplier_org_id, o.org_name supplier_name, o.buyer_org_name, o.buyer_org_full_name, o.buy_order_no, o.final_price, " +
+            " ia.`apply_number`, ia.`tatal_amount`, iai.`invoice_no`, ia.`modified`, o.sale_order_no, invoice_num " +
+            " FROM service_order.`invoice_apply` ia " +
+            " INNER JOIN service_order.`invoice_apply_invoice` iai ON iai.invoice_apply_id = ia.id AND iai.yn = 1 " +
+            " INNER JOIN service_order.`invoice_apply_order_relation` iaor ON iaor.invoice_apply_id = iai.invoice_apply_id AND iaor.yn = 1 " +
+            " INNER JOIN service_order.`order_third_relation` otr ON otr.`third_order_no` = iaor.`order_id` AND otr.`yn` = 1 " +
+            " INNER JOIN ( " +
+            " SELECT org.id AS supplier_org_id, oi.order_no AS buy_order_no, oi.order_no + 1 AS sale_order_no, oi.final_price, org.name AS org_name, " +
+            " oi.order_time, ua.user_name AS buyer_name, ua.legal_entity_organization_id AS buyer_org_id, ua.legal_entity_organization_name AS buyer_org_name, " +
+            " buyer_org.full_name AS buyer_org_full_name FROM service_order.order_info oi " +
+            " LEFT JOIN service_order.`reseller_order_info` roi ON oi.`order_no` = roi.`order_no` AND roi.`yn`=1 " +
+            " LEFT JOIN service_user.`shop_info` si ON si.shop_id = oi.shop_id AND si.yn = 1 " +
+            " LEFT JOIN service_user.organization org ON org.id = si.organize_id AND org.yn = 1 " +
+            " LEFT JOIN service_user.`user_account` ua ON ua.id = oi.buyer_id AND ua.yn = 1 " +
+            " LEFT JOIN service_user.`organization` buyer_org ON buyer_org.id = ua.legal_entity_organization_id " +
+            " WHERE oi.order_status = 40 " +
+            " AND roi.id IS NOT NULL AND oi.`yn`=1 AND order_split_type = 1 " +
+            " AND NOT EXISTS (SELECT 1 FROM service_order.order_info ooi WHERE ooi.parent_no = oi.order_no AND ooi.parent_no > 0) " +
+            " ) o ON o.buy_order_no = otr.`order_no` " +
+            " WHERE ia.`sql_type` = 0 AND ia.`yn` = 1 AND ia.`apply_status` = 1 AND ia.`deliver_type` = 1 ";
+
 }

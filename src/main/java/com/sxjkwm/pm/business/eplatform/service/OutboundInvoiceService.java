@@ -107,7 +107,7 @@ public class OutboundInvoiceService extends EpBaseService<OutboundInvoiceDto> {
         if (Objects.nonNull(supplierNames) && supplierNames.length > 0) {
             queryCondition.must(QueryBuilders.termsQuery("supplierName.keyword", supplierNames));
         }
-        return super.queryFromES(outboundInvoiceIndex, queryCondition, pageSize, pageNo);
+        return super.queryFromES(outboundInvoiceIndex, queryCondition, pageSize, pageNo, "saleInvoiceTitle");
     }
 
     @Async

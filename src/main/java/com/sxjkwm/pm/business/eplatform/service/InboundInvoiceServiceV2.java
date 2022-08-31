@@ -40,14 +40,14 @@ import java.util.stream.Collectors;
 
 /**
  * @author Vic.Chu
- * @date 2022/8/8 15:38
+ * @date 2022/8/30 9:38
  */
 @Service
-public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
+public class InboundInvoiceServiceV2 extends EpBaseService<InboundInvoiceDto> {
 
     private static final Logger logger = LoggerFactory.getLogger(InboundInvoiceService.class);
 
-    static final String inboundInvoiceIndex = "pepii";
+    static final String inboundInvoiceIndex = "pepiiv2";
 
     private static final ConditionPair[] invoiceBillWorkbookHeaders = {
             ConditionPair.of("supplierName", "供应商名称", String.class),
@@ -55,6 +55,8 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
             ConditionPair.of("finalPrice", "结算金额", BigDecimal.class),
             ConditionPair.of("buyInvoiceAmount", "发票金额", BigDecimal.class),
             ConditionPair.of("buyerOrgName", "采购单位", String.class),
+            ConditionPair.of("buyInvoiceApplyNumber", "发票申请单号", String.class),
+            ConditionPair.of("invoiceNo", "发票号", String.class),
             ConditionPair.of("ownerName", "对接人", String.class),
             ConditionPair.of("hasOutbound", "是否已开销项", Boolean.class),
     };
@@ -64,11 +66,21 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
     private final S3FileUtil s3FileUtil;
 
     @Autowired
-    public InboundInvoiceService(EpDao epDao, EsDao esDao, S3FileUtil s3FileUtil) {
+    public InboundInvoiceServiceV2(EpDao epDao, EsDao esDao, S3FileUtil s3FileUtil) {
         super(epDao, esDao);
         this.epDao = epDao;
         this.esDao = esDao;
         this.s3FileUtil = s3FileUtil;
+    }
+
+    @Override
+    protected InboundInvoiceDto convert(Map<String, Object> dataRow) {
+        return InboundInvoiceDto.fillData(dataRow);
+    }
+
+    @Override
+    protected String getSQL() {
+        return EpSql.inboundInvoiceSql2;
     }
 
     @Async
@@ -83,7 +95,17 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
         }
     }
 
-    public PageDataDto<Map<String, Object>> queryDataInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime, String[] supplierNames, String buyInvoiceApplyNumber) throws IOException {
+    private void createRowHeader(XSSFSheet sheet, XSSFCellStyle dataStyle) {
+        XSSFRow row = sheet.createRow(1);
+        for (int i = 0; i < invoiceBillWorkbookHeaders.length; i ++) {
+            ConditionPair conditionPair = invoiceBillWorkbookHeaders[i];
+            XSSFCell cell = row.createCell(i, CellType.STRING);
+            cell.setCellValue(conditionPair.colName);
+            cell.setCellStyle(dataStyle);
+        }
+    }
+
+    public PageDataDto<Map<String, Object>> queryDataInEs(Integer pageSize, Integer pageNo, Long startTime, Long endTime, String[] supplierNames, String buyInvoiceApplyNumber, String invoiceNo) throws IOException {
         BoolQueryBuilder queryCondition = QueryBuilders.boolQuery();
         if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
             queryCondition.must(QueryBuilders.rangeQuery("operateTime").from(startTime, true).to(endTime, true));
@@ -98,7 +120,10 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
         if (Objects.nonNull(supplierNames) && supplierNames.length > 0) {
             queryCondition.must(QueryBuilders.termsQuery("supplierName.keyword", supplierNames));
         }
-        return super.queryFromES(inboundInvoiceIndex, queryCondition, pageSize, pageNo, "buyInvoiceApplyNumber");
+        if (StringUtils.isNotBlank(invoiceNo)) {
+            queryCondition.must(QueryBuilders.matchQuery("invoiceNo.keyword", invoiceNo));
+        }
+        return super.queryFromES(inboundInvoiceIndex, queryCondition, pageSize, pageNo, "invoiceNo");
     }
 
     public String generateWorkbook(List<InboundInvoiceDto> dataList) throws NoSuchFieldException, IllegalAccessException {
@@ -208,107 +233,75 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
         sheet.addMergedRegion(titleRegion);
         createRowHeader(sheet, dataStyle); // create header
         int rowNum = 2;
-        BigDecimal totalPrice = new BigDecimal("0");
-        BigDecimal totalInvoiceAmount = new BigDecimal("0");
-        Set<String> addedInvoiceApplyNum = Sets.newHashSet();
+        Set<String> addedInvoiceApplyNums = Sets.newHashSet();
+        Set<String> addedInvoiceNums = Sets.newHashSet();
         Map<String, List<InboundInvoiceDto>> dataMapByInvoiceApply = dataList.stream().collect(Collectors.groupingBy(InboundInvoiceDto::getBuyInvoiceApplyNumber));
         Set<Map.Entry<String, List<InboundInvoiceDto>>> entrySet = dataMapByInvoiceApply.entrySet();
         Iterator<Map.Entry<String, List<InboundInvoiceDto>>> iterator = entrySet.iterator();
-//        int mergeStartRowNum = 0;
-//        int mergeEndRowNum = 0;
         while (iterator.hasNext()) {
             Map.Entry<String, List<InboundInvoiceDto>> entry = iterator.next();
-            List<InboundInvoiceDto> invoiceApplyList = entry.getValue();
-            int dataSize = invoiceApplyList.size();
-            for (int i = 0; i < invoiceApplyList.size(); i ++) {
-//                if (dataSize > 1) {
-//                    if (i == 0) {
-//                        mergeStartRowNum = rowNum;
-//                    }
-//                    if (i == invoiceApplyList.size() - 1) {
-//                        mergeEndRowNum = mergeStartRowNum + dataSize - 1;
-//                    }
-//                }
-                InboundInvoiceDto data = invoiceApplyList.get(i);
-                XSSFRow row = sheet.createRow(rowNum);
-                rowNum ++;
-                for (int j = 0; j < invoiceBillWorkbookHeaders.length; j ++) {
-                    ConditionPair conditionPair = invoiceBillWorkbookHeaders[j];
-                    XSSFCell cell = row.createCell(j);
-                    if (conditionPair.key.equals("ownerName")) {
-                        String ownerName = ContextHelper.getUserData().getUsername();
-                        cell.setCellValue(ownerName);
-                        cell.setCellStyle(dataStyle);
-                        continue;
-                    }
-                    Class<?> clazz = conditionPair.clazz;
-                    Field field = InboundInvoiceDto.class.getDeclaredField(conditionPair.key);
-                    boolean originalAccess = field.isAccessible();
-                    field.setAccessible(true);
-                    Object value = field.get(data);
-                    field.setAccessible(originalAccess);
-                    if (Objects.nonNull(value)) {
-                        if (clazz == BigDecimal.class) {
-                            BigDecimal amount = new BigDecimal(value.toString());
-                            if ("finalPrice".equals(conditionPair.key)) {
-                                totalPrice = totalPrice.add(amount);
+            String supplierName = entry.getKey();
+            List<InboundInvoiceDto> dataListBySupplier = entry.getValue();
+            Map<String, List<InboundInvoiceDto>> dataMapByInvoiceApplyNumber = dataListBySupplier.stream().collect(Collectors.groupingBy(InboundInvoiceDto::getBuyInvoiceApplyNumber));
+            Set<Map.Entry<String, List<InboundInvoiceDto>>> entrySetByInvoiceApplyNumber = dataMapByInvoiceApplyNumber.entrySet();
+            Iterator<Map.Entry<String, List<InboundInvoiceDto>>> iteratorByInvoiceApplyNumber = entrySetByInvoiceApplyNumber.iterator();
+            while (iteratorByInvoiceApplyNumber.hasNext()) {
+                Map.Entry<String, List<InboundInvoiceDto>> entryByInvoiceApplyNumber = iteratorByInvoiceApplyNumber.next();
+                String invoiceApplyNumber = entryByInvoiceApplyNumber.getKey();
+                List<InboundInvoiceDto> dataListByInvoiceApplyNumber = entryByInvoiceApplyNumber.getValue();
+                Map<String, List<InboundInvoiceDto>> dataMapByInvoiceNo = dataListByInvoiceApplyNumber.stream().collect(Collectors.groupingBy(InboundInvoiceDto::getInvoiceNo));
+                Set<Map.Entry<String, List<InboundInvoiceDto>>> entrySetByInvoiceNo = dataMapByInvoiceNo.entrySet();
+                Iterator<Map.Entry<String, List<InboundInvoiceDto>>> iteratorByInvoiceNo = entrySetByInvoiceNo.iterator();
+                while (iteratorByInvoiceNo.hasNext()) {
+                    Map.Entry<String, List<InboundInvoiceDto>> entryByInvoiceNo = iteratorByInvoiceNo.next();
+                    String invoiceNo = entryByInvoiceNo.getKey();
+                    List<InboundInvoiceDto> dataListByInvoiceNo = entryByInvoiceNo.getValue();
+                    for (int i = 0; i < dataListByInvoiceNo.size(); i ++) {
+                        InboundInvoiceDto data = dataListByInvoiceNo.get(i);
+                        XSSFRow row = sheet.createRow(rowNum ++);
+                        for (int j = 0; j < invoiceBillWorkbookHeaders.length; j ++) {
+                            ConditionPair conditionPair = invoiceBillWorkbookHeaders[j];
+                            XSSFCell cell = row.createCell(j);
+                            if (conditionPair.key.equals("ownerName")) {
+                                String ownerName = ContextHelper.getUserData().getUsername();
+                                cell.setCellValue(ownerName);
+                                cell.setCellStyle(dataStyle);
+                                continue;
                             }
-                            if ("buyInvoiceAmount".equals(conditionPair.key)) {
-                                if (!addedInvoiceApplyNum.contains(data.getBuyInvoiceApplyNumber())) {
-                                    totalInvoiceAmount = totalInvoiceAmount.add(amount);
-                                    addedInvoiceApplyNum.add(data.getBuyInvoiceApplyNumber());
+                            Class<?> clazz = conditionPair.clazz;
+                            Field field = InboundInvoiceDto.class.getDeclaredField(conditionPair.key);
+                            boolean originalAccess = field.isAccessible();
+                            field.setAccessible(true);
+                            Object value = field.get(data);
+                            field.setAccessible(originalAccess);
+                            if (Objects.nonNull(value)) {
+                                if (clazz == BigDecimal.class) {
+                                    BigDecimal amount = new BigDecimal(value.toString());
+//                                    if ("finalPrice".equals(conditionPair.key)) {
+//                                        totalPrice = totalPrice.add(amount);
+//                                    }
+//                                    if ("buyInvoiceAmount".equals(conditionPair.key)) {
+//                                        if (!addedInvoiceApplyNum.contains(data.getBuyInvoiceApplyNumber())) {
+//                                            totalInvoiceAmount = totalInvoiceAmount.add(amount);
+//                                            addedInvoiceApplyNum.add(data.getBuyInvoiceApplyNumber());
+//                                        }
+//                                    }
+                                    cell.setCellValue(amount.doubleValue());
+                                } else if (clazz == Boolean.class) {
+                                    if ((Boolean) value) {
+                                        cell.setCellValue("是");
+                                    } else {
+                                        cell.setCellValue("否");
+                                    }
+                                } else {
+                                    cell.setCellValue(value.toString());
                                 }
                             }
-                            cell.setCellValue(amount.doubleValue());
-                        } else if (clazz == Boolean.class) {
-                            if ((Boolean) value) {
-                                cell.setCellValue("是");
-                            } else {
-                                cell.setCellValue("否");
-                            }
-                        } else {
-                            cell.setCellValue(value.toString());
                         }
                     }
-                    cell.setCellStyle(dataStyle);
-                    sheet.autoSizeColumn(j);
                 }
             }
-//            if (dataSize > 1) {
-//                CellRangeAddress buyInvoicePriceRegion = new CellRangeAddress(mergeStartRowNum, mergeEndRowNum, 3, 3);
-//                sheet.addMergedRegion(buyInvoicePriceRegion);
-//            }
         }
-//        int totalDataSize = dataList.size();
-//        if (totalDataSize > 1) {
-//            CellRangeAddress supplierRegion = new CellRangeAddress(2, 2 + totalDataSize - 1, 0, 0);
-//            sheet.addMergedRegion(supplierRegion);
-//        }
-//        int totalRowNum = sheet.getPhysicalNumberOfRows();
-//        XSSFRow lastRow = sheet.createRow(totalRowNum);
-//        XSSFCell totalPriceCell = null;
-//        XSSFCell totalInvoiceAmountCell = null;
-//        for (int i = 0; i < invoiceBillWorkbookHeaders.length; i ++) {
-//            ConditionPair conditionPair = invoiceBillWorkbookHeaders[i];
-//            XSSFCell cell = lastRow.createCell(i);
-//            if (i == 0) {
-//                cell.setCellValue("合计：");
-//            } else {
-//                if ("finalPrice".equals(conditionPair.key)) {
-//                    totalPriceCell = cell;
-//                    cell.setCellValue(totalPrice.toString());
-//                }
-//                if ("buyInvoiceAmount".equals(conditionPair.key)) {
-//                    totalInvoiceAmountCell= cell;
-//                    cell.setCellValue(totalInvoiceAmount.toString());
-//                }
-//            }
-//            cell.setCellStyle(resultStyle);
-//        }
-//        if (!totalInvoiceAmount.equals(totalPrice)) {
-//            totalPriceCell.setCellStyle(errResultStyle);
-//            totalInvoiceAmountCell.setCellStyle(errResultStyle);
-//        }
     }
 
     public void downloadInvoiceBill(String objName, HttpServletResponse response) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
@@ -340,23 +333,4 @@ public class InboundInvoiceService extends EpBaseService<InboundInvoiceDto> {
         }
     }
 
-    private void createRowHeader(XSSFSheet sheet, XSSFCellStyle dataStyle) {
-        XSSFRow row = sheet.createRow(1);
-        for (int i = 0; i < invoiceBillWorkbookHeaders.length; i ++) {
-            ConditionPair conditionPair = invoiceBillWorkbookHeaders[i];
-            XSSFCell cell = row.createCell(i, CellType.STRING);
-            cell.setCellValue(conditionPair.colName);
-            cell.setCellStyle(dataStyle);
-        }
-    }
-
-    @Override
-    protected InboundInvoiceDto convert(Map<String, Object> dataRow) {
-        return InboundInvoiceDto.fillData(dataRow);
-    }
-
-    @Override
-    protected String getSQL() {
-        return EpSql.inboundInvoiceSql;
-    }
 }

@@ -4,12 +4,14 @@ import com.sxjkwm.pm.business.eplatform.dto.InboundInvoiceDto;
 import com.sxjkwm.pm.business.eplatform.dto.OutboundInvoiceDto;
 import com.sxjkwm.pm.business.eplatform.dto.OutboundQueryParam;
 import com.sxjkwm.pm.business.eplatform.service.InboundInvoiceService;
+import com.sxjkwm.pm.business.eplatform.service.InboundInvoiceServiceV2;
 import com.sxjkwm.pm.business.eplatform.service.OutboundInvoiceService;
 import com.sxjkwm.pm.common.PageDataDto;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
 import io.minio.errors.*;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,11 +32,12 @@ public class EplatformController {
 
     private final OutboundInvoiceService outboundInvoiceService;
 
-    private final InboundInvoiceService inboundInvoiceService;
+    private final InboundInvoiceServiceV2 inboundInvoiceServiceV2;
 
-    public EplatformController(OutboundInvoiceService outboundInvoiceService, InboundInvoiceService inboundInvoiceService) {
+    @Autowired
+    public EplatformController(OutboundInvoiceService outboundInvoiceService, InboundInvoiceServiceV2 inboundInvoiceServiceV2) {
         this.outboundInvoiceService = outboundInvoiceService;
-        this.inboundInvoiceService = inboundInvoiceService;
+        this.inboundInvoiceServiceV2 = inboundInvoiceServiceV2;
     }
 
     /**
@@ -89,28 +92,29 @@ public class EplatformController {
             @RequestParam(value = "startTime", required = false) Long startTime,
             @RequestParam(value = "endTime", required = false) Long endTime,
             @RequestParam(value = "supplierNames", required = false) String supplierNames,
-            @RequestParam(value = "buyInvoiceApplyNumber", required = false) String buyInvoiceApplyNumber
+            @RequestParam(value = "buyInvoiceApplyNumber", required = false) String buyInvoiceApplyNumber,
+            @RequestParam(value = "invoiceNo", required = false) String invoiceNo
             ) throws IOException {
         String[] sNames = null;
         if (StringUtils.isNotBlank(supplierNames)) {
             sNames = supplierNames.split(",");
         }
-        return RestResponse.of(inboundInvoiceService.queryDataInEs(pageSize, pageNo, startTime, endTime, sNames, buyInvoiceApplyNumber));
+        return RestResponse.of(inboundInvoiceServiceV2.queryDataInEs(pageSize, pageNo, startTime, endTime, sNames, buyInvoiceApplyNumber, invoiceNo));
     }
 
     @GetMapping("/es/inboundSyncInvoicePrinted")
     public RestResponse<Boolean> syncInboundInvoice() {
-        return RestResponse.of(inboundInvoiceService.syncData());
+        return RestResponse.of(inboundInvoiceServiceV2.syncData());
     }
 
     @PostMapping("/inboundInvoiceBill")
     public RestResponse<String> generateInboundInvoiceBill(@RequestBody List<InboundInvoiceDto> dataList) throws NoSuchFieldException, IllegalAccessException {
-        return RestResponse.of(inboundInvoiceService.generateWorkbook(dataList));
+        return RestResponse.of(inboundInvoiceServiceV2.generateWorkbook(dataList));
     }
 
     @GetMapping("/inboundInvoiceBill")
     public void downloadInboundInvoiceBill(@RequestParam("objName") String objName, HttpServletResponse response) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        inboundInvoiceService.downloadInvoiceBill(objName, response);
+        inboundInvoiceServiceV2.downloadInvoiceBill(objName, response);
     }
 
 }

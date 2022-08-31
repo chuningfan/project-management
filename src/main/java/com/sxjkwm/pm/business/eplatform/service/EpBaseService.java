@@ -72,8 +72,8 @@ public abstract class EpBaseService<T> {
         logger.info("Sync finished");
     }
 
-    protected PageDataDto<Map<String, Object>> queryFromES(String index, AbstractQueryBuilder queryCondition, Integer pageSize, Integer pageNo) throws IOException {
-        return esDao.searchListData(index, queryCondition, pageSize, pageNo, null, null, null);
+    protected PageDataDto<Map<String, Object>> queryFromES(String index, AbstractQueryBuilder queryCondition, Integer pageSize, Integer pageNo, String sortField) throws IOException {
+        return esDao.searchListData(index, queryCondition, pageSize, pageNo, null, sortField, null);
     }
 
     protected abstract T convert(Map<String, Object> dataRow);
