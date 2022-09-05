@@ -16,7 +16,7 @@ import java.util.List;
 
 @Configuration
 @Aspect
-public class AspectConfig {
+public class ValveAspectConfig {
 
     private final List<DoBefore> beforeList = Lists.newArrayList();
     private final List<DoAfter> afterList = Lists.newArrayList();
@@ -24,7 +24,7 @@ public class AspectConfig {
     private final LoggingWhenThrowException loggingWhenThrowException;
 
     @Autowired
-    public AspectConfig(LoggingWhenThrowException loggingWhenThrowException) {
+    public ValveAspectConfig(LoggingWhenThrowException loggingWhenThrowException) {
         this.loggingWhenThrowException = loggingWhenThrowException;
     }
 
