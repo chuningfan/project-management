@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.business.file.controller;
 
 import com.sxjkwm.pm.business.file.service.PreviewService;
+import com.sxjkwm.pm.configuration.annotation.PreviewFile;
 import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -27,12 +29,14 @@ public class PreviewController {
     }
 
     @GetMapping
-    public void preview(@RequestParam("fileId") Long fileId, HttpServletResponse response) throws PmException {
+    @PreviewFile
+    public void preview(@RequestParam("fileId") Long fileId, HttpServletRequest request, HttpServletResponse response) throws PmException {
         previewService.preview(fileId, response, true);
     }
 
     @GetMapping("/pattern")
-    public void previewPatternFile(@RequestParam("fileId") Long fileId, HttpServletResponse response) throws PmException {
+    @PreviewFile
+    public void previewPatternFile(@RequestParam("fileId") Long fileId, HttpServletRequest request, HttpServletResponse response) throws PmException {
         previewService.preview(fileId, response, false);
     }
 

@@ -40,10 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Vic.Chu
@@ -98,7 +95,7 @@ public class EsDao {
         request.timeout(TimeValue.timeValueSeconds(1));
         request.source(jsonObject, XContentType.JSON);
         IndexResponse response = restHighLevelClient.index(request, RequestOptions.DEFAULT);
-        logger.info("Add data successfully, index: {}, status: {}, id: {}",index,response.status().getStatus(), response.getId());
+        logger.info("Add data successfully, index: {}, status: {}, id: {}", index, response.status().getStatus(), response.getId());
         return response.getId();
     }
 
@@ -233,6 +230,25 @@ public class EsDao {
             return pageDataDto;
         }
         return null;
+    }
+
+    public List<Map<String, Object>> searchAllUnderIndex(String index, String fields) throws IOException {
+        SearchRequest request = new SearchRequest(index);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        if (StringUtils.isNotEmpty(fields)){
+            searchSourceBuilder.fetchSource(new FetchSourceContext(true,fields.split(","),Strings.EMPTY_ARRAY));
+        }
+        request.source(searchSourceBuilder);
+        SearchResponse response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
+        Long totalSize = response.getHits().getTotalHits().value;
+        searchSourceBuilder.from(0).size(totalSize.intValue());
+        request.source(searchSourceBuilder);
+        response = restHighLevelClient.search(request, RequestOptions.DEFAULT);
+        if (response.status().getStatus() == 200) {
+            List<Map<String, Object>> dataList = setSearchResponse(response, null);
+            return dataList;
+        }
+        return Collections.emptyList();
     }
 
 }

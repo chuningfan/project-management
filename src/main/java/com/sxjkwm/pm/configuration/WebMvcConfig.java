@@ -1,5 +1,6 @@
 package com.sxjkwm.pm.configuration;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,8 +23,14 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     }
 
     @Bean
-    @Order(0)
-    public CorsFilter corsFilter() {
+    public FilterRegistrationBean<CorsFilter> corsFilter() {
+        FilterRegistrationBean<CorsFilter> corsBean = new FilterRegistrationBean<CorsFilter>(corsFilterObj());
+        corsBean.setOrder(0);
+        corsBean.setName("CORS-Filter");
+        return corsBean;
+    }
+
+    private CorsFilter corsFilterObj() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", buildConfig()); //注册
         return new CorsFilter(source);
@@ -31,9 +38,10 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 
     private CorsConfiguration buildConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOrigin("*"); //允许任何域名
-        corsConfiguration.addAllowedHeader("*"); //允许任何头
-        corsConfiguration.addAllowedMethod("*"); //允许任何方法
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.addAllowedOrigin(CorsConfiguration.ALL); //允许任何域名
+        corsConfiguration.addAllowedHeader(CorsConfiguration.ALL); //允许任何头
+        corsConfiguration.addAllowedMethod(CorsConfiguration.ALL); //允许任何方法
         return corsConfiguration;
     }
 

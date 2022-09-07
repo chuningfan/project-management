@@ -104,8 +104,9 @@ public class SALEContractHandler implements PatternFileHandler {
                     map.put("数量", "");
                 }
                 map.put("单价（元）", unitPriceWithTax.toString());
-                map.put("金额（元）", unitPriceWithTax.multiply(new BigDecimal(item.getQuantity())).setScale(2, BigDecimal.ROUND_CEILING).toString());
-                totalPriceWithTax = totalPriceWithTax.add(item.getTotalPrice());
+                BigDecimal itemTotal = unitPriceWithTax.multiply(new BigDecimal(item.getQuantity())).setScale(2, BigDecimal.ROUND_CEILING);
+                map.put("金额（元）", itemTotal.toString());
+                totalPriceWithTax = totalPriceWithTax.add(itemTotal);
                 rowDataList.add(map);
             }
             totalPriceWithTax = totalPriceWithTax.setScale(2, BigDecimal.ROUND_CEILING);

@@ -9,6 +9,7 @@ import com.sxjkwm.pm.business.eplatform.service.OutboundInvoiceService;
 import com.sxjkwm.pm.common.PageDataDto;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
+import com.sxjkwm.pm.util.ContextUtil;
 import io.minio.errors.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,6 +116,12 @@ public class EplatformController {
     @GetMapping("/inboundInvoiceBill")
     public void downloadInboundInvoiceBill(@RequestParam("objName") String objName, HttpServletResponse response) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         inboundInvoiceServiceV2.downloadInvoiceBill(objName, response);
+    }
+
+    @GetMapping("/es/inboundSyncInvoicePrinted2")
+    public RestResponse<Boolean> syncInboundInvoice2() {
+        InboundInvoiceService inboundInvoiceService = ContextUtil.getBean(InboundInvoiceService.class);
+        return RestResponse.of(inboundInvoiceService.syncData());
     }
 
 }

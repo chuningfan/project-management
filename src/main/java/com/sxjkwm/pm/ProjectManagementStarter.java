@@ -2,7 +2,7 @@ package com.sxjkwm.pm;
 
 import cn.hutool.core.date.StopWatch;
 import com.sxjkwm.pm.business.material.service.MaterialCacheService;
-import com.sxjkwm.pm.configuration.AspectConfig;
+import com.sxjkwm.pm.configuration.ValveAspectConfig;
 import com.sxjkwm.pm.logging.LoggingAfterInvocation;
 import com.sxjkwm.pm.logging.LoggingBeforeInvocation;
 import com.sxjkwm.pm.util.ContextUtil;
@@ -34,7 +34,7 @@ public class ProjectManagementStarter {
         // setup something
         builder.listeners((ApplicationListener<ContextRefreshedEvent>) contextRefreshedEvent -> {
             ContextUtil.context = contextRefreshedEvent.getApplicationContext();
-            AspectConfig aspectConfig = ContextUtil.getBean(AspectConfig.class);
+            ValveAspectConfig aspectConfig = ContextUtil.getBean(ValveAspectConfig.class);
             aspectConfig.addBeforeWorker(new LoggingBeforeInvocation());
             aspectConfig.addAfterWorker(new LoggingAfterInvocation());
             MaterialCacheService materialCacheService = ContextUtil.context.getBean(MaterialCacheService.class);
