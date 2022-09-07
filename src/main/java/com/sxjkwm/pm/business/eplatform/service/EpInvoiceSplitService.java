@@ -55,7 +55,6 @@ public class EpInvoiceSplitService {
         try {
             List<InvoiceInfoEntity> invoiceInfoDtoList = epDao.query(EpSql.invoiceSql, new BeanPropertyRowMapper(InvoiceInfoEntity.class));
             Iterable<InvoiceInfoEntity> iterable = iterableReverseList(invoiceInfoDtoList);
-//            List<InvoiceInfoEntity> invoiceInfoEntityList1 = invoiceInfoDao.findAll();
             invoiceInfoDao.deleteAll();
             invoiceInfoDao.saveAll(iterable);
         } catch (Exception e) {
@@ -63,20 +62,16 @@ public class EpInvoiceSplitService {
     }
 
     public Iterable<InvoiceInfoEntity> iterableReverseList(List<InvoiceInfoEntity> l) {
-        return new Iterable<InvoiceInfoEntity>() {
-            public Iterator<InvoiceInfoEntity> iterator() {
-                return new Iterator<InvoiceInfoEntity>() {
-                    ListIterator<InvoiceInfoEntity> listIter = l.listIterator(l.size());
-                    public boolean hasNext() {
-                        return listIter.hasPrevious();
-                    }
-                    public InvoiceInfoEntity next() {
-                        return listIter.previous();
-                    }
-                    public void remove() {
-                        listIter.remove();
-                    }
-                };
+        return () -> new Iterator<InvoiceInfoEntity>() {
+            ListIterator<InvoiceInfoEntity> listIter = l.listIterator(l.size());
+            public boolean hasNext() {
+                return listIter.hasPrevious();
+            }
+            public InvoiceInfoEntity next() {
+                return listIter.previous();
+            }
+            public void remove() {
+                listIter.remove();
             }
         };
     }
@@ -119,28 +114,25 @@ public class EpInvoiceSplitService {
     }
 
     private Specification<InvoiceInfoEntity> getSpecification(InvoiceInfoEntity entity) {
-        Specification<InvoiceInfoEntity> specification = new Specification<InvoiceInfoEntity>() {
-            @Override
-            public Predicate toPredicate(Root<InvoiceInfoEntity> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
-                List<Predicate> predicates = new ArrayList<>();
-                // 判断条件不为空
-                if (StringUtils.isNotEmpty(entity.getApplyNumber())) {
-                    predicates.add(criteriaBuilder.equal(root.get("applyNumber"), entity.getApplyNumber()));
-                }
-                if (StringUtils.isNotEmpty(entity.getShopName())) {
-                    predicates.add(criteriaBuilder.equal(root.get("shopName"), entity.getShopName()));
-                }
-                if (null != entity.getInvoiceAmount()) {
-                    predicates.add(criteriaBuilder.equal(root.get("invoiceAmount"), entity.getInvoiceAmount()));
-                }
-                if (StringUtils.isNotEmpty(entity.getInvoiceTitle())) {
-                    predicates.add(criteriaBuilder.equal(root.get("invoiceTitle"), entity.getInvoiceTitle()));
-                }
-                if (StringUtils.isNotEmpty(entity.getOrganizeName())) {
-                    predicates.add(criteriaBuilder.equal(root.get("organizeName"), entity.getOrganizeName()));
-                }
-                return criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
+        Specification<InvoiceInfoEntity> specification = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            // 判断条件不为空
+            if (StringUtils.isNotEmpty(entity.getApplyNumber())) {
+                predicates.add(criteriaBuilder.equal(root.get("applyNumber"), entity.getApplyNumber()));
             }
+            if (StringUtils.isNotEmpty(entity.getShopName())) {
+                predicates.add(criteriaBuilder.equal(root.get("shopName"), entity.getShopName()));
+            }
+            if (null != entity.getInvoiceAmount()) {
+                predicates.add(criteriaBuilder.equal(root.get("invoiceAmount"), entity.getInvoiceAmount()));
+            }
+            if (StringUtils.isNotEmpty(entity.getInvoiceTitle())) {
+                predicates.add(criteriaBuilder.equal(root.get("invoiceTitle"), entity.getInvoiceTitle()));
+            }
+            if (StringUtils.isNotEmpty(entity.getOrganizeName())) {
+                predicates.add(criteriaBuilder.equal(root.get("organizeName"), entity.getOrganizeName()));
+            }
+            return criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         };
         return specification;
     }

@@ -47,11 +47,11 @@ public class EpDao {
     }
 
     public List query(String sql, Object[] params, RowMapper rowMapper){
-        return   epJdbcTemplate.query(sql, params, rowMapper);
+        return  epJdbcTemplate.query(sql, params, rowMapper);
     }
 
-    public List<InvoiceInfoEntity> query(String sql, RowMapper rowMapper){
-        return   epJdbcTemplate.query(sql, rowMapper);
+    public List query(String sql, RowMapper rowMapper){
+        return  epJdbcTemplate.query(sql, rowMapper);
     }
 
 }
