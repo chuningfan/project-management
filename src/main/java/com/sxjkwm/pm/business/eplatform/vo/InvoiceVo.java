@@ -21,6 +21,16 @@ public class InvoiceVo {
      */
     private BigDecimal invoiceAmount;
     /**
+     * 发票抬头
+     */
+    private String invoiceTitle;
+    /**
+     * 采购单位
+     */
+    private String buyerOrg;
+
+
+    /**
      * 供应商金额信息
      */
     private List<SupplierInfoVo> supplierInfo;
@@ -39,6 +49,22 @@ public class InvoiceVo {
 
     public void setInvoiceAmount(BigDecimal invoiceAmount) {
         this.invoiceAmount = invoiceAmount;
+    }
+
+    public String getInvoiceTitle() {
+        return invoiceTitle;
+    }
+
+    public void setInvoiceTitle(String invoiceTitle) {
+        this.invoiceTitle = invoiceTitle;
+    }
+
+    public String getBuyerOrg() {
+        return buyerOrg;
+    }
+
+    public void setBuyerOrg(String buyerOrg) {
+        this.buyerOrg = buyerOrg;
     }
 
     public List<SupplierInfoVo> getSupplierInfo() {

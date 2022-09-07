@@ -9,30 +9,31 @@ import java.math.BigDecimal;
  * @Date 2022/8/29 9:32
  * @Version 1.0
  **/
-public class InvoiceInfoDto {
-    private String invoiceApplyId;
+
+public class InvoiceInfoDto  {
     private String invoiceNo;
     private BigDecimal invoiceAmount;
-    private String thirdOrderId;
-    private String applicationNo;
     private String applyNumber;
     private BigDecimal totalAmount;
-    private Integer orderNum;
     private String orderNo;
-    private String orderId;
     private BigDecimal paymentPrice;
     private BigDecimal totalPrice;
-    private String shopId;
     private String shopName;
+    private String invoiceTitle;
+    private String organizeId;
+    private String organizeName;
 
 
-    public String getInvoiceApplyId() {
-        return invoiceApplyId;
+
+    public String getInvoiceTitle() {
+        return invoiceTitle;
     }
 
-    public void setInvoiceApplyId(String invoiceApplyId) {
-        this.invoiceApplyId = invoiceApplyId;
+    public void setInvoiceTitle(String invoiceTitle) {
+        this.invoiceTitle = invoiceTitle;
     }
+
+
 
     public String getInvoiceNo() {
         return invoiceNo;
@@ -74,21 +75,6 @@ public class InvoiceInfoDto {
         this.totalPrice = totalPrice;
     }
 
-    public String getThirdOrderId() {
-        return thirdOrderId;
-    }
-
-    public void setThirdOrderId(String thirdOrderId) {
-        this.thirdOrderId = thirdOrderId;
-    }
-
-    public String getApplicationNo() {
-        return applicationNo;
-    }
-
-    public void setApplicationNo(String applicationNo) {
-        this.applicationNo = applicationNo;
-    }
 
     public String getApplyNumber() {
         return applyNumber;
@@ -106,29 +92,6 @@ public class InvoiceInfoDto {
         this.orderNo = orderNo;
     }
 
-    public String getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-    }
-
-    public String getShopId() {
-        return shopId;
-    }
-
-    public void setShopId(String shopId) {
-        this.shopId = shopId;
-    }
-
-    public Integer getOrderNum() {
-        return orderNum;
-    }
-
-    public void setOrderNum(Integer orderNum) {
-        this.orderNum = orderNum;
-    }
 
     public String getShopName() {
         return shopName;
@@ -137,4 +100,21 @@ public class InvoiceInfoDto {
     public void setShopName(String shopName) {
         this.shopName = shopName;
     }
+
+    public String getOrganizeName() {
+        return organizeName;
+    }
+
+    public void setOrganizeName(String organizeName) {
+        this.organizeName = organizeName;
+    }
+
+    public String getOrganizeId() {
+        return organizeId;
+    }
+
+    public void setOrganizeId(String organizeId) {
+        this.organizeId = organizeId;
+    }
+
 }

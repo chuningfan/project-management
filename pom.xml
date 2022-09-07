@@ -78,6 +78,12 @@
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
             <version>${elasticsearch}</version>
         </dependency>
+
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.4</version>
+        </dependency>
 <!--        &lt;!&ndash; lucene start ***************************************** &ndash;&gt;-->
 <!--        <dependency>-->
 <!--            <groupId>org.apache.lucene</groupId>-->

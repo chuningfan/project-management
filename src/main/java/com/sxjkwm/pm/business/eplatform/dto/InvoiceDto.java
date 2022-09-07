@@ -1,5 +1,7 @@
 package com.sxjkwm.pm.business.eplatform.dto;
 
+import java.math.BigDecimal;
+
 /**
  * @ClassName InvoiceDto
  * @Description
@@ -14,17 +16,34 @@ public class InvoiceDto {
      */
     private String applyNumber;
     /**
-     * 开始时间
+     * 采购单位
      */
-    private String startTime;
+    private String organizeName;
     /**
-     * 结束时间
+     * 供应商名称
      */
-    private String endTime;
+    private String shopName;
+    /**
+     * 发票抬头
+     */
+    private String invoiceTitle;
+    /**
+     * 开票金额
+     */
+    private BigDecimal invoiceAmount;
+
 
     private Integer pageNum;
 
     private Integer pageSize;
+
+    public String getInvoiceTitle() {
+        return invoiceTitle;
+    }
+
+    public void setInvoiceTitle(String invoiceTitle) {
+        this.invoiceTitle = invoiceTitle;
+    }
 
     public String getApplyNumber() {
         return applyNumber;
@@ -34,20 +53,20 @@ public class InvoiceDto {
         this.applyNumber = applyNumber;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public String getOrganizeName() {
+        return organizeName;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
+    public void setOrganizeName(String organizeName) {
+        this.organizeName = organizeName;
     }
 
-    public String getEndTime() {
-        return endTime;
+    public String getShopName() {
+        return shopName;
     }
 
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void setShopName(String shopName) {
+        this.shopName = shopName;
     }
 
     public Integer getPageNum() {
@@ -64,5 +83,13 @@ public class InvoiceDto {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public BigDecimal getInvoiceAmount() {
+        return invoiceAmount;
+    }
+
+    public void setInvoiceAmount(BigDecimal invoiceAmount) {
+        this.invoiceAmount = invoiceAmount;
     }
 }
