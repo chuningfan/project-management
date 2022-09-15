@@ -1,9 +1,9 @@
 package com.sxjkwm.pm.business.eplatform.entity;
 
 
-
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * @ClassName InvoiceInfoEntity
@@ -41,11 +41,10 @@ public class InvoiceInfoEntity {
     protected String organizeId;
     @Column(name = "organize_name")
     protected String organizeName;
+    @Column(name = "pay_status")
+    protected Integer payStatus;
 
-
-
-
-    public InvoiceInfoEntity(Long id, String invoiceNo, BigDecimal invoiceAmount, String applyNumber, BigDecimal totalAmount, String orderNo, BigDecimal paymentPrice, BigDecimal totalPrice, String shopName, String invoiceTitle, String organizeId, String organizeName) {
+    public InvoiceInfoEntity(Long id, String invoiceNo, BigDecimal invoiceAmount, String applyNumber, BigDecimal totalAmount, String orderNo, BigDecimal paymentPrice, BigDecimal totalPrice, String shopName, String invoiceTitle, String organizeId, String organizeName, Integer payStatus) {
         this.id = id;
         this.invoiceNo = invoiceNo;
         this.invoiceAmount = invoiceAmount;
@@ -58,6 +57,15 @@ public class InvoiceInfoEntity {
         this.invoiceTitle = invoiceTitle;
         this.organizeId = organizeId;
         this.organizeName = organizeName;
+        this.payStatus = payStatus;
+    }
+
+    public Integer getPayStatus() {
+        return payStatus;
+    }
+
+    public void setPayStatus(Integer payStatus) {
+        this.payStatus = payStatus;
     }
 
     public InvoiceInfoEntity() {
@@ -157,5 +165,28 @@ public class InvoiceInfoEntity {
 
     public void setOrganizeName(String organizeName) {
         this.organizeName = organizeName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        InvoiceInfoEntity that = (InvoiceInfoEntity) o;
+        if ((applyNumber.equals(that.getApplyNumber())) &&
+                (invoiceAmount == that.invoiceAmount) &&
+                (invoiceNo.equals(that.getInvoiceNo())) &&
+                (invoiceTitle.equals(that.getInvoiceTitle())) &&
+                (totalAmount == that.getTotalAmount()) &&
+                (orderNo.equals(that.getOrderNo())) &&
+                (paymentPrice == that.getPaymentPrice()) &&
+                (totalPrice == that.getTotalPrice()) &&
+                (shopName.equals(that.getShopName())) &&
+                (organizeId.equals(that.getOrganizeId())) &&
+                (organizeName.equals(that.getOrganizeName()))) {
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(invoiceNo, invoiceAmount, applyNumber, totalAmount, orderNo, paymentPrice, totalPrice, shopName, invoiceTitle, organizeId, organizeName);
     }
 }

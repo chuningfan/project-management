@@ -6,6 +6,8 @@ import com.sxjkwm.pm.business.eplatform.vo.InvoiceVo;
 import com.sxjkwm.pm.common.PageDataDto;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
+import com.sxjkwm.pm.constants.PmError;
+import com.sxjkwm.pm.exception.PmException;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -28,13 +30,13 @@ public class EpInvoiceSplitController {
     }
 
     @GetMapping
-    public RestResponse<PageDataDto<List<InvoiceVo>>> invoiceSplit( @RequestParam(value = "pageSize") Integer pageSize,
-                                                                    @RequestParam(value = "pageNum") Integer pageNum,
-                                                                    @RequestParam(value = "applyNumber", required = false) String applyNumber,
-                                                                    @RequestParam(value = "supplierName", required = false) String supplierName,
-                                                                    @RequestParam(value = "invoiceAmount", required = false) BigDecimal invoiceAmount,
-                                                                    @RequestParam(value = "invoiceTitle", required = false) String invoiceTitle,
-                                                                    @RequestParam(value = "buyerOrg", required = false) String buyerOrg) {
+    public RestResponse<PageDataDto<List<InvoiceVo>>> invoiceSplit(@RequestParam(value = "pageSize") Integer pageSize,
+                                                                   @RequestParam(value = "pageNum") Integer pageNum,
+                                                                   @RequestParam(value = "applyNumber", required = false) String applyNumber,
+                                                                   @RequestParam(value = "supplierName", required = false) String supplierName,
+                                                                   @RequestParam(value = "invoiceAmount", required = false) BigDecimal invoiceAmount,
+                                                                   @RequestParam(value = "invoiceTitle", required = false) String invoiceTitle,
+                                                                   @RequestParam(value = "buyerOrg", required = false) String buyerOrg) {
         try {
             InvoiceDto invoiceDto = new InvoiceDto();
             invoiceDto.setApplyNumber(applyNumber);
@@ -48,6 +50,16 @@ public class EpInvoiceSplitController {
         } catch (Exception e) {
             return RestResponse.of(e);
         }
+    }
+
+    @PutMapping
+    public RestResponse updateInvoice(@RequestParam(value = "id") Long id) throws PmException {
+        Integer payStatus = 1;
+        int count = epInvoiceSplitService.invoiceUpdate(id, payStatus);
+        if (count == 0) {
+            throw new PmException(PmError.NO_DATA_FOUND);
+        }
+        return RestResponse.of(count);
     }
 
 }

@@ -13,6 +13,10 @@ import java.util.List;
 public class SupplierInfoVo {
 
     /**
+     * id
+     */
+    private Long id;
+    /**
      * 供应商名称
      */
     private String supplierName;
@@ -25,10 +29,22 @@ public class SupplierInfoVo {
      */
     private BigDecimal supplierAmount;
 
-    public SupplierInfoVo(String supplierName, BigDecimal supplierAmount, String orderNo) {
+    private Integer payStatus;
+
+    public SupplierInfoVo(Long id, String supplierName, String orderNo, BigDecimal supplierAmount, Integer payStatus) {
+        this.id = id;
         this.supplierName = supplierName;
-        this.supplierAmount = supplierAmount;
         this.orderNo = orderNo;
+        this.supplierAmount = supplierAmount;
+        this.payStatus = payStatus;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getSupplierName() {
@@ -53,5 +69,13 @@ public class SupplierInfoVo {
 
     public void setOrderNo(String orderNo) {
         this.orderNo = orderNo;
+    }
+
+    public Integer getPayStatus() {
+        return payStatus;
+    }
+
+    public void setPayStatus(Integer payStatus) {
+        this.payStatus = payStatus;
     }
 }

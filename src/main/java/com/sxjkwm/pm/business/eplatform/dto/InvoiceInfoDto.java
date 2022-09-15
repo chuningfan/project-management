@@ -11,6 +11,8 @@ import java.math.BigDecimal;
  **/
 
 public class InvoiceInfoDto  {
+
+    private Long id;
     private String invoiceNo;
     private BigDecimal invoiceAmount;
     private String applyNumber;
@@ -22,8 +24,15 @@ public class InvoiceInfoDto  {
     private String invoiceTitle;
     private String organizeId;
     private String organizeName;
+    private Integer  payStatus;
 
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getInvoiceTitle() {
         return invoiceTitle;
@@ -117,4 +126,11 @@ public class InvoiceInfoDto  {
         this.organizeId = organizeId;
     }
 
+    public Integer getPayStatus() {
+        return payStatus;
+    }
+
+    public void setPayStatus(Integer payStatus) {
+        this.payStatus = payStatus;
+    }
 }

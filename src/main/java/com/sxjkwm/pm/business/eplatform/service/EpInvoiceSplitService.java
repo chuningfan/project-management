@@ -23,10 +23,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,18 +50,40 @@ public class EpInvoiceSplitService {
     @Async
     @Scheduled(cron = "0 0 23 * * ?")
     public void syncInvoiceInfo() {
-        try {
-            List<InvoiceInfoEntity> invoiceInfoDtoList = epDao.query(EpSql.invoiceSql, new BeanPropertyRowMapper(InvoiceInfoEntity.class));
-            Iterable<InvoiceInfoEntity> iterable = iterableReverseList(invoiceInfoDtoList);
-            invoiceInfoDao.deleteAll();
-            invoiceInfoDao.saveAll(iterable);
-        } catch (Exception e) {
+        List<InvoiceInfoEntity> invoiceInfoDtoList = epDao.query(EpSql.invoiceSql, new BeanPropertyRowMapper(InvoiceInfoEntity.class));
+        List<InvoiceInfoEntity> list = invoiceInfoDao.findAll();
+        HashSet<InvoiceInfoEntity> h1 = new HashSet(invoiceInfoDtoList);
+        HashSet<InvoiceInfoEntity> h2 = new HashSet(list);
+        HashSet<InvoiceInfoEntity> h3 = new HashSet(list);
+        List<InvoiceInfoEntity> list1 = h1.stream().filter(h2::contains).collect(Collectors.toList());
+        if (!list1.isEmpty()){
+            h3.removeAll(list1);
+            List<Long> ids = Lists.newArrayList();
+            h3.forEach(entity -> {
+                ids.add(entity.getId());
+            });
+            // 删除ids
+            invoiceInfoDao.deleteBatch(ids);
         }
+        if (!list.isEmpty()) {
+            int count1 = invoiceInfoDtoList.size();
+            int count2 = list.size();
+            if (count1 > count2) {
+                h1.removeAll(h2);
+            } else {
+                h2.removeAll(h1);
+            }
+        }
+        List<InvoiceInfoEntity> entities = Lists.newArrayList();
+        entities.addAll(h1);
+        Iterable<InvoiceInfoEntity> iterable = iterableReverseList(entities);
+        invoiceInfoDao.saveAll(iterable);
     }
 
     public Iterable<InvoiceInfoEntity> iterableReverseList(List<InvoiceInfoEntity> l) {
         return () -> new Iterator<InvoiceInfoEntity>() {
             ListIterator<InvoiceInfoEntity> listIter = l.listIterator(l.size());
+
             public boolean hasNext() {
                 return listIter.hasPrevious();
             }
@@ -102,7 +122,7 @@ public class EpInvoiceSplitService {
                 invoiceVo.setInvoiceTitle(invoice.getInvoiceTitle());
                 invoiceVo.setBuyerOrg(invoice.getOrganizeName());
             });
-            List<SupplierInfoVo> supplierInfoVos = list1.stream().map(infoDto -> new SupplierInfoVo(infoDto.getShopName(), infoDto.getPaymentPrice(), infoDto.getOrderNo())).collect(Collectors.toList());
+            List<SupplierInfoVo> supplierInfoVos = list1.stream().map(infoDto -> new SupplierInfoVo(infoDto.getId(), infoDto.getOrderNo(), infoDto.getShopName(), infoDto.getPaymentPrice(), infoDto.getPayStatus())).collect(Collectors.toList());
             invoiceVo.setSupplierInfo(supplierInfoVos);
             invoiceVoList.add(invoiceVo);
         });
@@ -135,5 +155,11 @@ public class EpInvoiceSplitService {
             return criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()])).getRestriction();
         };
         return specification;
+    }
+
+    @Transactional
+    public int invoiceUpdate(Long id, Integer payStatus) {
+        int count = invoiceInfoDao.invoiceUpdate(payStatus, id);
+        return count;
     }
 }
