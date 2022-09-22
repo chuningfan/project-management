@@ -1,9 +1,6 @@
 package com.sxjkwm.pm.business.flow.controller;
 
-import com.google.common.collect.Lists;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
-import com.sxjkwm.pm.business.flow.dto.NodeIndexDto;
-import com.sxjkwm.pm.business.flow.entity.Flow;
 import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.business.flow.service.FlowNodeService;
 import com.sxjkwm.pm.common.RestResponse;
@@ -11,8 +8,6 @@ import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

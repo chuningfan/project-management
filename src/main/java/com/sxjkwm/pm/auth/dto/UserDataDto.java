@@ -25,6 +25,8 @@ public class UserDataDto implements Serializable {
 
     private String mobile;
 
+    private String do1UserId;
+
     public Long getUserId() {
         return userId;
     }
@@ -95,5 +97,13 @@ public class UserDataDto implements Serializable {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public String getDo1UserId() {
+        return do1UserId;
+    }
+
+    public void setDo1UserId(String do1UserId) {
+        this.do1UserId = do1UserId;
     }
 }

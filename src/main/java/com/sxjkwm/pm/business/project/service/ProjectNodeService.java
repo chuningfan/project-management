@@ -203,6 +203,11 @@ public class ProjectNodeService {
             return null;
         }
         ProjectNodeDto dto = new ProjectNodeDto();
+        FlowNode flowNode = flowNodeDao.findById(flowNodeId).orElse(null);
+        if (Objects.nonNull(flowNode)) {
+            dto.setFormId(flowNode.getFormId());
+            dto.setSpecialFormDataHandler(flowNode.getSpecialFormDataHandler());
+        }
         List<FlowNodeDefinition> flowNodeDefinitions = flowNodeDefinitionDao.getByFlowNodeId(flowNodeId);
         if (CollectionUtils.isEmpty(flowNodeDefinitions)) {
             return null;

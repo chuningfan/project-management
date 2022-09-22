@@ -24,6 +24,10 @@ public class FlowNodeDto implements Serializable {
 
     private Long auditingFlowId;
 
+    private String formId;
+
+    private String specialFormDataHandler;
+
     public Long getId() {
         return id;
     }
@@ -104,4 +108,19 @@ public class FlowNodeDto implements Serializable {
         this.auditingFlowId = auditingFlowId;
     }
 
+    public String getFormId() {
+        return formId;
+    }
+
+    public void setFormId(String formId) {
+        this.formId = formId;
+    }
+
+    public String getSpecialFormDataHandler() {
+        return specialFormDataHandler;
+    }
+
+    public void setSpecialFormDataHandler(String specialFormDataHandler) {
+        this.specialFormDataHandler = specialFormDataHandler;
+    }
 }

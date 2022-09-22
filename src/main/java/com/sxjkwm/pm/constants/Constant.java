@@ -168,6 +168,12 @@ public interface Constant<K, V> {
                 return SALEContractHandler.class;
             }
         },
+        AUDITING_REPORT(3, "评审报告", "通用评审报告", 1) {
+            @Override
+            public Class<? extends PatternFileHandler> fileHandlerClass() {
+                return null;
+            }
+        },
         ;
 
         private Integer category;

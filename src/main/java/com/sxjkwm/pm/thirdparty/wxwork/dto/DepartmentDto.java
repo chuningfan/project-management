@@ -1,4 +1,4 @@
-package com.sxjkwm.pm.wxwork.dto;
+package com.sxjkwm.pm.thirdparty.wxwork.dto;
 
 import java.io.Serializable;
 import java.util.List;

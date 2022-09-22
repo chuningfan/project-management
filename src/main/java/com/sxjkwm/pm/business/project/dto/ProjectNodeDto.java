@@ -27,6 +27,10 @@ public class ProjectNodeDto implements Serializable {
 
     private Boolean lastNode = false;
 
+    private String formId;
+
+    private String specialFormDataHandler;
+
     public Long getId() {
         return id;
     }
@@ -89,5 +93,21 @@ public class ProjectNodeDto implements Serializable {
 
     public void setLastNode(Boolean lastNode) {
         this.lastNode = lastNode;
+    }
+
+    public String getFormId() {
+        return formId;
+    }
+
+    public void setFormId(String formId) {
+        this.formId = formId;
+    }
+
+    public String getSpecialFormDataHandler() {
+        return specialFormDataHandler;
+    }
+
+    public void setSpecialFormDataHandler(String specialFormDataHandler) {
+        this.specialFormDataHandler = specialFormDataHandler;
     }
 }

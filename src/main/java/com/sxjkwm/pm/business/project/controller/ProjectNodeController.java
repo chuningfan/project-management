@@ -1,6 +1,9 @@
 package com.sxjkwm.pm.business.project.controller;
 
+import cn.com.do1.apisdk.inter.rep.vo.ApiFormPushResult;
+import com.sxjkwm.pm.business.project.dto.AuditingFormRequest;
 import com.sxjkwm.pm.business.project.dto.ProjectNodeDto;
+import com.sxjkwm.pm.business.project.handler.AuditingFormDataHandler;
 import com.sxjkwm.pm.business.project.service.ProjectNodeService;
 import com.sxjkwm.pm.common.BaseController;
 import com.sxjkwm.pm.common.RestResponse;
@@ -21,9 +24,12 @@ public class ProjectNodeController extends BaseController {
 
     private final ProjectNodeService projectNodeService;
 
+    private final AuditingFormDataHandler auditingFormDataHandler;
+
     @Autowired
-    public ProjectNodeController(ProjectNodeService projectNodeService) {
+    public ProjectNodeController(ProjectNodeService projectNodeService, AuditingFormDataHandler auditingFormDataHandler) {
         this.projectNodeService = projectNodeService;
+        this.auditingFormDataHandler = auditingFormDataHandler;
     }
 
     @PostMapping
@@ -39,6 +45,11 @@ public class ProjectNodeController extends BaseController {
     @DeleteMapping("/{flowId}/{flowNodeId}/{flowNodeDefinitionId}/{dataId}")
     public RestResponse<Boolean> deleteDataById(@PathVariable("flowId") Long flowId, @PathVariable("flowNodeId") Long flowNodeId, @PathVariable("flowNodeDefinitionId") Long flowNodeDefinitionId, @PathVariable("dataId") Long dataId) {
         return RestResponse.of(projectNodeService.deleteDataById(flowId, flowNodeId, flowNodeDefinitionId, dataId));
+    }
+
+    @PostMapping("/auditing")
+    public RestResponse<ApiFormPushResult> auditing(@RequestBody AuditingFormRequest request) throws Throwable {
+        return RestResponse.of(auditingFormDataHandler.doHandle(request.getProjectId(), request.getFlowId(), request.getFlowNodeId(), request.getFormId(), request.getSpecialFormDataHandler(), request.getCommand()));
     }
 
 }

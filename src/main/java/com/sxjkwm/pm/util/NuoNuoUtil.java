@@ -83,34 +83,34 @@ public class NuoNuoUtil {
         }
     }
 
-    public static void main(String[] args) throws PmException {
-        Order order = new Order();
-        order.setBuyerName("陕西高速电子工程有限公司");
-        order.setBuyerTaxNum("91610000745002334M");
-        order.setBuyerTel("029-87832662");
-        order.setBuyerAddress("西安市友谊东路428号605室");
-        order.setBuyerAccount("上海浦东发展银行西安分行营业部 72010154500000897");
-        order.setSalerTaxNum("91610000220556561F");
-        order.setSalerTel("029-83691018");
-        order.setSalerAddress("陕西省西安市碑林区长安北路14号西安国际奥林匹克中心广场B座");
-        order.setInvoiceDate("2016-01-13 12:30:00");
-        order.setChecker("张三");
-        order.setClerk("李四");
-        order.setOrderNo("20170105120207971597");
-        List<InvoiceDetail> invoiceDetailList = Lists.newArrayList();
-        InvoiceDetail invoiceDetail = new InvoiceDetail();
-        invoiceDetailList.add(invoiceDetail);
-        invoiceDetail.setGoodsName("广场广播系统主机");
-        invoiceDetail.setGoodsCode("1090505990000000000");
-        invoiceDetail.setPrice("17522.123894");
-        invoiceDetail.setNum("1");
-        invoiceDetail.setUnit("台");
-        invoiceDetail.setSpecType("HSD-ZK12H");
-        invoiceDetail.setTax("2277.88");
-        invoiceDetail.setTaxRate("0.13");
-        order.setInvoiceDetail(invoiceDetailList);
-        processInvoice(order);
-    }
+//    public static void main(String[] args) throws PmException {
+//        Order order = new Order();
+//        order.setBuyerName("陕西高速电子工程有限公司");
+//        order.setBuyerTaxNum("91610000745002334M");
+//        order.setBuyerTel("029-87832662");
+//        order.setBuyerAddress("西安市友谊东路428号605室");
+//        order.setBuyerAccount("上海浦东发展银行西安分行营业部 72010154500000897");
+//        order.setSalerTaxNum("91610000220556561F");
+//        order.setSalerTel("029-83691018");
+//        order.setSalerAddress("陕西省西安市碑林区长安北路14号西安国际奥林匹克中心广场B座");
+//        order.setInvoiceDate("2016-01-13 12:30:00");
+//        order.setChecker("张三");
+//        order.setClerk("李四");
+//        order.setOrderNo("20170105120207971597");
+//        List<InvoiceDetail> invoiceDetailList = Lists.newArrayList();
+//        InvoiceDetail invoiceDetail = new InvoiceDetail();
+//        invoiceDetailList.add(invoiceDetail);
+//        invoiceDetail.setGoodsName("广场广播系统主机");
+//        invoiceDetail.setGoodsCode("1090505990000000000");
+//        invoiceDetail.setPrice("17522.123894");
+//        invoiceDetail.setNum("1");
+//        invoiceDetail.setUnit("台");
+//        invoiceDetail.setSpecType("HSD-ZK12H");
+//        invoiceDetail.setTax("2277.88");
+//        invoiceDetail.setTaxRate("0.13");
+//        order.setInvoiceDetail(invoiceDetailList);
+//        processInvoice(order);
+//    }
 
 
 }

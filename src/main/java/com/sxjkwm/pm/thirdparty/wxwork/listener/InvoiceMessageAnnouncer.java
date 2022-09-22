@@ -1,4 +1,4 @@
-package com.sxjkwm.pm.wxwork.listener;
+package com.sxjkwm.pm.thirdparty.wxwork.listener;
 
 import com.sxjkwm.pm.business.finance.dto.WxMessageDto;
 import com.sxjkwm.pm.common.PmListener;

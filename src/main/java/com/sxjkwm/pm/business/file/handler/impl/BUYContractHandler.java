@@ -13,12 +13,12 @@ import com.sxjkwm.pm.business.project.dto.ProjectDto;
 import com.sxjkwm.pm.business.project.service.ProjectService;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
+import com.sxjkwm.pm.thirdparty.wxwork.service.UserService;
 import com.sxjkwm.pm.util.RMBChange;
-import com.sxjkwm.pm.wxwork.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * @author Vic.Chu
  * @date 2022/8/17 8:44
  */
-@Service
+@Component
 public class BUYContractHandler implements PatternFileHandler {
 
     private final ProjectService projectService;

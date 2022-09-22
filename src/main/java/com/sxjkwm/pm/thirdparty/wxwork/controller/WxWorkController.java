@@ -1,10 +1,10 @@
-package com.sxjkwm.pm.wxwork.controller;
+package com.sxjkwm.pm.thirdparty.wxwork.controller;
 
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
 import com.sxjkwm.pm.exception.PmException;
-import com.sxjkwm.pm.wxwork.service.DepartmentService;
-import com.sxjkwm.pm.wxwork.service.UserService;
+import com.sxjkwm.pm.thirdparty.wxwork.service.DepartmentService;
+import com.sxjkwm.pm.thirdparty.wxwork.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

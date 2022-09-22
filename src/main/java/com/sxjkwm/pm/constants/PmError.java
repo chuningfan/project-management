@@ -17,6 +17,8 @@ public enum PmError implements Constant<String, String> {
     ILLEGAL_REQUEST_TOKEN("1005", "Illegal request token"),
     INVALIDS_DATA("1006", "Invalid data"),
     UNKNOWN_HTTP_METHOD_TYPE("1007", "Unknown http method type"),
+    UNSUPPORTED_HTTP_METHOD_TYPE("1008", "Unknown http method type"),
+    TRY_AG_LATER("1009", "Request failed, please try again later"),
     // third-party error
     WXWORK_TOKEN_ERROR("2001", "Get WxWork token failed!"),
     WXWORK_LOGIN_FAILED("2002", "Login failed!"),

@@ -14,7 +14,7 @@ import com.sxjkwm.pm.business.project.dto.ProjectDto;
 import com.sxjkwm.pm.business.project.service.ProjectService;
 import com.sxjkwm.pm.constants.PmError;
 import com.sxjkwm.pm.exception.PmException;
-import com.sxjkwm.pm.wxwork.service.UserService;
+import com.sxjkwm.pm.thirdparty.wxwork.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

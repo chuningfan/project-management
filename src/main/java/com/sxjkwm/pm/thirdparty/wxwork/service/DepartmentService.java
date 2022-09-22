@@ -1,4 +1,4 @@
-package com.sxjkwm.pm.wxwork.service;
+package com.sxjkwm.pm.thirdparty.wxwork.service;
 
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONArray;

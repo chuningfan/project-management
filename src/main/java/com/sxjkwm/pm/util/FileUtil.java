@@ -1,8 +1,10 @@
 package com.sxjkwm.pm.util;
 
+import cn.hutool.core.lang.UUID;
 import com.artofsolving.jodconverter.DefaultDocumentFormatRegistry;
 import com.artofsolving.jodconverter.DocumentConverter;
 import com.artofsolving.jodconverter.DocumentFormat;
+import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +16,23 @@ import java.util.Collection;
 import java.util.Objects;
 
 public class FileUtil {
+
+    public static String tempFileDirPath = null;
+
+    static {
+        File tempDir = new File(System.getProperty("java.io.tmpdir"));
+        if (!tempDir.exists()) {
+
+        }
+        // create temp dir for file processing
+        String basePath = tempDir.getAbsolutePath();
+        String subDirName = "tempFiles";
+        tempFileDirPath = basePath + subDirName;
+        File tempFileDir = new File(tempFileDirPath);
+        if (!tempFileDir.exists()) {
+            tempFileDir.mkdir();
+        }
+    }
 
     private static final String DEFAULT_SUFFIX = "pdf";
 
@@ -117,6 +136,32 @@ public class FileUtil {
     public static ByteArrayInputStream outputStreamConvertInputStream(final OutputStream out) {
         ByteArrayOutputStream baos=(ByteArrayOutputStream) out;
         return new ByteArrayInputStream(baos.toByteArray());
+    }
+
+    public static File streamToFile(InputStream inputStream, String fileName) throws IOException {
+        // create sub-folder
+        String subFolderPath = tempFileDirPath + "/" + ContextHelper.getUserData().getWxUserId();
+        File subFolderDir = new File(subFolderPath);
+        if (!subFolderDir.exists()) {
+            subFolderDir.mkdir();
+        }
+        File file = new File(subFolderPath + "/" + fileName);
+        if (file.exists()) {
+            file.delete();
+        }
+        file.createNewFile();
+        byte[] b = new byte[1024];
+        int p = 0;
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+            while ((p = inputStream.read(b)) != -1) {
+                fileOutputStream.write(b, 0, p);
+            }
+        } finally {
+            if (Objects.nonNull(inputStream)) {
+                inputStream.close();
+            }
+        }
+        return file;
     }
 
 }

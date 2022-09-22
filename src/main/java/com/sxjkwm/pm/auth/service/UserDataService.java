@@ -70,6 +70,7 @@ public class UserDataService {
             result.setWxUserId(user.getWxUserId());
             result.setMobile(user.getMobile());
             result.setAvatar(user.getAvatar());
+            result.setDo1UserId(user.getDo1UserId());
             String deptIdStr = user.getDeptIds();
             if (StringUtils.isNotBlank(deptIdStr)) {
                 List<Long> deptIds = Lists.newArrayList();
@@ -134,6 +135,7 @@ public class UserDataService {
             dataDto.setWxUserId(wxUserId);
             dataDto.setMobile(user.getMobile());
             dataDto.setAvatar(user.getAvatar());
+            dataDto.setDo1UserId(user.getDo1UserId());
             dataDto.setUsername(user.getName());
             List<String> roleNames = userRoleMap.get(wxUserId);
             if (CollectionUtils.isEmpty(roleNames)) {

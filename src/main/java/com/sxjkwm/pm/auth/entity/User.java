@@ -32,6 +32,9 @@ public class User extends BaseEntity {
     @Column(name = "login_pwd")
     private String loginPwd;
 
+    @Column(name = "do1_user_id")
+    private String do1UserId;
+
     public String getWxUserId() {
         return wxUserId;
     }
@@ -86,5 +89,13 @@ public class User extends BaseEntity {
 
     public void setLoginPwd(String loginPwd) {
         this.loginPwd = loginPwd;
+    }
+
+    public String getDo1UserId() {
+        return do1UserId;
+    }
+
+    public void setDo1UserId(String do1UserId) {
+        this.do1UserId = do1UserId;
     }
 }

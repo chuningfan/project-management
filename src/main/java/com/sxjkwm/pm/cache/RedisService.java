@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.cache;
 
 import com.sxjkwm.pm.common.CacheService;
+import org.redisson.api.RLock;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,11 @@ public class RedisService implements CacheService {
     @Override
     public void store(String key, String data, long expireTime, TimeUnit expireTimeUnit) {
         redissonClient.getBucket(key).set(data, expireTime, expireTimeUnit);
+    }
+
+    public RLock getLock(String lockKey) {
+        RLock lock = redissonClient.getLock(lockKey);
+        return lock;
     }
 
 }

@@ -3,7 +3,7 @@ package com.sxjkwm.pm.auth.controller;
 import com.sxjkwm.pm.auth.entity.User;
 import com.sxjkwm.pm.common.RestResponse;
 import com.sxjkwm.pm.constants.Constant;
-import com.sxjkwm.pm.wxwork.service.UserService;
+import com.sxjkwm.pm.thirdparty.wxwork.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
