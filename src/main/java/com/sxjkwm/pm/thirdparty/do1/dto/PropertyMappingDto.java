@@ -16,7 +16,9 @@ public class PropertyMappingDto implements Serializable {
 
     private Long defId;
 
-    private Long flowNodeId;
+    private Long defFlowNodeId;
+
+    private Long auditingFlowNodeId;
 
     private Long flowId;
 
@@ -52,12 +54,20 @@ public class PropertyMappingDto implements Serializable {
         this.defId = defId;
     }
 
-    public Long getFlowNodeId() {
-        return flowNodeId;
+    public Long getDefFlowNodeId() {
+        return defFlowNodeId;
     }
 
-    public void setFlowNodeId(Long flowNodeId) {
-        this.flowNodeId = flowNodeId;
+    public void setDefFlowNodeId(Long defFlowNodeId) {
+        this.defFlowNodeId = defFlowNodeId;
+    }
+
+    public Long getAuditingFlowNodeId() {
+        return auditingFlowNodeId;
+    }
+
+    public void setAuditingFlowNodeId(Long auditingFlowNodeId) {
+        this.auditingFlowNodeId = auditingFlowNodeId;
     }
 
     public Long getFlowId() {

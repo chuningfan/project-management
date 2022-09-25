@@ -30,4 +30,16 @@ public class BaseEntity extends AuditableEntity {
         this.isDeleted = isDeleted;
     }
 
+    public boolean isDeleted() {
+        return isDeleted.intValue() == Constant.YesOrNo.YES.getValue();
+    }
+
+    public boolean isAvailable() {
+        return isDeleted.intValue() == Constant.YesOrNo.NO.getValue();
+    }
+
+    public void setAsAvailable() {
+        this.isDeleted = Constant.YesOrNo.NO.getValue();
+    }
+
 }

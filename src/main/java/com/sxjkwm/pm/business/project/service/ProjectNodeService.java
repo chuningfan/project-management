@@ -2,6 +2,7 @@ package com.sxjkwm.pm.business.project.service;
 
 import cn.hutool.core.map.MapUtil;
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.sxjkwm.pm.auth.context.impl.ContextHelper;
 import com.sxjkwm.pm.business.file.dao.ProjectFileDao;
@@ -40,10 +41,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -118,7 +116,7 @@ public class ProjectNodeService {
         }
         FlowNodeCollectionDefinition condition = new FlowNodeCollectionDefinition();
         condition.setFlowNodeId(projectNodeDto.getFlowNodeId());
-        condition.setIsDeleted(0);
+        condition.setAsAvailable();
         List<FlowNodeCollectionDefinition> flowNodeCollectionDefinitions = flowNodeCollectionDefinitionDao.findAll(Example.of(condition), Sort.by(Sort.Direction.ASC, "headerIndex"));
         Map<Long, List<FlowNodeCollectionDefinition>> flowNodeCollectionDefKeyMap = null;
         if (CollectionUtils.isNotEmpty(flowNodeCollectionDefinitions)) {
@@ -136,7 +134,12 @@ public class ProjectNodeService {
                 if (Objects.nonNull(flowNodeCollectionDefKeyMap) && CollectionUtils.isNotEmpty(refCollectionDefs) && CollectionUtils.isNotEmpty(collectionData = dto.getCollectionData())) {
                     List<FlowNodeCollectionDefinition> definitions = flowNodeCollectionDefKeyMap.get(dto.getFlowNodePropertyDefId());
                     if (CollectionUtils.isNotEmpty(definitions)) {
-                        List<String> flowNodeCollectionDefKeys = definitions.stream().map(FlowNodeCollectionDefinition::getHeaderKey).collect(Collectors.toList());
+                        List<String> flowNodeCollectionDefKeys = Lists.newArrayList();
+//                        List<String> flowNodeCollectionDefKeys = definitions.stream().map(FlowNodeCollectionDefinition::getHeaderKey).collect(Collectors.toList());
+                        Map<String, FlowNodeCollectionDefinition> flowNodeCollectionDefs = definitions.stream().collect(Collectors.toMap(FlowNodeCollectionDefinition::getHeaderKey, def -> def, (k1, k2) -> k2));
+                        for (FlowNodeCollectionDefinition definition: definitions) {
+                            flowNodeCollectionDefKeys.add(definition.getHeaderKey());
+                        }
                         StringBuilder builder = new StringBuilder("INSERT INTO " + tableName + "(").append(Joiner.on(",").join(flowNodeCollectionDefKeys)).append(", collection_prop_def_id, flow_node_id, project_id, created_at, modified_at, created_by, modified_by) VALUES ");
                         Long nowTime = System.currentTimeMillis();
                         Long createdAt = nowTime;
@@ -153,11 +156,22 @@ public class ProjectNodeService {
                             builder.append("(");
                             List<String> vals = Lists.newArrayList();
                             for (String columnName : flowNodeCollectionDefKeys) {
-                                String val = (String) dataMap.get(columnName);
-                                vals.add(val);
+                                Object valObj = dataMap.get(columnName);
+                                String val = "NULL_VIC";
+                                if (Objects.nonNull(valObj)) {
+                                    val = String.valueOf(valObj);
+                                }
+                                String dbType = flowNodeCollectionDefs.get(columnName).getPropertyType();
+                                if (!("NULL_VIC".equals(val)) && (dbType.indexOf("VARCHAR") > -1 || dbType.indexOf("TEXT") > -1)) {
+                                    vals.add("'" + val + "'");
+                                } else {
+                                    if ("NULL_VIC".equals(val)) {
+                                        val = "NULL";
+                                    }
+                                    vals.add(val);
+                                }
                             }
-                            builder.append("'");
-                            builder.append(Joiner.on("','").join(vals)).append("'");
+                            builder.append(Joiner.on(",").join(vals));
                             builder.append("," + dto.getFlowNodePropertyDefId());
                             builder.append("," + projectNodeDto.getFlowNodeId());
                             builder.append("," + projectNodeDto.getProjectId());

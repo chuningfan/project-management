@@ -226,6 +226,16 @@ public interface Constant<K, V> {
                 }
                 return new BigDecimal(val);
             }
+
+            @Override
+            public String getDbType() {
+                return "DECIMAL(14,2)";
+            }
+
+            @Override
+            public boolean collectable() {
+                return true;
+            }
         },
         STRING("字符串", "string", String.class) {
             @Override
@@ -235,17 +245,47 @@ public interface Constant<K, V> {
                 }
                 return val;
             }
+
+            @Override
+            public String getDbType() {
+                return "VARCHAR(255)";
+            }
+
+            @Override
+            public boolean collectable() {
+                return true;
+            }
         },
         FILE("文件", "file", Long.class) {
             @Override
             public Long getValue(String val) {
                 return Objects.nonNull(val) ? Long.valueOf(val) : null;
             }
+
+            @Override
+            public String getDbType() {
+                return null;
+            }
+
+            @Override
+            public boolean collectable() {
+                return false;
+            }
         },
         COLLECTION("集合", "collection", List.class) {
             @Override
             public Object getValue(String val) {
                 return null;
+            }
+
+            @Override
+            public String getDbType() {
+                return null;
+            }
+
+            @Override
+            public boolean collectable() {
+                return false;
             }
         },
         CHECKBOX("复选框", "checkbox", String.class) {
@@ -257,6 +297,16 @@ public interface Constant<K, V> {
                 List<String> vals = Splitter.on(",").splitToList(val);
                 return vals.stream().map(Integer::valueOf).collect(Collectors.toList());
             }
+
+            @Override
+            public String getDbType() {
+                return "VARCHAR(255)";
+            }
+
+            @Override
+            public boolean collectable() {
+                return false;
+            }
         },
         RADIO("单选框", "radio", String.class) {
             @Override
@@ -266,11 +316,47 @@ public interface Constant<K, V> {
                 }
                 return Integer.valueOf(val);
             }
+
+            @Override
+            public String getDbType() {
+                return "INT(1)";
+            }
+
+            @Override
+            public boolean collectable() {
+                return false;
+            }
         },
         TEXT("文本域", "text", String.class) {
             @Override
             public Object getValue(String val) {
                 return val;
+            }
+
+            @Override
+            public String getDbType() {
+                return "VARCHAR(4000)";
+            }
+
+            @Override
+            public boolean collectable() {
+                return true;
+            }
+        },
+        DATE("日期", "date", Long.class) {
+            @Override
+            public Object getValue(String val) {
+                return null;
+            }
+
+            @Override
+            public String getDbType() {
+                return "BIGINT";
+            }
+
+            @Override
+            public boolean collectable() {
+                return true;
             }
         },
         TIME("时间", "time", Long.class) {
@@ -278,11 +364,31 @@ public interface Constant<K, V> {
             public Object getValue(String val) {
                 return Long.valueOf(val);
             }
+
+            @Override
+            public String getDbType() {
+                return "BIGINT";
+            }
+
+            @Override
+            public boolean collectable() {
+                return true;
+            }
         },
         MATERIAL("物料", "material", Long.class) {
             @Override
             public Object getValue(String val) {
                 return Long.valueOf(val);
+            }
+
+            @Override
+            public String getDbType() {
+                return "VARCHAR(255)";
+            }
+
+            @Override
+            public boolean collectable() {
+                return false;
             }
         },
         ;
@@ -314,6 +420,11 @@ public interface Constant<K, V> {
         }
 
         public abstract Object getValue(String val);
+
+        public abstract String getDbType();
+
+        public abstract boolean collectable(); // 类型是否支持列表展示
+
     }
 
     enum ProjectNodeStatus implements Constant<String, Integer> {

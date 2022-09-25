@@ -171,7 +171,7 @@ public class Do1Service {
     public Boolean removeMappingByDefinition(Long flowId, Long flowNodeId, Long defId, String formId, String fieldId) {
         PropertyMapping condition = new PropertyMapping();
         condition.setFlowId(flowId);
-        condition.setFlowNodeId(flowNodeId);
+        condition.setAuditingFlowNodeId(flowNodeId);
         condition.setDefId(defId);
         condition.setFormId(formId);
         condition.setFieldId(fieldId);
@@ -179,9 +179,10 @@ public class Do1Service {
         return true;
     }
 
-    public List<PropertyMappingDto> findPropertyMappingByFlowNodeId(Long flowNodeId) {
+    public List<PropertyMappingDto> findPropertyMappingByFlowNodeId(Long auditingFlowNodeId) {
         PropertyMapping condition = new PropertyMapping();
-        condition.setFlowNodeId(flowNodeId);
+        condition.setIsDeleted(Constant.YesOrNo.NO.getValue());
+        condition.setAuditingFlowNodeId(auditingFlowNodeId);
         List<PropertyMapping> propertyMappings = propertyMappingDao.findAll(Example.of(condition));
         if (CollectionUtils.isEmpty(propertyMappings)) {
             return Collections.emptyList();
@@ -206,6 +207,11 @@ public class Do1Service {
             return Collections.emptyList();
         }
         return mappings;
+    }
+
+    public Boolean deletePropertyMapping(Long id) {
+        propertyMappingDao.deleteById(id);
+        return Boolean.TRUE;
     }
 
 }

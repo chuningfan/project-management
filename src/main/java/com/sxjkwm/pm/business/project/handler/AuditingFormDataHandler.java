@@ -68,7 +68,7 @@ public class AuditingFormDataHandler {
         this.projectService = projectService;
     }
 
-    public ApiFormPushResult doHandle(Long projectId, Long flowId, Long flowNodeId, String formId, String specialFormDataHandler, Integer command) throws Throwable {
+    public ApiFormPushResult doHandle(Long projectId, Long flowId, Long auditingFlowNodeId, String formId, String specialFormDataHandler, Integer command) throws Throwable {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<File> tmpFiles = Lists.newArrayList();
         try {
@@ -76,7 +76,7 @@ public class AuditingFormDataHandler {
             PropertyMapping mappingCondition = new PropertyMapping();
             mappingCondition.setFormId(formId);
             mappingCondition.setFlowId(flowId);
-            mappingCondition.setFlowNodeId(flowNodeId);
+            mappingCondition.setAuditingFlowNodeId(auditingFlowNodeId);
             List<PropertyMapping> mappingList = propertyMappingDao.findAll(Example.of(mappingCondition));
             if (CollectionUtils.isEmpty(mappingList)) {
                 throw new PmException(PmError.NO_DATA_FOUND, "No auditing form mapping found");

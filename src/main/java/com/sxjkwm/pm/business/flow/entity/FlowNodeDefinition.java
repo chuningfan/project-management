@@ -34,7 +34,7 @@ public class FlowNodeDefinition extends BaseEntity {
     @Column(name = "collection_property_handler")
     private String collectionPropertyHandler;
 
-    @Column(name = "non_null")
+    @Column(name = "non_null", columnDefinition = " INT(1) DEFAULT 0 ")
     private Integer nonNull;
 
     @Column(name = "need_to_audit")

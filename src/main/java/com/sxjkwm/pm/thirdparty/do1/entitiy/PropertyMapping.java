@@ -12,7 +12,7 @@ import javax.persistence.Table;
  * @date 2022/9/17 15:49
  */
 @Entity
-@Table(name = "pm_do1_property_mapping", indexes = {@Index(name = "pmDo1_property_mapping_fnId", columnList = "flow_node_id")})
+@Table(name = "pm_do1_property_mapping", indexes = {@Index(name = "pmDo1_property_mapping_fnId", columnList = "auditing_flow_node_id")})
 public class PropertyMapping extends BaseEntity {
 
     @Column(name = "do1_form_id")
@@ -24,8 +24,11 @@ public class PropertyMapping extends BaseEntity {
     @Column(name = "def_id")
     private Long defId;
 
-    @Column(name = "flow_node_id")
-    private Long flowNodeId;
+    @Column(name = "def_flow_node_id")
+    private Long defFlowNodeId;
+
+    @Column(name = "auditing_flow_node_id")
+    private Long auditingFlowNodeId;
 
     @Column(name = "flow_id")
     private Long flowId;
@@ -54,12 +57,20 @@ public class PropertyMapping extends BaseEntity {
         this.defId = defId;
     }
 
-    public Long getFlowNodeId() {
-        return flowNodeId;
+    public Long getDefFlowNodeId() {
+        return defFlowNodeId;
     }
 
-    public void setFlowNodeId(Long flowNodeId) {
-        this.flowNodeId = flowNodeId;
+    public void setDefFlowNodeId(Long defFlowNodeId) {
+        this.defFlowNodeId = defFlowNodeId;
+    }
+
+    public Long getAuditingFlowNodeId() {
+        return auditingFlowNodeId;
+    }
+
+    public void setAuditingFlowNodeId(Long auditingFlowNodeId) {
+        this.auditingFlowNodeId = auditingFlowNodeId;
     }
 
     public Long getFlowId() {

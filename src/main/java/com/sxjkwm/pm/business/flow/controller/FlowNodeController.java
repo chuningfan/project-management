@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.business.flow.controller;
 
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
+import com.sxjkwm.pm.business.flow.dto.NodeAndDefinitionDto;
 import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.business.flow.service.FlowNodeService;
 import com.sxjkwm.pm.common.RestResponse;
@@ -59,6 +60,11 @@ public class FlowNodeController {
     @PostMapping(value = "/sort")
     public RestResponse<Boolean> sort(@RequestBody List<Long> nodeIds) {
         return RestResponse.of(flowNodeService.sort(nodeIds));
+    }
+
+    @GetMapping("/nodeAndDefinitions")
+    public RestResponse<List<NodeAndDefinitionDto>> fetchNodesAndDefByFlowId(@RequestParam("flowId") Long flowId) throws PmException {
+        return RestResponse.of(flowNodeService.fetchNodeAndDefsByFlowId(flowId));
     }
 
 }

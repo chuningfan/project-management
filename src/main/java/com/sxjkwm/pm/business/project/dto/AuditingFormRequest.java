@@ -10,7 +10,7 @@ public class AuditingFormRequest implements Serializable {
 
     private Long projectId; // 项目ID
     private Long flowId; // 流程ID
-    private Long flowNodeId; // 流程节点ID
+    private Long flowNodeId; // 审批流程节点ID
     private String formId; // 表单ID
     private String specialFormDataHandler; // 处理表单中特殊数据的handler
     private Integer command;  // 传1：保存为草稿，在企微-七巧云表单继续操作；传2：直接发起审批申请

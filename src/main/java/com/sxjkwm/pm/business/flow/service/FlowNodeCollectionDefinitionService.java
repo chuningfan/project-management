@@ -2,9 +2,11 @@ package com.sxjkwm.pm.business.flow.service;
 
 import cn.hutool.core.lang.UUID;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeCollectionDefinitionDao;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionDefDto;
+import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionPropTypeDto;
 import com.sxjkwm.pm.business.flow.entity.FlowNode;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeCollectionDefinition;
 import com.sxjkwm.pm.business.project.entity.Project;
@@ -53,39 +55,29 @@ public class FlowNodeCollectionDefinitionService {
                 existingMap = existingDefs.stream().collect(Collectors.toMap(FlowNodeCollectionDefinition::getId, d -> d));
             }
             List<FlowNodeCollectionDefinition> definitions = Lists.newArrayList();
-            List<String> newColumns = Lists.newArrayList();
-            List<String> modifyColumns = Lists.newArrayList();
-            List<String> dropColumns = Lists.newArrayList();
+            List<FlowNodeCollectionDefinition> newColumns = Lists.newArrayList();
+            Map<String, FlowNodeCollectionDefinition> modifyColumns = Maps.newHashMap();
+            List<FlowNodeCollectionDefinition> dropColumns = Lists.newArrayList();
             FlowNodeCollectionDefinition definition;
-//            int colNo = 1;
             for (FlowNodeCollectionDefDto dto: dtoList) {
-                definition = new FlowNodeCollectionDefinition();
-                definition.setCollectionPropertyDefId(collectionPropDefId);
-                definition.setFlowNodeId(flowNodeId);
-                definition.setIsDeleted(dto.getIsDeleted());
-                definition.setHeaderIndex(dto.getHeaderIndex());
-                String headerKey = dto.getHeaderKey();
-                if (StringUtils.isBlank(headerKey)) {
+                definition = new FlowNodeCollectionDefinition(dto);
+                FlowNodeCollectionDefinition originDef = existingMap.get(definition.getId());
+                String headerKey = definition.getHeaderKey();
+                if (StringUtils.isBlank(headerKey) || !definition.getHeaderName().equals(originDef.getHeaderName())) {
                     headerKey = "col_" + flowNodeId + "_" + collectionPropDefId + "_" + PinYinUtil.convertChineseWordToPinYin(dto.getHeaderName(), "_");
                 }
                 definition.setHeaderKey(headerKey);
-                definition.setHeaderName(dto.getHeaderName());
-                definition.setId(dto.getId());
-                if (Objects.nonNull(dto.getId())) {
-                    if (Objects.nonNull(existingMap) && definition.getIsDeleted().intValue() == 0) {
-                        FlowNodeCollectionDefinition originDef = existingMap.get(dto.getId());
-                        if (Objects.nonNull(originDef) && !originDef.getCollectionPropertyDefId().equals(dto.getCollectionPropertyDefId())) {
-                            String modifyStr = originDef.getCollectionPropertyDefId() + "," + dto.getCollectionPropertyDefId();
-                            modifyColumns.add(modifyStr);
+                if (Objects.nonNull(definition.getId())) { // 修改已有列
+                    if (definition.isDeleted()) {
+                        dropColumns.add(definition);
+                    }
+                    if (definition.isAvailable()) {
+                        if (originDef.shouldBeModified(definition)) {
+                            modifyColumns.put(originDef.getHeaderKey(), definition);
                         }
                     }
-                    if (definition.getIsDeleted().intValue() == 1) { // 删除列
-                        FlowNodeCollectionDefinition originDef = existingMap.get(dto.getId());
-                        String dropStr = originDef.getHeaderKey();
-                        dropColumns.add(dropStr);
-                    }
                 } else {
-                    newColumns.add(definition.getHeaderKey());
+                    newColumns.add(definition);  // 直接新增
                 }
                 definitions.add(definition);
             }
@@ -95,21 +87,23 @@ public class FlowNodeCollectionDefinitionService {
             Integer tableCount = flowNodeCollectionDefinitionDao.tryCreateTable(tableName);
             if (tableCount > 0) {
                 // 表已存在
-                if (CollectionUtils.isNotEmpty(modifyColumns)) {
-                    for (String mod: modifyColumns) {
-                        String originColumn = mod.split(",")[0];
-                        String newColumn = mod.split(",")[1];
-                        modifyColumn(tableName, originColumn, newColumn, null);
+                if (!modifyColumns.isEmpty()) {
+                    Set<Map.Entry<String, FlowNodeCollectionDefinition>> entrySet = modifyColumns.entrySet();
+                    Iterator<Map.Entry<String, FlowNodeCollectionDefinition>> iterator = entrySet.iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry<String, FlowNodeCollectionDefinition> entry = iterator.next();
+                        FlowNodeCollectionDefinition newDef = entry.getValue();
+                        modifyColumn(tableName, entry.getKey(), newDef.getHeaderKey(), newDef.getPropertyType());
                     }
                 }
                 if (CollectionUtils.isNotEmpty(newColumns)) {
-                    for (String newColumn: newColumns) {
-                        addColumn(tableName, newColumn, null);
+                    for (FlowNodeCollectionDefinition newColumn: newColumns) {
+                        addColumn(tableName, newColumn.getHeaderKey(), newColumn.getPropertyType());
                     }
                 }
                 if (CollectionUtils.isNotEmpty(dropColumns)) {
-                    for (String dropColumn: dropColumns) {
-                        dropColumn(tableName, dropColumn);
+                    for (FlowNodeCollectionDefinition dropColumn: dropColumns) {
+                        dropColumn(tableName, dropColumn.getHeaderKey());
                     }
                 }
             } else {
@@ -117,8 +111,10 @@ public class FlowNodeCollectionDefinitionService {
                     StringBuilder builder = new StringBuilder("CREATE TABLE ");
                     builder.append(tableName).append(" (");
                     builder.append("id      BIGINT(20) primary key NOT NULL AUTO_INCREMENT,");
-                    for (String newColumn: newColumns) {
-                        builder.append(newColumn + " VARCHAR(255),");
+                    for (FlowNodeCollectionDefinition newColumn: newColumns) {
+                        String propType = newColumn.getPropertyType();
+                        propType = StringUtils.isBlank(propType) ? " VARCHAR(255)," : (" " + propType + ",");
+                        builder.append(newColumn.getHeaderKey() + propType);
                     }
                     builder.append("collection_prop_def_id       BIGINT(20),");
                     builder.append("flow_node_id       BIGINT(20),");
@@ -208,4 +204,17 @@ public class FlowNodeCollectionDefinitionService {
         }
         return true;
     }
+
+    public List<FlowNodeCollectionPropTypeDto> getCollectionPropTypes() {
+        List<FlowNodeCollectionPropTypeDto> dataList = Lists.newArrayList();
+        FlowNodeCollectionPropTypeDto dto;
+        for (Constant.PropertyType type: Constant.PropertyType.values()) {
+            if (type.collectable()) {
+                dto = new FlowNodeCollectionPropTypeDto(type.getLabel(), type.getValue(), type.getDbType());
+                dataList.add(dto);
+            }
+        }
+        return dataList;
+    }
+
 }

@@ -2,9 +2,15 @@ package com.sxjkwm.pm.business.flow.service;
 
 import com.sxjkwm.pm.business.file.dao.PatternFileDao;
 import com.sxjkwm.pm.business.flow.dao.FlowNodeDao;
+import com.sxjkwm.pm.business.flow.dao.FlowNodeDefinitionDao;
+import com.sxjkwm.pm.business.flow.dto.FlowNodeDefinitionDto;
 import com.sxjkwm.pm.business.flow.dto.FlowNodeDto;
+import com.sxjkwm.pm.business.flow.dto.NodeAndDefinitionDto;
 import com.sxjkwm.pm.business.flow.entity.FlowNode;
+import com.sxjkwm.pm.business.flow.entity.FlowNodeDefinition;
 import com.sxjkwm.pm.constants.Constant;
+import com.sxjkwm.pm.constants.PmError;
+import com.sxjkwm.pm.exception.PmException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +29,14 @@ public class FlowNodeService {
 
     private final FlowNodeDao flowNodeDao;
 
+    private final FlowNodeDefinitionDao flowNodeDefinitionDao;
+
     private final PatternFileDao patternFileDao;
 
     @Autowired
-    public FlowNodeService(FlowNodeDao flowNodeDao, PatternFileDao patternFileDao) {
+    public FlowNodeService(FlowNodeDao flowNodeDao, FlowNodeDefinitionDao flowNodeDefinitionDao, PatternFileDao patternFileDao) {
         this.flowNodeDao = flowNodeDao;
+        this.flowNodeDefinitionDao = flowNodeDefinitionDao;
         this.patternFileDao = patternFileDao;
     }
 
@@ -94,6 +103,41 @@ public class FlowNodeService {
             return true;
         }
         return false;
+    }
+
+    public List<NodeAndDefinitionDto> fetchNodeAndDefsByFlowId(Long flowId) throws PmException {
+        FlowNode condition = new FlowNode();
+        condition.setAsAvailable();
+        condition.setFlowId(flowId);
+        condition.setSkippable(null);
+        List<FlowNode> nodes = flowNodeDao.findAll(Example.of(condition));
+        if (CollectionUtils.isEmpty(nodes)) {
+            throw new PmException(PmError.NO_DATA_FOUND);
+        }
+        List<Long> nodeIds = nodes.stream().map(FlowNode::getId).collect(Collectors.toList());
+        List<FlowNodeDefinition> definitions = flowNodeDefinitionDao.findByFlowNodeIds(nodeIds);
+        Map<Long, List<FlowNodeDefinition>> definitionsByFlowNodeId = definitions.stream().collect(Collectors.groupingBy(FlowNodeDefinition::getFlowNodeId));
+        List<NodeAndDefinitionDto> resList = Lists.newArrayList();
+        NodeAndDefinitionDto dto;
+        List<FlowNodeDefinitionDto> definitionDtoList;
+        for (FlowNode flowNode: nodes) {
+            dto = new NodeAndDefinitionDto();
+            dto.setFlowNodeId(flowNode.getId());
+            dto.setFlowNodeName(flowNode.getNodeName());
+            List<FlowNodeDefinition> relatedDefs = definitionsByFlowNodeId.get(flowNode.getId());
+            if (CollectionUtils.isNotEmpty(relatedDefs)) {
+                List<FlowNodeDefinitionDto> dtoList = Lists.newArrayList();
+                for (FlowNodeDefinition def: relatedDefs) {
+                    FlowNodeDefinitionDto definitionDto = new FlowNodeDefinitionDto();
+                    definitionDto.setId(def.getId());
+                    definitionDto.setPropertyName(def.getPropertyName());
+                    dtoList.add(definitionDto);
+                }
+                dto.setDefinitionDtoList(dtoList);
+                resList.add(dto);
+            }
+        }
+        return resList;
     }
 
 }

@@ -1,6 +1,7 @@
 package com.sxjkwm.pm.business.flow.controller;
 
 import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionDefDto;
+import com.sxjkwm.pm.business.flow.dto.FlowNodeCollectionPropTypeDto;
 import com.sxjkwm.pm.business.flow.entity.FlowNodeCollectionDefinition;
 import com.sxjkwm.pm.business.flow.service.FlowNodeCollectionDefinitionService;
 import com.sxjkwm.pm.common.RestResponse;
@@ -43,6 +44,11 @@ public class FlowNodeCollectionDefinitionController {
     @PostMapping(value = "/sort")
     public RestResponse<Boolean> sort(@RequestBody List<Long> nodeIds) {
         return RestResponse.of(flowNodeCollectionDefinitionService.sort(nodeIds));
+    }
+
+    @GetMapping("/collectionPropTypes")
+    public RestResponse<List<FlowNodeCollectionPropTypeDto>> getCollectionPropTypes() {
+        return RestResponse.of(flowNodeCollectionDefinitionService.getCollectionPropTypes());
     }
 
 }

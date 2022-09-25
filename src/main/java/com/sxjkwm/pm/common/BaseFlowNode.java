@@ -15,8 +15,8 @@ public class BaseFlowNode extends BaseEntity {
     @Column(name = "node_name")
     protected String nodeName;
 
-    @Column(name = "skippable")
-    protected Integer skippable = Constant.YesOrNo.NO.getValue();
+    @Column(name = "skippable", columnDefinition = " INT(1) DEFAULT 1")
+    protected Integer skippable;
 
     @Column(name = "node_index")
     protected Integer nodeIndex;

@@ -46,8 +46,13 @@ public class Do1Controller {
     }
 
     @GetMapping("/propertyMapping")
-    public RestResponse<List<PropertyMappingDto>> findPropertyMappingByFlowNodeId(@RequestParam("flowNodeId") Long flowNodeId) {
-        return RestResponse.of(do1Service.findPropertyMappingByFlowNodeId(flowNodeId));
+    public RestResponse<List<PropertyMappingDto>> findPropertyMappingByFlowNodeId(@RequestParam("auditingFlowNodeId") Long auditingFlowNodeId) {
+        return RestResponse.of(do1Service.findPropertyMappingByFlowNodeId(auditingFlowNodeId));
+    }
+
+    @DeleteMapping("/propertyMapping/{id}")
+    public RestResponse<Boolean> deleteById(@PathVariable("id") Long id) {
+        return RestResponse.of(do1Service.deletePropertyMapping(id));
     }
 
 }
